@@ -116,7 +116,27 @@ def api(ruta):
     if codigo not in (200, 204):
         return None
     return json.loads(texto) if texto else None
+  
 
+
+# Prueba: GET /api/area_conocimiento?limite=3
+print()
+print("=== Prueba de áreas de conocimiento ===")
+
+codigo, respuesta = ver(API + "/api/area_conocimiento?limite=3")
+
+revisar("GET /api/area_conocimiento?limite=3 responde con HTTP 200",
+        codigo == 200)
+
+try:
+    resultado = json.loads(respuesta)
+    registros = resultado["datos"]
+
+    revisar("La API devuelve exactamente 3 registros",
+            isinstance(registros, list) and len(registros) == 3)
+except (json.JSONDecodeError, KeyError, TypeError):
+    revisar("La respuesta contiene 3 registros", False,
+            "Respuesta JSON inválida o sin la clave 'datos'")
 
 def esperar_api(segundos=180):
     """Acepta 200 y 204: un 204 es la API diciendo que la tabla está vacía,
