@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Objetivos de las líneas</h1>
+<form method="post">
+<p><label for="linea_investigacion">Linea investigacion</label>
+<select id="linea_investigacion" name="linea_investigacion">
+<option value="">Seleccione una opción</option>
+{% for opcion in opciones['linea_investigacion'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('linea_investigacion') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<p><label for="ods">Objetivo de desarrollo sostenible</label>
+<select id="ods" name="ods">
+<option value="">Seleccione una opción</option>
+{% for opcion in opciones['ods'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('ods') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<button class="boton primario" name="verbo" value="completa" {{ 'disabled' if not disponibles else '' }}>Guardar la ficha completa</button>
+{% if editando %}<button class="boton" name="verbo" value="parcial" {{ 'disabled' if not disponibles else '' }}>Guardar solo lo que cambié</button>{% endif %}
+</form>{% endblock %}

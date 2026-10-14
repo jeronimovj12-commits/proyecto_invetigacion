@@ -4,7 +4,7 @@
 {% block contenido %}
 <div class="portada">
   <h1>Módulo de Investigación</h1>
-  <p class="nota">El catálogo jerárquico del conocimiento: gran área, área y disciplina.</p>
+  <p class="nota">Gestión de docentes, grupos, semilleros y sus relaciones.</p>
 </div>
 
 <div class="tarjetas">
@@ -17,17 +17,17 @@
     </a>
   </article>
 
-  {# La segunda tarjeta NO es un enlace, y es deliberado: dice lo que esta
-     versión NO hace. Un menú que promete pantallas que no existen es peor
-     que un menú corto. #}
-  <article class="tarjeta apagada">
-    <h2>Las demás tablas</h2>
-    <p>
-      Esta versión construye <strong>una</strong> tabla completa, de punta a
-      punta: su API y su pantalla. Las demás llegan en las versiones
-      siguientes, cada una con la suya.
-    </p>
-  </article>
+<article class="tarjeta"><h2>Docentes</h2><a class="boton primario" href="{{ url_for('listar_docente') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Grupos de investigación</h2><a class="boton primario" href="{{ url_for('listar_grupo_investigacion') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Semilleros</h2><a class="boton primario" href="{{ url_for('listar_semillero') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Participación en semilleros</h2><a class="boton primario" href="{{ url_for('listar_participa_semillero') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Participación en grupos</h2><a class="boton primario" href="{{ url_for('listar_participa_grupo') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Líneas de semilleros</h2><a class="boton primario" href="{{ url_for('listar_semillero_linea') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Líneas de grupos</h2><a class="boton primario" href="{{ url_for('listar_grupo_linea') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Áreas de las líneas</h2><a class="boton primario" href="{{ url_for('listar_ac_linea') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Objetivos de las líneas</h2><a class="boton primario" href="{{ url_for('listar_ods_linea') }}">Ver el listado</a></article>
+<article class="tarjeta"><h2>Aplicaciones de las líneas</h2><a class="boton primario" href="{{ url_for('listar_aa_linea') }}">Ver el listado</a></article>
+
 
 </div>
 {% endblock %}

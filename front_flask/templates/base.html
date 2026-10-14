@@ -42,6 +42,16 @@
            class="{{ 'activo' if request.endpoint and 'area_conocimiento' in request.endpoint or request.endpoint == 'listar_areas_conocimiento' }}"
            >Áreas de conocimiento</a>
       </div>
+<a href="{{ url_for('listar_docente') }}">Docentes</a>
+<a href="{{ url_for('listar_grupo_investigacion') }}">Grupos de investigación</a>
+<a href="{{ url_for('listar_semillero') }}">Semilleros</a>
+<a href="{{ url_for('listar_participa_semillero') }}">Participación en semilleros</a>
+<a href="{{ url_for('listar_participa_grupo') }}">Participación en grupos</a>
+<a href="{{ url_for('listar_semillero_linea') }}">Líneas de semilleros</a>
+<a href="{{ url_for('listar_grupo_linea') }}">Líneas de grupos</a>
+<a href="{{ url_for('listar_ac_linea') }}">Áreas de las líneas</a>
+<a href="{{ url_for('listar_ods_linea') }}">Objetivos de las líneas</a>
+<a href="{{ url_for('listar_aa_linea') }}">Aplicaciones de las líneas</a>
     </nav>
   </header>
 

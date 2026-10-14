@@ -1,0 +1,6 @@
+from typing import Protocol
+
+
+class IRepositorioUniversidad(Protocol):
+    async def obtener_todos(self, limite: int) -> list[dict]: ...
+    async def obtener_por_id(self, identidad: dict) -> dict | None: ...

@@ -8,32 +8,21 @@ Todas las consultas filtran por activo = TRUE: el borrado es LÓGICO.
 """
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from repositorios.conexion_postgresql import ConexionPostgreSQL
 
 
-class RepositorioAreaConocimientoPostgreSQL:
+class RepositorioAreaConocimientoPostgreSQL(ConexionPostgreSQL):
     """Implementación concreta de IRepositorioAreaConocimiento."""
 
     # Las columnas se listan una sola vez: si mañana entra una, entra aquí.
     COLUMNAS = "id, gran_area, area, disciplina"
-
-    def __init__(self, cadena_conexion: str):
-        self._cadena_conexion = cadena_conexion
-        self._engine: AsyncEngine | None = None
-
-    def _obtener_engine(self) -> AsyncEngine:
-        # Se crea la primera vez que se necesita: construir el repositorio no
-        # abre conexiones.
-        if self._engine is None:
-            self._engine = create_async_engine(self._cadena_conexion)
-        return self._engine
 
     async def obtener_todos(self, limite: int) -> list[dict]:
         sql = text(
             f"SELECT {self.COLUMNAS} FROM area_conocimiento "
             "WHERE activo = TRUE ORDER BY id LIMIT :limite"
         )
-        async with self._obtener_engine().connect() as conexion:
+        async with self._conexion() as conexion:
             resultado = await conexion.execute(sql, {"limite": limite})
             return [dict(fila._mapping) for fila in resultado]
 
@@ -43,7 +32,7 @@ class RepositorioAreaConocimientoPostgreSQL:
             f"SELECT {self.COLUMNAS} FROM area_conocimiento "
             "WHERE id = :id AND activo = TRUE"
         )
-        async with self._obtener_engine().connect() as conexion:
+        async with self._conexion() as conexion:
             resultado = await conexion.execute(sql, {"id": id_area})
             fila = resultado.first()
             return dict(fila._mapping) if fila else None
@@ -53,7 +42,7 @@ class RepositorioAreaConocimientoPostgreSQL:
             "INSERT INTO area_conocimiento (id, gran_area, area, disciplina, activo) "
             "VALUES (:id, :gran_area, :area, :disciplina, TRUE)"
         )
-        async with self._obtener_engine().begin() as conexion:
+        async with self._conexion() as conexion:
             resultado = await conexion.execute(sql, datos)
             return resultado.rowcount == 1
 
@@ -67,7 +56,7 @@ class RepositorioAreaConocimientoPostgreSQL:
             f"UPDATE area_conocimiento SET {asignaciones} "
             "WHERE id = :pk_id AND activo = TRUE"
         )
-        async with self._obtener_engine().begin() as conexion:
+        async with self._conexion() as conexion:
             resultado = await conexion.execute(sql, {**datos, "pk_id": id_area})
             return resultado.rowcount
 
@@ -78,6 +67,11 @@ class RepositorioAreaConocimientoPostgreSQL:
             "UPDATE area_conocimiento SET activo = FALSE "
             "WHERE id = :id AND activo = TRUE"
         )
-        async with self._obtener_engine().begin() as conexion:
+        async with self._conexion() as conexion:
             resultado = await conexion.execute(sql, {"id": id_area})
             return resultado.rowcount
+
+    async def tiene_dependientes(self, id_area: str) -> bool:
+        async with self._conexion() as conexion:
+            resultado = await conexion.execute(text("SELECT EXISTS (SELECT 1 FROM ac_linea WHERE area_conocimiento = :id AND activo = TRUE)"), {"id": id_area})
+            return bool(resultado.scalar())

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Participación en semilleros</h1>
+<form method="post">
+<p><label for="docente">Docente</label>
+<select id="docente" name="docente">
+<option value="">Seleccione una opción</option>
+{% for opcion in opciones['docente'] %}
+<option value="{{ opcion['cedula'] }}" {{ 'selected' if ficha and ficha.get('docente') == opcion['cedula'] else '' }}>{{ opcion['nombres'] }} ({{ opcion['cedula'] }})</option>
+{% endfor %}</select>
+</p>
+<p><label for="semillero">Semillero</label>
+<select id="semillero" name="semillero">
+<option value="">Seleccione una opción</option>
+{% for opcion in opciones['semillero'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('semillero') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<p><label for="rol">Rol</label>
+<input id="rol" name="rol" type="text" value="{{ ficha.get('rol') if ficha and ficha.get('rol') is not none else '' }}">
+</p>
+<p><label for="fecha_inicio">Fecha inicio</label>
+<input id="fecha_inicio" name="fecha_inicio" type="date" value="{{ ficha.get('fecha_inicio') if ficha and ficha.get('fecha_inicio') is not none else '' }}">
+</p>
+<p><label for="fecha_fin">Fecha fin</label>
+<input id="fecha_fin" name="fecha_fin" type="date" value="{{ ficha.get('fecha_fin') if ficha and ficha.get('fecha_fin') is not none else '' }}">
+</p>
+<button class="boton primario" name="verbo" value="completa" {{ 'disabled' if not disponibles else '' }}>Guardar la ficha completa</button>
+{% if editando %}<button class="boton" name="verbo" value="parcial" {{ 'disabled' if not disponibles else '' }}>Guardar solo lo que cambié</button>{% endif %}
+</form>{% endblock %}

@@ -4,7 +4,7 @@ clase concreta: por eso se le puede enchufar un repositorio de mentiras y
 probarlo sin base de datos (inversión de dependencias).
 """
 
-from typing import Protocol
+from typing import Protocol, AsyncContextManager
 
 
 class IRepositorioAreaConocimiento(Protocol):
@@ -30,3 +30,7 @@ class IRepositorioAreaConocimiento(Protocol):
         """Marca activo = FALSE. Devuelve filas afectadas (0 = no existía
         o ya estaba inactiva)."""
         ...
+
+    def transaccion(self) -> AsyncContextManager[None]: ...
+
+    async def tiene_dependientes(self, id_area: str) -> bool: ...

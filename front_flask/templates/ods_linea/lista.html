@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Objetivos de las líneas</h1>
+<a class="boton primario" href="{{ url_for('crear_ods_linea') }}">Agregar ficha</a>
+<div class="tabla-scroll"><table><thead><tr><th>Linea investigacion</th><th>Objetivo de desarrollo sostenible</th><th>Acciones</th></tr></thead><tbody>
+{% for fila in filas %}<tr>
+<td>{{ fila["linea_investigacion"] if fila["linea_investigacion"] is not none else "" }}</td><td>{{ fila["ods"] if fila["ods"] is not none else "" }}</td><td><a href="{{ url_for('editar_ods_linea', linea_investigacion=fila["linea_investigacion"], ods=fila["ods"]) }}">Editar</a>
+<form method="post" action="{{ url_for('eliminar_ods_linea', linea_investigacion=fila["linea_investigacion"], ods=fila["ods"]) }}"><button class="boton" type="submit">Retirar ficha</button></form></td>
+</tr>{% else %}<tr><td colspan="3">No hay fichas disponibles.</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

@@ -149,3 +149,8 @@ input[readonly] { background: #efedea; color: var(--suave); cursor: not-allowed;
 footer { padding: 18px 20px 30px; color: var(--suave); font-size: 13px;
          border-top: 1px solid var(--borde); margin-top: 30px; }
 footer p { margin: 0; }
+
+/* Las pantallas de relaciones necesitan menú adaptable y selectores. */
+.menu-interno { flex-wrap: wrap; }
+select { display: block; width: 100%; padding: 9px 11px; border: 1px solid var(--borde); border-radius: 6px; font: inherit; background: #fff; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }

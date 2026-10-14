@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Aplicaciones de las líneas</h1>
+<form method="post">
+<p><label for="area_aplicacion">Area aplicacion</label>
+<select id="area_aplicacion" name="area_aplicacion">
+<option value="">Seleccione una opción</option>
+{% for opcion in opciones['area_aplicacion'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('area_aplicacion') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<p><label for="linea_investigacion">Linea investigacion</label>
+<select id="linea_investigacion" name="linea_investigacion">
+<option value="">Seleccione una opción</option>
+{% for opcion in opciones['linea_investigacion'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('linea_investigacion') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<button class="boton primario" name="verbo" value="completa" {{ 'disabled' if not disponibles else '' }}>Guardar la ficha completa</button>
+{% if editando %}<button class="boton" name="verbo" value="parcial" {{ 'disabled' if not disponibles else '' }}>Guardar solo lo que cambié</button>{% endif %}
+</form>{% endblock %}

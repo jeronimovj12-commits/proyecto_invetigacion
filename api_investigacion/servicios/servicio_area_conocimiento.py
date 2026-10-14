@@ -59,8 +59,11 @@ class ServicioAreaConocimiento:
 
     async def eliminar(self, id_area: str) -> int:
         id_area = self._validar_id(id_area)
-        filas = await self._repositorio.eliminar_logico(id_area)
-        if filas == 0:
-            raise LookupError(
-                f"No existe un área con el código {id_area}.")
-        return filas
+        async with self._repositorio.transaccion():
+            await self.obtener(id_area)
+            if await self._repositorio.tiene_dependientes(id_area):
+                raise ValueError("El área tiene líneas activas relacionadas. Retire primero esas relaciones.")
+            filas = await self._repositorio.eliminar_logico(id_area)
+            if filas == 0:
+                raise LookupError(f"No existe un área con el código {id_area}.")
+            return filas

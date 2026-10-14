@@ -35,6 +35,7 @@ lo que llega es lo que el JSON traía, ni más ni menos.
 """
 
 import os
+import re
 
 import requests
 
@@ -85,13 +86,12 @@ def _mensajes(respuesta) -> list[str]:
     cuerpo = _cuerpo(respuesta)
     errores = cuerpo.get("errores")
     if isinstance(errores, list) and errores:
-        etiquetas = {"area": "Área", "granArea": "Gran área",
-                     "disciplina": "Disciplina", "id": "Código"}
+        etiquetas = ETIQUETAS
         frases = []
         for error in errores:
             frase = str(error)
             for campo, etiqueta in etiquetas.items():
-                frase = frase.replace(campo, etiqueta)
+                frase = re.sub(r"\b" + re.escape(campo) + r"\b", etiqueta, frase)
             frases.append(frase)
         return frases
     detalle = cuerpo.get("detail")
@@ -251,3 +251,499 @@ def eliminar_area_conocimiento(id):
     if respuesta is None:
         return False, NO_DISPONIBLE
     return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+
+from urllib.parse import quote
+
+def listar_docente(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/docente?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_docente(identidad: dict):
+    return "/api/docente/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('cedula',))
+
+def obtener_docente(identidad: dict):
+    respuesta = _llamar("GET", _ruta_docente(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_docente(datos: dict):
+    respuesta = _llamar("POST", '/api/docente', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_docente(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_docente(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_docente(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_docente(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_docente(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_docente(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_grupo_investigacion(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/grupo_investigacion?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_grupo_investigacion(identidad: dict):
+    return "/api/grupo_investigacion/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('id',))
+
+def obtener_grupo_investigacion(identidad: dict):
+    respuesta = _llamar("GET", _ruta_grupo_investigacion(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_grupo_investigacion(datos: dict):
+    respuesta = _llamar("POST", '/api/grupo_investigacion', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_grupo_investigacion(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_grupo_investigacion(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_grupo_investigacion(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_grupo_investigacion(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_grupo_investigacion(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_grupo_investigacion(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_semillero(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/semillero?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_semillero(identidad: dict):
+    return "/api/semillero/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('id',))
+
+def obtener_semillero(identidad: dict):
+    respuesta = _llamar("GET", _ruta_semillero(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_semillero(datos: dict):
+    respuesta = _llamar("POST", '/api/semillero', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_semillero(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_semillero(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_semillero(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_semillero(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_semillero(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_semillero(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_participa_semillero(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/participa_semillero?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_participa_semillero(identidad: dict):
+    return "/api/participa_semillero/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('docente', 'semillero'))
+
+def obtener_participa_semillero(identidad: dict):
+    respuesta = _llamar("GET", _ruta_participa_semillero(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_participa_semillero(datos: dict):
+    respuesta = _llamar("POST", '/api/participa_semillero', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_participa_semillero(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_participa_semillero(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_participa_semillero(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_participa_semillero(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_participa_semillero(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_participa_semillero(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_participa_grupo(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/participa_grupo?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_participa_grupo(identidad: dict):
+    return "/api/participa_grupo/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('docente_cedula', 'grupo_investigacion_id'))
+
+def obtener_participa_grupo(identidad: dict):
+    respuesta = _llamar("GET", _ruta_participa_grupo(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_participa_grupo(datos: dict):
+    respuesta = _llamar("POST", '/api/participa_grupo', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_participa_grupo(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_participa_grupo(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_participa_grupo(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_participa_grupo(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_participa_grupo(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_participa_grupo(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_semillero_linea(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/semillero_linea?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_semillero_linea(identidad: dict):
+    return "/api/semillero_linea/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('semillero', 'linea_investigacion'))
+
+def obtener_semillero_linea(identidad: dict):
+    respuesta = _llamar("GET", _ruta_semillero_linea(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_semillero_linea(datos: dict):
+    respuesta = _llamar("POST", '/api/semillero_linea', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_semillero_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_semillero_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_semillero_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_semillero_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_semillero_linea(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_semillero_linea(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_grupo_linea(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/grupo_linea?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_grupo_linea(identidad: dict):
+    return "/api/grupo_linea/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('grupo_investigacion', 'linea_investigacion'))
+
+def obtener_grupo_linea(identidad: dict):
+    respuesta = _llamar("GET", _ruta_grupo_linea(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_grupo_linea(datos: dict):
+    respuesta = _llamar("POST", '/api/grupo_linea', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_grupo_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_grupo_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_grupo_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_grupo_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_grupo_linea(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_grupo_linea(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_ac_linea(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/ac_linea?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_ac_linea(identidad: dict):
+    return "/api/ac_linea/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('linea_investigacion', 'area_conocimiento'))
+
+def obtener_ac_linea(identidad: dict):
+    respuesta = _llamar("GET", _ruta_ac_linea(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_ac_linea(datos: dict):
+    respuesta = _llamar("POST", '/api/ac_linea', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_ac_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_ac_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_ac_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_ac_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_ac_linea(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_ac_linea(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_ods_linea(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/ods_linea?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_ods_linea(identidad: dict):
+    return "/api/ods_linea/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('linea_investigacion', 'ods'))
+
+def obtener_ods_linea(identidad: dict):
+    respuesta = _llamar("GET", _ruta_ods_linea(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_ods_linea(datos: dict):
+    respuesta = _llamar("POST", '/api/ods_linea', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_ods_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_ods_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_ods_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_ods_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_ods_linea(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_ods_linea(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_aa_linea(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/aa_linea?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def _ruta_aa_linea(identidad: dict):
+    return "/api/aa_linea/" + "/".join(quote(str(identidad[campo]), safe="") for campo in ('area_aplicacion', 'linea_investigacion'))
+
+def obtener_aa_linea(identidad: dict):
+    respuesta = _llamar("GET", _ruta_aa_linea(identidad))
+    if respuesta is None:
+        return False, None, NO_DISPONIBLE
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta), []
+    return False, None, _mensajes(respuesta)
+
+def crear_aa_linea(datos: dict):
+    respuesta = _llamar("POST", '/api/aa_linea', json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def reemplazar_aa_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PUT", _ruta_aa_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def actualizar_aa_linea(identidad: dict, datos: dict):
+    respuesta = _llamar("PATCH", _ruta_aa_linea(identidad), json=datos)
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def eliminar_aa_linea(identidad: dict):
+    respuesta = _llamar("DELETE", _ruta_aa_linea(identidad))
+    if respuesta is None:
+        return False, NO_DISPONIBLE
+    return (True, []) if respuesta.status_code == 200 else (False, _mensajes(respuesta))
+
+def listar_universidad(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/universidad?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def listar_linea_investigacion(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/linea_investigacion?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def listar_objetivo_desarrollo_sostenible(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/objetivo_desarrollo_sostenible?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+def listar_area_aplicacion(limite: int = 1000):
+    respuesta = _llamar("GET", f"/api/area_aplicacion?limite={limite}")
+    if respuesta is None:
+        return False, [], NO_DISPONIBLE
+    if respuesta.status_code == 204:
+        return True, [], []
+    if respuesta.status_code == 200:
+        return True, _cuerpo(respuesta).get("datos", []), []
+    return False, [], _mensajes(respuesta)
+
+
+ETIQUETAS.update({'id': 'Id', 'gran_area': 'Gran area', 'area': 'Area', 'disciplina': 'Disciplina', 'nombre': 'Nombre', 'categoria': 'Categoria', 'tipo': 'Tipo', 'ciudad': 'Ciudad', 'descripcion': 'Descripcion', 'cedula': 'Cedula', 'nombres': 'Nombres', 'apellidos': 'Apellidos', 'genero': 'Genero', 'cargo': 'Cargo', 'fecha_nacimiento': 'Fecha nacimiento', 'correo': 'Correo', 'telefono': 'Telefono', 'url_cvlac': 'Url cvlac', 'fecha_actualizacion': 'Fecha actualizacion', 'escalafon': 'Escalafon', 'perfil': 'Perfil', 'cat_minciencia': 'Cat minciencia', 'conv_minciencia': 'Conv minciencia', 'nacionalidaad': 'Nacionalidad', 'linea_investigacion_principal': 'Linea investigacion principal', 'url_gruplac': 'Url gruplac', 'convocatoria': 'Convocatoria', 'fecha_fundacion': 'Fecha fundacion', 'universidsad': 'Universidad', 'interno': 'Interno', 'ambito': 'Ambito', 'grupo_investigacion': 'Grupo investigacion', 'docente': 'Docente', 'semillero': 'Semillero', 'rol': 'Rol', 'fecha_inicio': 'Fecha inicio', 'fecha_fin': 'Fecha fin', 'docente_cedula': 'Docente', 'grupo_investigacion_id': 'Grupo de investigación', 'linea_investigacion': 'Linea investigacion', 'area_conocimiento': 'Area conocimiento', 'ods': 'Objetivo de desarrollo sostenible', 'area_aplicacion': 'Area aplicacion'})

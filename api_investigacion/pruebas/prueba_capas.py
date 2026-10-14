@@ -8,6 +8,7 @@ real y no un dibujo: el servicio nunca supo que había un motor detrás.
 Se corre con:  docker compose exec api-investigacion python pruebas/prueba_capas.py
 """
 
+from contextlib import asynccontextmanager
 import asyncio
 import os
 import sys
@@ -22,6 +23,13 @@ class RepositorioDeMentiras:
 
     def __init__(self):
         self._filas: list[dict] = []
+
+    @asynccontextmanager
+    async def transaccion(self):
+        yield
+
+    async def tiene_dependientes(self, id_area: str) -> bool:
+        return False
 
     async def obtener_todos(self, limite: int) -> list[dict]:
         activas = [fila for fila in self._filas if fila["activo"]]

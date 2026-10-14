@@ -17,9 +17,8 @@ from controllers.area_conocimiento_controller import router as router_area
 
 app = FastAPI(
     title="API Investigación",
-    description="Módulo de Investigación — versión 1: el catálogo de "
-                "áreas de conocimiento.",
-    version="v1",
+    description="Módulo Investigación — versión 2: relaciones y catálogos.",
+    version="v2",
 )
 
 app.include_router(router_area)
@@ -40,8 +39,14 @@ def _mensaje_validacion(error: dict) -> str:
     if error.get("type") == "string_type":
         return f"El campo {campo} debe ser texto."
     if error.get("type") == "int_parsing":
-        return "El parámetro limite debe ser un número entero."
-    return f"El campo {campo} no es válido: {mensaje}."
+        return f"El campo {campo} debe ser un número entero."
+    if error.get("type") == "extra_forbidden":
+        return f"El campo {campo} no está permitido."
+    if error.get("type", "").startswith("date"):
+        return f"El campo {campo} debe ser una fecha válida."
+    if error.get("type") == "value_error":
+        return "Los campos enviados no admiten esos valores."
+    return f"El campo {campo} no es válido."
 
 
 @app.exception_handler(RequestValidationError)
@@ -79,5 +84,47 @@ async def error_http(_solicitud: Request, excepcion: StarletteHTTPException):
 @app.get("/")
 async def diagnostico():
     """Responde sin tocar la base: sirve para saber si la API está viva."""
-    return {"mensaje": "API Investigación — módulo de áreas de conocimiento",
-            "version": "v1", "contratos": "/docs"}
+    return {"mensaje": "API Investigación — catálogos y relaciones",
+            "version": "v2", "contratos": "/docs"}
+
+from controllers.docente_controller import router as router_docente
+app.include_router(router_docente)
+
+from controllers.grupo_investigacion_controller import router as router_grupo_investigacion
+app.include_router(router_grupo_investigacion)
+
+from controllers.semillero_controller import router as router_semillero
+app.include_router(router_semillero)
+
+from controllers.participa_semillero_controller import router as router_participa_semillero
+app.include_router(router_participa_semillero)
+
+from controllers.participa_grupo_controller import router as router_participa_grupo
+app.include_router(router_participa_grupo)
+
+from controllers.semillero_linea_controller import router as router_semillero_linea
+app.include_router(router_semillero_linea)
+
+from controllers.grupo_linea_controller import router as router_grupo_linea
+app.include_router(router_grupo_linea)
+
+from controllers.ac_linea_controller import router as router_ac_linea
+app.include_router(router_ac_linea)
+
+from controllers.ods_linea_controller import router as router_ods_linea
+app.include_router(router_ods_linea)
+
+from controllers.aa_linea_controller import router as router_aa_linea
+app.include_router(router_aa_linea)
+
+from controllers.universidad_controller import router as router_universidad
+app.include_router(router_universidad)
+
+from controllers.linea_investigacion_controller import router as router_linea_investigacion
+app.include_router(router_linea_investigacion)
+
+from controllers.objetivo_desarrollo_sostenible_controller import router as router_objetivo_desarrollo_sostenible
+app.include_router(router_objetivo_desarrollo_sostenible)
+
+from controllers.area_aplicacion_controller import router as router_area_aplicacion
+app.include_router(router_area_aplicacion)
