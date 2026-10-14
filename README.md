@@ -1,3 +1,6 @@
+git add README.md
+git commit -m "Resolver conflicto del README"
+git push -u origin main<<<<<<< HEAD
 # Módulo Investigación — ejemplo de referencia (Python)
 
 Este repositorio contiene **dos cosas distintas**, y conviene no confundirlas:
@@ -165,3 +168,6 @@ tendría cualquier organización real.
 **Los colores no se cambian.** El artículo tercero de la resolución que
 adopta el manual es explícito, y la **versión 4** del proyecto evalúa que la
 pantalla lo cumpla.
+=======
+# proyecto_invetigacion
+>>>>>>> a6b24d29c69eb1e413f8289525d36bba80f1f2db
