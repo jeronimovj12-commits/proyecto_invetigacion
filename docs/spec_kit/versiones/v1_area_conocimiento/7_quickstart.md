@@ -200,3 +200,19 @@ curl.exe -i "http://localhost:8025/api/area_conocimiento/9Z99"
 
 
 La respuesta debe mostrar el estado 404.
+## Comprobar la diferencia entre PUT y PATCH
+
+Primero, crea el registro de prueba `9Z01`.
+
+En Postman, envía un `PUT` a `http://localhost:8025/api/area_conocimiento/9Z01` con este cuerpo:
+
+```json
+{
+  "granArea": "Ciencias Naturales",
+  "disciplina": "Prueba de actualización"
+}
+```
+
+Como falta el campo `area`, la respuesta esperada es `422`.
+
+Luego envía un `PATCH` a la misma dirección y con el mismo cuerpo. La respuesta esperada es `200`, porque PATCH permite enviar solo los campos que se van a cambiar.
