@@ -191,10 +191,6 @@ curl.exe -i "http://localhost:8025/api/area_conocimiento/9Z99"
 
 La respuesta debe mostrar el estado `404`.
 
-powershell
-(Invoke-RestMethod "http://localhost:8025/api/area_conocimiento?limite=3").datos.Count
-
-
 El resultado debe ser 3.
 
 Para comprobar que un código inexistente responde 404, ejecuta:
