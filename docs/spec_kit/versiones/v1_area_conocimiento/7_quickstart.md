@@ -174,3 +174,33 @@ guardar, y **la prueba de apagar la API**.
    servicio no está disponible — **y sin una sola fila**. Los datos siguen
    ahí, a un puerto de distancia; si aparecieran, sería porque el front llegó
    a la base por su cuenta.
+## Comprobar el límite y un código inexistente
+
+Con la API encendida en http://localhost:8025, ejecuta:
+```powershell
+(Invoke-RestMethod "http://localhost:8025/api/area_conocimiento?limite=3").datos.Count
+```
+
+El resultado debe ser `3`.
+
+Para comprobar que un código inexistente responde 404, ejecuta:
+
+```powershell
+curl.exe -i "http://localhost:8025/api/area_conocimiento/9Z99"
+```
+
+La respuesta debe mostrar el estado `404`.
+
+powershell
+(Invoke-RestMethod "http://localhost:8025/api/area_conocimiento?limite=3").datos.Count
+
+
+El resultado debe ser 3.
+
+Para comprobar que un código inexistente responde 404, ejecuta:
+
+powershell
+curl.exe -i "http://localhost:8025/api/area_conocimiento/9Z99"
+
+
+La respuesta debe mostrar el estado 404.
