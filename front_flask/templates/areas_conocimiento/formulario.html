@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block titulo %}{{ "Editar" if editando else "Agregar" }} — Áreas de conocimiento{% endblock %}
+
+{% block contenido %}
+
+{# El formulario de el área de conocimiento: sirve para agregar y para editar.
+
+   La diferencia entre los dos usos está en `editando`, y se ve en dos
+   sitios: la llave va de solo lectura al editar, y aparecen DOS botones de
+   guardar en vez de uno. #}
+
+<div class="encabezado">
+  <div>
+    <h1>{{ "Editar" if editando else "Agregar" }} el área de conocimiento</h1>
+    <p class="nota">
+      {% if editando %}
+        Código identifica la ficha y no se cambia. Si está mal, se
+        agrega otra y se retira ésta.
+      {% else %}
+        Un código corto como «1A01». Es TEXTO, no un número.
+      {% endif %}
+    </p>
+  </div>
+  <a class="boton" href="{{ url_for('listar_areas_conocimiento') }}">Volver</a>
+</div>
+
+<form method="post" class="tarjeta-formulario">
+
+  {# LA LLAVE. Al editar va de solo lectura: es la identidad de la ficha, lo
+     que la base llama llave primaria. Un campo que el usuario puede escribir
+     pero el sistema no puede cambiar es una promesa falsa. #}
+  <label>
+    Código
+    <input type="text" name="id" maxlength="6" value="{{ ficha["id"] if ficha else "" }}"
+           {{ "readonly" if editando }}>
+    {% if not editando %}<span class="ayuda">Un código corto como «1A01». Es TEXTO, no un número.</span>{% endif %}
+  </label>
+
+  <label>
+    Gran área
+    <input type="text" name="gran_area" maxlength="60" value="{{ ficha["gran_area"] if ficha and ficha["gran_area"] is not none else "" }}">
+  </label>
+
+  <label>
+    Área
+    <input type="text" name="area" maxlength="60" value="{{ ficha["area"] if ficha and ficha["area"] is not none else "" }}">
+  </label>
+
+  <label>
+    Disciplina
+    <input type="text" name="disciplina" maxlength="150" value="{{ ficha["disciplina"] if ficha and ficha["disciplina"] is not none else "" }}">
+    <span class="ayuda">El campo más largo de la tabla.</span>
+  </label>
+
+  {# ==============================================================
+     LOS DOS BOTONES, QUE NO HACEN LO MISMO
+
+       · «Guardar la ficha completa» manda todo, así que un dato
+         obligatorio en blanco se rechaza (gran área, área, disciplina).
+       · «Guardar solo lo que cambié» manda únicamente lo diligenciado,
+         así que el mismo formulario a medio llenar sí se guarda.
+
+     El mismo formulario, dos comportamientos, y la diferencia no la decide
+     ningún `if` de negocio: la decide QUÉ SE ENVÍA.
+     ============================================================== #}
+  {% if editando %}
+    <div class="pareja">
+      <button class="boton primario" type="submit" name="verbo" value="completa">
+        Guardar la ficha completa
+      </button>
+      <button class="boton" type="submit" name="verbo" value="parcial">
+        Guardar solo lo que cambié
+      </button>
+    </div>
+    <span class="ayuda">
+      «La ficha completa» exige que estén diligenciados gran área, área, disciplina.
+      «Solo lo que cambié» guarda lo que usted escribió y deja lo demás como
+      estaba.
+    </span>
+  {% else %}
+    <button class="boton primario" type="submit">Agregar</button>
+  {% endif %}
+
+</form>
+
+{% endblock %}

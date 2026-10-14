@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Investigación{% endblock %}
+
+{% block contenido %}
+<div class="portada">
+  <h1>Módulo de Investigación</h1>
+  <p class="nota">El catálogo jerárquico del conocimiento: gran área, área y disciplina.</p>
+</div>
+
+<div class="tarjetas">
+
+  <article class="tarjeta">
+    <h2>Áreas de conocimiento</h2>
+    <p>El catálogo jerárquico del conocimiento: gran área, área y disciplina.</p>
+    <a class="boton primario" href="{{ url_for('listar_areas_conocimiento') }}">
+      Ver el listado
+    </a>
+  </article>
+
+  {# La segunda tarjeta NO es un enlace, y es deliberado: dice lo que esta
+     versión NO hace. Un menú que promete pantallas que no existen es peor
+     que un menú corto. #}
+  <article class="tarjeta apagada">
+    <h2>Las demás tablas</h2>
+    <p>
+      Esta versión construye <strong>una</strong> tabla completa, de punta a
+      punta: su API y su pantalla. Las demás llegan en las versiones
+      siguientes, cada una con la suya.
+    </p>
+  </article>
+
+</div>
+{% endblock %}
