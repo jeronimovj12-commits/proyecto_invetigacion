@@ -900,17 +900,24 @@ def eliminar_ods_linea(linea_investigacion, ods):
 
 def _opciones_aa_linea():
     opciones, disponibles = {}, True
+    mensajes = []
     ok, filas, errores = cliente_api.listar_area_aplicacion()
     opciones["area_aplicacion"] = filas
     if not ok:
         _avisar(errores)
+        disponibles = False
+    elif not filas:
+        mensajes.append("No hay áreas de aplicación activas para seleccionar.")
         disponibles = False
     ok, filas, errores = cliente_api.listar_linea_investigacion()
     opciones["linea_investigacion"] = filas
     if not ok:
         _avisar(errores)
         disponibles = False
-    return opciones, disponibles
+    elif not filas:
+        mensajes.append("No hay líneas de investigación activas para seleccionar.")
+        disponibles = False
+    return opciones, disponibles, " ".join(mensajes)
 
 def _cuerpo_aa_linea(crear=False):
     cuerpo = {}
@@ -928,16 +935,23 @@ def listar_aa_linea():
 
 @app.route("/aa-linea/nuevo", methods=["GET", "POST"])
 def crear_aa_linea():
-    opciones, disponibles = _opciones_aa_linea()
+    opciones, disponibles, mensaje_opciones = _opciones_aa_linea()
     ficha = None
     if request.method == "POST":
         ficha = _cuerpo_aa_linea(crear=True)
-        ok, errores = cliente_api.crear_aa_linea(ficha)
-        if ok:
-            flash("Se agregó la ficha.", "exito")
-            return redirect(url_for("listar_aa_linea"))
-        _avisar(errores)
-    return render_template("aa_linea/formulario.html", ficha=ficha, editando=False, opciones=opciones, disponibles=disponibles)
+        if not disponibles:
+            _avisar([mensaje_opciones])
+        elif not ficha["linea_investigacion"]:
+            _avisar(["Selecciona una línea de investigación"])
+        else:
+            ok, errores = cliente_api.crear_aa_linea(ficha)
+            if ok:
+                flash("Se agregó la ficha.", "exito")
+                return redirect(url_for("listar_aa_linea"))
+            _avisar(errores)
+    return render_template("aa_linea/formulario.html", ficha=ficha, editando=False,
+                           opciones=opciones, disponibles=disponibles,
+                           mensaje_opciones=mensaje_opciones)
 
 
 @app.route("/aa-linea/<int:area_aplicacion>/<int:linea_investigacion>/editar", methods=["GET", "POST"])
@@ -947,10 +961,18 @@ def editar_aa_linea(area_aplicacion, linea_investigacion):
     if not ok:
         _avisar(errores)
         return redirect(url_for("listar_aa_linea"))
-    opciones, disponibles = _opciones_aa_linea()
+    opciones, disponibles, mensaje_opciones = _opciones_aa_linea()
     if request.method == "POST":
         datos = _cuerpo_aa_linea()
-        if request.form.get("verbo") == "completa":
+        if not disponibles:
+            _avisar([mensaje_opciones])
+            ok = False
+            errores = []
+        elif not datos["linea_investigacion"]:
+            _avisar(["Selecciona una línea de investigación"])
+            ok = False
+            errores = []
+        elif request.form.get("verbo") == "completa":
             ok, errores = cliente_api.reemplazar_aa_linea(identidad, datos)
         else:
             ok, errores = cliente_api.actualizar_aa_linea(identidad, _campos_cambiados(datos, ficha))
@@ -959,7 +981,9 @@ def editar_aa_linea(area_aplicacion, linea_investigacion):
             return redirect(url_for("listar_aa_linea"))
         _avisar(errores)
         ficha = {**ficha, **datos}
-    return render_template("aa_linea/formulario.html", ficha=ficha, editando=True, opciones=opciones, disponibles=disponibles)
+    return render_template("aa_linea/formulario.html", ficha=ficha, editando=True,
+                           opciones=opciones, disponibles=disponibles,
+                           mensaje_opciones=mensaje_opciones)
 
 
 @app.route("/aa-linea/<int:area_aplicacion>/<int:linea_investigacion>/eliminar", methods=["POST"])

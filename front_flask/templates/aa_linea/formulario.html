@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% block contenido %}
 <h1>Aplicaciones de las líneas</h1>
+{% if mensaje_opciones %}<p class="aviso error">{{ mensaje_opciones }}</p>{% endif %}
 <form method="post">
 <p><label for="area_aplicacion">Area aplicacion</label>
-<select id="area_aplicacion" name="area_aplicacion">
+<select id="area_aplicacion" name="area_aplicacion" required>
 <option value="">Seleccione una opción</option>
 {% for opcion in opciones['area_aplicacion'] %}
 <option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('area_aplicacion') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
 {% endfor %}</select>
 </p>
 <p><label for="linea_investigacion">Linea investigacion</label>
-<select id="linea_investigacion" name="linea_investigacion">
+<select id="linea_investigacion" name="linea_investigacion" required>
 <option value="">Seleccione una opción</option>
 {% for opcion in opciones['linea_investigacion'] %}
 <option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('linea_investigacion') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
