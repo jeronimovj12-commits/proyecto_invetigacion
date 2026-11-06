@@ -28,6 +28,10 @@ Se conserva la API y pantalla de area_conocimiento.
 - Los catálogos de universidades y líneas no tienen semillas en el init.sql
   actual. Las opciones permanecerán vacías hasta cargar datos reales. No se
   inventan registros oficiales. La prueba integrada carga sus propias fichas.
+  Desde el 5 de noviembre se ofrecen cargas opcionales separadas en
+  `db/opcionales/`: seis universidades de la fuente Excel y fichas ficticias
+  `DEMO V2` para los padres sin datos completos cargables. No se modifica
+  init.sql. Procedimiento y protección ante conflictos en `7_quickstart.md`.
 
 ## Integridad y capas
 
@@ -38,6 +42,8 @@ un error; la operación no queda confirmada a medias.
 
 ## Pendiente para declarar terminada
 
-Ejecutar la prueba integrada con PostgreSQL y el front reales, comprobar los
-formularios manualmente, revisar estas decisiones de negocio y firmar el
-checklist del equipo. No hacer tag v2 antes de completar esos pasos.
+La prueba integrada del 4 de noviembre consta en `VERIFICACION_V2.md`.
+Falta completar la revisión manual de las diez pantallas (hay evidencia parcial
+de `aa_linea` y `ods_linea`), revisar e integrar los aportes de compañeros,
+revisar estas decisiones de negocio y firmar el checklist del equipo.
+No hacer tag v2 antes de completar esos pasos.

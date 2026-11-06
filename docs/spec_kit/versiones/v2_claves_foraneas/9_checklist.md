@@ -119,3 +119,18 @@
   revisión manual de las diez pantallas.
 - [ ] Crear el tag de la v2. No se crea mientras existan requisitos
   pendientes.
+
+## Datos y aceptación aún abierta — 5 de noviembre de 2026
+
+- [x] Fuentes oficiales y datos ficticios separados; inventario local de activos
+  documentado. Evidencia: `VERIFICACION_V2.md` y `db/opcionales/`.
+- [x] Cargas opcionales verificadas con PostgreSQL aislado: repetición sin
+  duplicados y rechazo de conflictos, inactivos y catálogos sin opciones.
+  Evidencia: sección del 5 de noviembre de `VERIFICACION_V2.md`.
+- [x] Quickstart incluye carga en instalaciones nuevas/existentes y recorrido
+  por dependencias. Evidencia: `7_quickstart.md`.
+- [ ] Completar revisión manual de las diez pantallas: aa_linea y ods_linea
+  tienen evidencia parcial previa, sin certificar todos los casos del conjunto.
+- [ ] Revisar e integrar los aportes de compañeros y documentar la integración.
+- [ ] Obtener firmas del equipo y completar la aceptación. La v2 no está cerrada;
+  no se autoriza integración a main ni creación del tag mediante este avance.

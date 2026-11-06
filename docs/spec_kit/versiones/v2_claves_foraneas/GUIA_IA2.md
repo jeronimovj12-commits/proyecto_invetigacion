@@ -220,3 +220,72 @@ el HTTP simulado no sustituyen ese recorrido visual, conforme a
 Este archivo no constituye una declaración de terminación de la v2. La
 constitución y la metodología exigen completar la compuerta del frontend,
 aceptación y sustentación antes del cierre.
+
+## 7. Prompt de esta sesión — datos y documentación (5 de noviembre de 2026)
+
+Texto literal del pedido disponible en esta sesión:
+
+```text
+Trabaja sobre el proyecto actual para preparar los datos necesarios y actualizar la documentación de la v2.
+
+Primero lee la constitución, los documentos de v2 y git status. Conserva los cambios existentes y trabaja en v2-desarrollo. No fusiones con main ni crees el tag v2.
+
+PARTE 1 — Datos para los desplegables
+- Revisa las semillas, los catálogos y las relaciones necesarias para usar las diez pantallas de v2.
+- Identifica qué catálogos tienen datos activos y cuáles están vacíos. Distingue los datos oficiales de los datos de prueba.
+- Busca primero en los archivos del proyecto las fuentes oficiales disponibles. No inventes información oficial.
+- Si faltan fuentes, prepara un script separado y opcional para cargar datos ficticios de demostración, identificados con el prefijo “DEMO V2”.
+- Incluye los datos mínimos y sus dependencias para permitir probar los desplegables. Respeta las restricciones reales del esquema.
+- El script debe poder ejecutarse varias veces sin duplicar registros, sobrescribir datos ajenos ni reactivar registros inactivos. Ante conflictos, informa claramente.
+- No borres la base ni los volúmenes de Docker. No modifiques las semillas oficiales para mezclarles datos de demostración.
+- Documenta el comando exacto para cargar los datos en una instalación existente y en una nueva. Verifica el script en una base de prueba aislada si el entorno lo permite; si no, registra esa limitación.
+
+PARTE 2 — Documentación del avance
+- Actualiza el quickstart de v2 con los pasos de carga y el orden recomendado para probar las pantallas según sus dependencias.
+- Revisa 8_tasks.md, 9_checklist.md y VERIFICACION_V2.md para que reflejen la evidencia disponible.
+- Mantén pendientes las pruebas manuales no realizadas, la revisión e integración de aportes de mis compañeros y las firmas.
+- No conviertas pruebas automáticas en evidencia de revisión manual ni declares terminada la v2.
+- Registra este prompt y los cambios derivados en GUIA_IA2.md sin inventar prompts anteriores.
+
+Al terminar:
+1. Resume los catálogos faltantes y la solución preparada.
+2. Indica los archivos modificados y las verificaciones realmente ejecutadas.
+3. Crea dos commits separados, únicamente si existen cambios reales:
+   - "Agrega datos opcionales de demostración para los desplegables de v2"
+   - "Documenta la carga de datos y los pendientes de verificación de v2"
+4. Comprueba la identidad de Git antes de hacer commit. Si falta, pregúntamela.
+5. No hagas push todavía.
+```
+
+**Objetivo:** preparar opciones de los desplegables y documentar el avance sin
+cerrar la v2 ni mezclar datos oficiales y ficticios.
+
+**Fuentes consultadas:** constitución, documentos v2, VERIFICACION_V2.md,
+Docker Compose, db/init.sql, SQL originales de ProyectosDeAula, hojas del Excel
+Base de Datos v6.xlsx, código del smoke test y consultas de solo lectura a la
+base local. El estado inicial estaba limpio en v2-desarrollo. Se comprobó la
+identidad configurada de Git antes de preparar los commits.
+
+**Cambios derivados:** tres SQL opcionales en db/opcionales (auxiliar seguro,
+universidades oficiales y demo), quickstart, tareas, checklist, verificación,
+esta guía y aclaración del estado de los catálogos en 2_spec.md.
+Se recuperaron seis universidades completas del Excel; no se completó por
+invención la ficha incompleta de docente. Para los padres sin datos cargables
+se prepararon dos juegos de fichas DEMO V2. No se alteró init.sql.
+
+**Verificación real:** cargas iniciales y repetidas en la base aislada
+verificacion_datos_v2_20261105; conflictos por datos diferentes, registro inactivo
+y catálogo sin opciones activas rechazados con error. Se conservaron tanto el
+valor ajeno como la inactividad y la secuencia SERIAL. Detalle reproducible y
+limitaciones en VERIFICACION_V2.md. No se cargó la demo en investigacion_local,
+no se repitió el smoke test y no se hizo nueva revisión manual.
+
+**Pendientes:** completar el recorrido manual restante, revisar e integrar
+aportes de compañeros, revisar decisiones, firmar y cerrar. Se conserva la
+trazabilidad anterior sin inventar prompts previos. La evidencia manual parcial
+de aa_linea y ods_linea consta en VERIFICACION_V2.md y no certifica todo el conjunto.
+
+La restricción histórica de esta guía sobre no hacer commits correspondía a
+los pedidos anteriores de documentación; este prompt autoriza los dos commits
+de avance indicados, sin push, sin main ni tag v2. El tag y el cierre continúan
+pendientes de aceptación.

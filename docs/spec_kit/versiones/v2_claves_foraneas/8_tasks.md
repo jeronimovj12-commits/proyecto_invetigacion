@@ -79,3 +79,19 @@
   pendiente: `VERIFICACION_V2.md`.
 - [ ] Cerrar el checklist de la v2 después de la revisión manual. Evidencia de
   pendiente: `3_plan.md` y `VERIFICACION_V2.md`.
+
+## Preparación de datos y pendientes — 5 de noviembre de 2026
+
+- [x] Inventariar opciones activas, distinguir semillas de fichas PRUEBA V2 y
+  revisar fuentes locales. Evidencia: inventario en `VERIFICACION_V2.md`.
+- [x] Separar la carga de seis universidades del Excel de la carga ficticia
+  DEMO V2 y sus dependencias. Evidencia: `db/opcionales/`.
+- [x] Verificar carga inicial, repetición, conflictos, inactivos y falta de
+  catálogo en PostgreSQL aislado. Evidencia: `VERIFICACION_V2.md`, base
+  `verificacion_datos_v2_20261105`. No acredita revisión manual.
+- [x] Documentar comandos para instalaciones existentes/nuevas y orden de las
+  diez pantallas. Evidencia: `7_quickstart.md`.
+- [ ] Completar el recorrido manual restante; conservar la evidencia parcial
+  previa de aa_linea y ods_linea sin dar por comprobadas las diez pantallas.
+- [ ] Revisar e integrar los aportes de compañeros y registrar qué se aceptó.
+- [ ] Obtener firmas y cerrar formalmente la aceptación cuando corresponda.
