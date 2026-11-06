@@ -263,3 +263,52 @@ y ods_linea (recorrido del usuario y comprobación final de inactividad), sin
 atribuirles cobertura de todos los casos. Continúan pendientes la revisión
 manual restante de las diez pantallas, revisión e integración de aportes de
 compañeros, decisiones de negocio, firmas y cierre. La v2 sigue abierta.
+
+## Carga ejecutada en PostgreSQL local — 5 de noviembre de 2026
+
+Por solicitud explícita del usuario se ejecutaron ahora las cargas opcionales
+sobre `investigacion_local`. Este apartado actualiza el estado posterior al
+ensayo aislado anterior; no modifica su evidencia histórica.
+
+Comandos ejecutados desde la raíz del repositorio:
+
+```sh
+docker compose exec -T postgres pg_isready -U investigacion -d investigacion_local
+docker compose cp db/opcionales postgres:/tmp/v2-opcionales
+docker compose exec -T postgres psql -X -U investigacion -d investigacion_local -f /tmp/v2-opcionales/universidades_oficiales_v2.sql
+docker compose exec -T postgres psql -X -U investigacion -d investigacion_local -f /tmp/v2-opcionales/demo_v2.sql
+```
+
+PostgreSQL confirmó disponibilidad. Ambas cargas terminaron con COMMIT y código
+de salida 0, sin conflictos: se insertaron las seis universidades oficiales
+(IDs 1–6) y las diez fichas DEMO V2 (dos universidades, líneas, docentes,
+grupos y semilleros; claves 1902000001 y 1902000002).
+
+Se consultaron realmente por HTTP los ocho endpoints de la API local con
+`GET http://localhost:8025/api/{tabla}?limite=1000`. Todos respondieron 200;
+`total` coincidió con la cantidad de elementos de `datos`:
+
+| Tabla | HTTP | Opciones activas devueltas |
+|---|---:|---:|
+| universidad | 200 | 8 |
+| linea_investigacion | 200 | 3 |
+| docente | 200 | 2 |
+| grupo_investigacion | 200 | 2 |
+| semillero | 200 | 2 |
+| area_conocimiento | 200 | 218 |
+| objetivo_desarrollo_sostenible | 200 | 17 |
+| area_aplicacion | 200 | 21 |
+
+La consulta directa posterior de solo lectura confirmó que las universidades
+1701599218 y 1701599219 siguen inactivas; la línea 1701599219 y las fichas de
+docente, grupo y semillero 1701599219 también siguen inactivas. La línea previa
+1701599220 continúa activa. Las nuevas fichas DEMO están activas. Los scripts
+solo insertaron las filas nuevas; no sobrescribieron ni reactivaron las previas.
+No se ejecutó init.sql ni se borraron datos, bases o volúmenes.
+
+Esta comprobación acredita carga y disponibilidad de opciones desde la API.
+No se realizó un nuevo recorrido manual del navegador ni se ejecutó el smoke
+test en esta sesión. Continúan pendientes las pruebas manuales restantes de
+las diez pantallas, la revisión e integración de aportes de compañeros, las
+decisiones pendientes del equipo y las firmas. La v2 no se declara terminada.
+No se creó tag v2 ni se fusionó con main. No se hizo commit ni push en esta sesión.
