@@ -2,6 +2,8 @@
 
 Fecha de inspección: 5 de noviembre de 2026. Este documento contiene hallazgos
 y propuestas, no decisiones ya aprobadas por el profesor o el equipo.
+Los apartados iniciales conservan la inspección anterior a implementar;
+la actualización al final registra la autorización y el trabajo posterior.
 
 ## Estado de Git y verificaciones documentales
 
@@ -107,3 +109,45 @@ Es referencia técnica, no especificación del profesor.
 
 Recuperación de acceso, registro público, duración y política del último admin
 no están detallados en los originales; deben resolverse antes de cerrar contratos.
+
+## Actualización: primera implementación autorizada
+
+El usuario autorizó dos roles, permisos del administrador y consulta, alta por
+administrador, TTL de 30 minutos configurable sin refresh token, logout global
+con version_sesion, asignaciones con borrado lógico y Argon2. Recuperación por
+correo, restitución de asignaciones, front, CRUD administrativo y protección
+de todas las rutas quedaron fuera de esta entrega. No son requisitos nuevos
+atribuidos al profesor. El cierre de v2 permanece pendiente.
+
+Antes de migrar se consultaron nuevamente information_schema y pg_constraint
+locales: coincidieron con el esquema original, con cero cuentas/roles/asignaciones.
+Después de las pruebas, la base compartida conserva cero columnas nuevas y
+cero filas en esas tablas. No se aplicó allí la migración.
+
+Se eligieron PyJWT 2.15.1 y pwdlib[argon2] 0.3.0, instalados y probados en la
+imagen aislada. La [guía oficial de FastAPI](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/)
+usa estas bibliotecas para JWT y Argon2; la [API oficial de PyJWT](https://pyjwt.readthedocs.io/en/stable/api.html)
+documenta algorithms fijo y require para exigir claims. Se consultaron estas
+fuentes en esta sesión. PasswordHash.recommended produce Argon2id; no se
+implementó hashing ni firma propios. Las versiones anteriores del stack siguen
+con el esquema de dependencias del proyecto; no se convirtieron todas a un lockfile.
+
+La razón para ampliar las dependencias (art. 2) es usar bibliotecas mantenidas
+en lugar de criptografía propia. La razón para ampliar las tablas (art. 5) es
+persistir revocación tras reinicio y permitir borrado lógico sin borrar vínculos.
+La razón para ampliar errores (art. 10) es distinguir autenticación fallida
+(401) de autorización insuficiente (403). Estas propuestas de enmienda se
+ejecutan en el alcance autorizado por el usuario, sin afirmar ratificación
+formal del texto constitucional ni firmas del equipo.
+
+Se usa main_v3:app y un compose separado para no romper el entorno de v2 con
+columnas/dependencias aún no instaladas. El controlador solo conoce la interfaz
+de servicio; el servicio recibe repositorio y adaptadores por interfaces; el
+ensamblador_autenticacion construye implementaciones concretas. El repositorio
+oculta parámetros en errores SQLAlchemy; la frontera HTTP y el comando no
+imprimen excepciones internas. No se agregó middleware global todavía.
+
+La política de logout quedó concretada: incremento atómico condicional de la
+versión en PostgreSQL. Se verificó con HTTP, dos logouts concurrentes y reinicio
+real del proceso uvicorn de prueba; no depende de memoria de la API. Las
+operaciones ya autorizadas antes del logout no se cancelan retroactivamente.

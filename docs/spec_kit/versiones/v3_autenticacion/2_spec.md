@@ -1,65 +1,70 @@
-# Especificación inicial — v3: autenticación, JWT, usuarios y roles
+﻿# Especificación — primera entrega backend v3
 
-Fecha: 5 de noviembre de 2026. **Borrador para revisión del equipo**.
-Solo preparación documental; no hay implementación de v3 ni cambio de esquema.
+Estado: implementación parcial en v3-desarrollo, 5 de noviembre de 2026.
+V2 continúa abierta: pruebas manuales restantes, integración de aportes de
+compañeros y firmas pendientes. No hay merge, tags ni cierre de versión.
 
-## Procedencia y adelanto autorizado
+## Requisitos originales confirmados
 
-Requisitos originales localizados en documentos del profesor del repositorio:
+- [Módulo Investigación §3](../../../../ProyectosDeAula/docs/modulo_investigacion.md):
+  POST /api/login con JWT, autenticación/autorización, menú por roles, CRUD de
+  usuario/rol/rol_usuario solo para administradores y logout; consulta no escribe.
+- [Metodología §2, §5 y §6](../../../../ProyectosDeAula/docs/0_METODOLOGIA.md):
+  sesiones, Bearer desde el front, contraseñas hasheadas, secretos externos y
+  regresión de versiones previas.
+- [Constitución](../../1_constitution.md): interfaces entre capas, SQL
+  parametrizado sin ORM, front separado por HTTP y borrado lógico.
 
-| Fuente (rutas relativas a esta carpeta) | Requisito confirmado |
+Las fuentes no fijan los dos roles iniciales, 30 minutos, Argon2, HS256 ni
+version_sesion. Son decisiones del usuario para esta implementación.
+
+## Políticas autorizadas para esta entrega
+
+| Tema | Política de implementación |
 |---|---|
-| [Módulo Investigación §2–3](../../../../ProyectosDeAula/docs/modulo_investigacion.md) | POST /api/login con JWT, middleware de autenticación/autorización, menú por roles, CRUD de usuario/rol/rol_usuario solo para administradores y logout; consulta no escribe |
-| [Metodología §2 y §6](../../../../ProyectosDeAula/docs/0_METODOLOGIA.md) | JWT, sesiones, Authorization: Bearer desde el front, contraseñas hasheadas (bcrypt o equivalente), regresión v1–v2 |
-| [Mapa de versiones](../0_mapa_versiones.md) | Las tres tablas entran en v3; dashboard y consultas multitabla pertenecen a v4 |
-| [Constitución](../../1_constitution.md), artículos 1–11 | Capas con interfaces, SQL parametrizado sin ORM, front separado por HTTP, secretos por entorno, borrado lógico y contratos explícitos |
+| Roles | administrador lee/escribe investigación y seguridad; consulta solo lee investigación |
+| Identidad | Usuario activo, version_sesion coincidente y roles/asignaciones activos leídos desde PostgreSQL por solicitud |
+| Permisos | Sin roles iniciales efectivos: 403; credencial/token inválido, inactividad o versión revocada: 401 |
+| Alta | Primer administrador mediante comando local; futuro CRUD solo por admin; no registro público |
+| Contraseña | Argon2id mediante pwdlib; entrada oculta y sin valores predeterminados |
+| Sesión | 30 minutos configurables; HS256; sin refresh token ni renovación automática |
+| Logout | Incremento atómico y persistente de version_sesion: invalida todas las sesiones anteriores del usuario |
+| Asignaciones | Columna activo para borrado lógico; no restitución de retiradas en esta entrega |
+| Recuperación | Correo automático fuera de esta entrega |
 
-Sí existe el alcance original de v3; no se encontró un contrato detallado
-original de sus cuerpos, permisos por recurso, expiración o recuperación.
-Los detalles de este spec kit que no constan en las fuentes son propuestas.
+## Alcance realmente implementado
 
-La constitución (art. 1), el mapa y la metodología (§1.1) exigen cerrar una
-versión antes de escribir la siguiente. El usuario decidió explícitamente
-adelantar esta preparación mientras v2 sigue abierta. Se registra la desviación
-de secuencia, sin simular cierre, aceptación del profesor ni enmienda aprobada.
-La constitución no se modifica. Antes de implementar, el equipo debe resolver
-esta secuencia conforme al art. 11 y a sus responsabilidades con el profesor.
+Migración explícita con precondiciones; interfaces, servicio, repositorio y
+adaptadores de seguridad; POST /api/login, GET /api/sesion y POST /api/logout;
+comando local transaccional del primer administrador; pruebas HTTP con base
+nueva y reinicio de la API de prueba. Contratos exactos en 6_contracts.md.
 
-V2 conserva pendientes las pruebas manuales restantes, revisión e integración
-de aportes de compañeros, decisiones y firmas. Véase
-[VERIFICACION_V2.md](../../../../VERIFICACION_V2.md). No fusionar con main ni crear tags.
+El arranque v3 es `main_v3:app`, con compose independiente, PostgreSQL propio y
+puerto local 8026. `main:app` y el compose de v2 permanecen sin modificar.
+La base compartida investigacion_local no recibió las migraciones.
 
-## Alcance confirmado
+## Límites y pendientes explícitos
 
-- Inicio de sesión que entrega JWT y control de acceso por roles en la API.
-- Sesiones y cierre de sesión, con pantallas y menú coherentes con los roles.
-- CRUD de `usuario`, `rol` y `rol_usuario`, API y front, solo para administradores.
-- Un usuario de consulta no puede escribir, incluso accediendo directamente a la API.
-- Contraseñas hasheadas, nunca expuestas en respuestas ni almacenadas en claro.
-- Front Flask independiente: conserva el token y lo envía como Bearer por HTTP;
-  no importa código de la API ni consulta PostgreSQL.
-- Preservar el comportamiento de dominio de v1–v2 para usuarios autorizados.
+**Las rutas existentes de investigación todavía NO están protegidas**, incluso
+si se consultan a través del arranque parcial v3. La función de política de
+permisos no equivale a middleware global. No hay pantallas Flask de seguridad,
+CRUD administrativo, registro público ni recuperación por correo. No hay todavía
+endpoint para retirar asignaciones: se preparó el esquema y su filtro efectivo.
+No usar este backend parcial como sistema completamente protegido.
 
-No se incluyen dashboard, consultas de v4 ni publicación. Registro público,
-recuperación automática, refresh tokens y MFA no se asumen como requisitos.
+Quedan pendientes protección de cada recurso/verbo, control del último admin,
+limitación de intentos de login, tratamiento de claves/secretos comprometidos,
+front, aceptación del equipo y revisión manual. No se asume conformidad total
+con la rúbrica por aprobar pruebas automáticas parciales.
 
-## Decisiones pendientes del equipo
+## Secuencia y cambios respecto de la constitución
 
-| Tema | Confirmado | Por decidir / propuesta |
-|---|---|---|
-| Permisos | Administración de seguridad solo admin; consulta no escribe | Matriz por recurso/verbo, roles adicionales, lecturas anónimas, combinación de roles y usuario sin rol; proponer denegar lo no concedido |
-| Primer usuario | No hay usuarios ni roles locales | Proponer comando de bootstrap controlado, idempotente, con secreto por entorno y sin contraseña predeterminada; definir responsable |
-| Registro | No se exige alta pública | Proponer alta solo por admin; definir si habrá invitaciones o registro público |
-| Sesiones | JWT y logout obligatorios | Duración absoluta/inactividad, renovación, almacenamiento del front y revocación; no fijar tiempos sin acuerdo |
-| Recuperación | Sin procedimiento especificado | Definir responsable, verificación de identidad y mecanismo; no prometer correo automático |
-| Roles y cambios | Existen usuario y rol activos | Definir efecto inmediato al desactivar o quitar un rol, protección del último admin y autoedición |
-| Retiro de asignaciones | CRUD exigido, borrado lógico constitucional | Resolver ausencia de activo en rol_usuario antes de contratar DELETE |
+Art. 1, mapa y metodología exigen cerrar la versión anterior antes de la siguiente.
+Se registra la instrucción explícita del usuario de adelantar primero documentación
+y ahora esta primera implementación sin cerrar v2. No se atribuye aprobación
+al profesor ni se altera el estado de v2.
 
-## Criterios de aceptación a verificar en el futuro
-
-Login válido entrega token sin password/hash; credenciales incorrectas no revelan
-si existe la cuenta. Token ausente, inválido o vencido impide acceso protegido.
-Identidad válida sin permiso impide la operación sin cambiar datos. Admin puede
-gestionar seguridad; consulta no escribe; ocultar el menú no sustituye la API.
-Logout limpia el estado del front y cumple la política de revocación acordada.
-Cada caso debe probarse en servicios, HTTP real y navegador; hoy están pendientes.
+Conforme al art. 11, en 4_research.md quedan descritos el motivo y consecuencias
+de añadir columnas (art. 5), bibliotecas de seguridad (art. 2) y 401/403 (art. 10).
+El usuario autorizó esas políticas para esta entrega; no se modificó el texto de
+la constitución ni se inventaron firmas o ratificación formal del equipo.

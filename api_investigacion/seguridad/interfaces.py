@@ -1,0 +1,13 @@
+"""Puertos de seguridad; no dependen de HTTP ni PostgreSQL."""
+from typing import Protocol
+
+
+class IClaves(Protocol):
+    def crear(self, clave: str) -> str: ...
+    def verificar(self, clave: str, resumen: str) -> bool: ...
+
+
+class ITokens(Protocol):
+    segundos: int
+    def emitir(self, usuario_id: int, version: int) -> str: ...
+    def validar(self, token: str) -> dict: ...

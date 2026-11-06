@@ -1,0 +1,36 @@
+# Instalación aislada: no usa investigacion_local ni los volúmenes de v2.
+services:
+  postgres-v3:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: investigacion_v3
+      POSTGRES_DB: investigacion_v3
+      POSTGRES_PASSWORD: ${V3_DB_PASSWORD:?Configure V3_DB_PASSWORD fuera de Git}
+    volumes:
+      - pgdata-v3:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./db/migraciones:/migraciones:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U investigacion_v3 -d investigacion_v3']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  api-v3:
+    build: ./api_investigacion
+    command: uvicorn main_v3:app --host 0.0.0.0 --port 8025 --no-access-log
+    ports:
+      - '127.0.0.1:8026:8025'
+    environment:
+      DB_POSTGRES: postgresql+asyncpg://investigacion_v3:${V3_DB_PASSWORD:?}@postgres-v3:5432/investigacion_v3
+      JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET fuera de Git}
+      JWT_ISSUER: investigacion-v3
+      JWT_AUDIENCE: investigacion-api
+      JWT_MINUTOS: ${JWT_MINUTOS:-30}
+    volumes:
+      - ./api_investigacion:/app
+      - ./db:/db-v3:ro
+    depends_on:
+      postgres-v3:
+        condition: service_healthy
+volumes:
+  pgdata-v3:

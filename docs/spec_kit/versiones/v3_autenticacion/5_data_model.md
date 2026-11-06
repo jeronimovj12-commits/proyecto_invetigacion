@@ -2,7 +2,9 @@
 
 Fuente: db/init.sql y ProyectosDeAula/db_scripts/postgresql/investigacion.pg.sql.
 Contrastado el 5 de noviembre de 2026 con information_schema.columns y
-pg_constraint de investigacion_local, esquema public. No se cambió el esquema.
+pg_constraint de investigacion_local, esquema public. Los apartados originales
+describen la base compartida, cuyo esquema no se cambió; la migración aislada
+de esta primera entrega se describe al final.
 Tablas vacías: rol=0, usuario=0, rol_usuario=0; sin semillas en init.sql.
 
 ## rol
@@ -72,3 +74,20 @@ Ejemplo conceptual (no datos insertados): usuario U con roles R1 y R2 ocupa
 dos filas (U,R1) y (U,R2). Desactivar U bloquea ambas efectivamente, pero no
 equivale a retirar R1 conservando R2. Esto explica por qué falta decidir el
 retiro individual de rol_usuario.
+
+## Ampliación autorizada y probada únicamente en bases aisladas
+
+| Tabla / columna nueva | Tipo | NULL | Default | Uso |
+|---|---|---|---|---|
+| usuario.version_sesion | integer | No | 0 | CHECK >= 0; logout incrementa atómicamente y JWT exige coincidencia |
+| rol_usuario.activo | boolean | No | TRUE | Filtrar asignaciones retiradas sin borrar la fila |
+
+Archivo: db/migraciones/v3_001_sesiones_asignaciones.sql. No modifica init.sql,
+claves compuestas ni FK; no reinicia secuencias y no reescribe hashes. La
+repetición conserva versiones y estados inactivos. La restitución de una
+asignación retirada queda fuera de la primera entrega: no hay endpoint que
+reactive filas. Tampoco se implementó todavía el endpoint para retirarlas.
+
+No se guarda JWT en PostgreSQL: solo la versión que permite invalidarlo.
+Roles y asignaciones se leen desde la base; no se confía en permisos del token.
+Véanse contratos implementados en 6_contracts.md y evidencia en VERIFICACION_V3.md.

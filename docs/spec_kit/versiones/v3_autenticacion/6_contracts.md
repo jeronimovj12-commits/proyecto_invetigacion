@@ -1,77 +1,78 @@
-# Borrador de contratos — v3
+﻿# Contratos implementados — backend parcial v3
 
-**No implementado ni aprobado.** Solo POST /api/login, JWT, Bearer, control por
-roles, CRUD administrativo y logout proceden del alcance original. Los cuerpos,
-códigos nuevos, rutas restantes y políticas siguientes son propuestas revisables.
-No sustituye los contratos actuales de v1–v2.
+Estos tres contratos son políticas autorizadas por el usuario. El profesor
+confirma POST /api/login con JWT y logout, pero no estos cuerpos, tiempos o claims.
+El resto del CRUD y la protección global siguen pendientes.
 
-## Autenticación y sesión propuestas
+## POST /api/login
 
-| Método y ruta | Cuerpo / resultado propuesto | Acceso |
-|---|---|---|
-| POST /api/login | JSON {username, password}; 200 con access_token, token_type="bearer", expires_in y usuario público con roles | Público |
-| GET /api/sesion | 200 con identidad y roles efectivos, sin token ni password | Autenticado |
-| POST /api/logout | 200 {estado:200, mensaje:"Sesión cerrada."}; semántica de revocación pendiente | Autenticado; acordar repetición/vencimiento |
+Público. Content-Type: application/json. Cuerpo exacto:
+`{"username":"<cuenta>","password":"<contraseña>"}`.
+username: texto de 1–100 caracteres; password: 1–1024; campos adicionales
+rechazados. No hay normalización automática ni registro público.
 
-expires_in se expresa en segundos; su valor no está decidido. Claims propuestos:
-sub como ID de usuario en texto, iat y exp, iss/aud acordados; jti solo si la
-política de revocación lo necesita. No incluir contraseña, hash ni secretos.
-Cabecera de llamadas protegidas: Authorization: Bearer <token>.
+200: `{access_token, token_type:"bearer", expires_in, usuario}`.
+expires_in es JWT_MINUTOS*60 (30 minutos por defecto, configuración 1–1440).
+usuario contiene únicamente `{id, username, email, nombre_completo, roles}`;
+nombre_completo admite null y roles es lista de nombres activos efectivos.
+Nunca se retorna password/hash. Cache-Control: no-store; Pragma: no-cache.
 
-Login fallido propone 401 con mensaje genérico "Credenciales inválidas." tanto
-para cuenta inexistente como contraseña incorrecta/inactividad. No devolver
-detalles internos. Falta acordar límites de intentos y política de bloqueo.
+401 genérico para cuenta inexistente, contraseña incorrecta o usuario no activo
+(incluido NULL); no se devuelve token. Credenciales válidas sin administrador
+ni consulta efectivos: 403, sin token. La existencia de roles arbitrarios no
+concede permisos de los dos roles iniciales.
 
-## Administración propuesta
+## JWT emitido y validado
 
-Todas estas operaciones requieren administrador efectivo en la API, además
-de menú restringido en el front. Respuestas de usuario nunca contienen password.
+Algoritmo permitido fijo HS256, jamás obtenido del encabezado del solicitante.
+JWT_SECRET externo, aleatorio y de al menos 32 bytes. Biblioteca PyJWT 2.15.1.
 
-| Recurso | Rutas propuestas | Campos de creación / edición |
-|---|---|---|
-| usuario | GET/POST /api/usuario; GET/PUT/PATCH/DELETE /api/usuario/{id} | username, email, nombre_completo; password solo de entrada al crear; proponer cambio de contraseña por operación separada aún por definir |
-| rol | GET/POST /api/rol; GET/PUT/PATCH/DELETE /api/rol/{id} | nombre, descripcion |
-| rol_usuario | GET/POST /api/rol_usuario; GET/PUT/PATCH/DELETE /api/rol_usuario/{usuario_id}/{rol_id} | usuario_id, rol_id |
+Claims obligatorios: sub (texto decimal positivo, ID integer PostgreSQL),
+version_sesion (entero no negativo, sin booleanos), iat y exp (enteros UTC NumericDate),
+iss y aud (coinciden exactamente con JWT_ISSUER y JWT_AUDIENCE; aud único).
+Se exige exp>iat, vigencia no superior al TTL configurado, firma válida, token
+no vencido e iat no futuro. No se admiten claims obligatorios omitidos.
+No se confía en roles transportados por el token: se consultan en la base.
 
-IDs SERIAL de usuario/rol asignados por servidor. No admitir id, activo o fechas
-como campos editables en los cuerpos de usuario/rol. No se aprueban aún reglas
-para cambiar componentes de rol_usuario: evaluar cambio de clave frente a
-operación de reasignación transaccional, sin borrar físicamente como atajo.
-DELETE de rol_usuario está **bloqueado para especificación final** por falta
-de activo; enumerarlo conserva el requisito CRUD, no afirma soporte existente.
+Después de verificar el JWT, cada operación consulta usuario activo y versión
+vigente; roles: rol.activo IS TRUE y rol_usuario.activo IS TRUE. La API usa el
+estado persistido, sin lista de revocaciones en memoria.
 
-Proponer mantener convenciones del proyecto: listas con limite y sobre
-{tabla, limite, total, datos}, vacías 204; creaciones 200, modificaciones/retiros
-200 con filasAfectadas; PUT exige los campos editables acordados, PATCH distingue
-omisión y null. Antes de implementar, concretar DTO de cada operación y respuesta,
-política de duplicados, cambios de contraseña y retiro del último administrador.
+## GET /api/sesion
 
-## Errores propuestos y compatibilidad
+Cabecera Authorization: Bearer <token>. 200 con el usuario público descrito
+arriba y cabeceras no-store. Credencial ausente/malformada, token inválido,
+usuario inexistente/inactivo o versión antigua: 401. Identidad válida sin rol
+inicial efectivo: 403.
 
-| Estado | Uso |
-|---|---|
-| 401 | Falta de Bearer, token inválido/vencido o login inválido; proponer WWW-Authenticate: Bearer |
-| 403 | Identidad válida sin permiso; ninguna escritura |
-| 400 | Regla de negocio o referencia inactiva; PATCH vacío |
-| 404 | Registro inexistente o inactivo, después de autorizar al solicitante |
-| 422 | Cuerpo inválido según modelos Pydantic |
-| 500 | Fallo interno con respuesta pública sin secretos |
+## POST /api/logout
 
-Conservar sobre {estado, mensaje, detalle}; 422 añade errores. Proponer detalle
-genérico en errores de autenticación, sin credenciales, hash, token o SQL.
-401/403 requieren revisar el art. 10 antes de cerrar el contrato. No cambiar
-automáticamente la política v2 de claves duplicadas por otro código.
+Bearer obligatorio. Sin cuerpo requerido. 200:
+`{"estado":200,"mensaje":"Sesión cerrada en todos los dispositivos."}`.
 
-La matriz de permisos por recurso/verbo está pendiente. No se asume que admin
-pueda escribir todos los recursos de dominio solo por administrar usuarios.
-El requisito confirmado es que consulta no escribe y seguridad es solo admin.
+UPDATE condicional atómico de version_sesion en PostgreSQL, con validación de
+la versión presentada. Desde que confirma, tokens de la versión anterior reciben
+401, incluso después de reiniciar la API. Logout repetido con el token anterior:
+401. Dos logouts simultáneos sobre la misma versión: uno confirma y el otro
+responde 401, sin perder el incremento. Token vigente de usuario que perdió sus
+roles aún permite cerrar sus propias sesiones; no concede acceso de investigación.
 
-## Contrato de front por acordar
+Cambiar TTL, emisor, audiencia o secreto puede invalidar tokens existentes.
+El vencimiento no renueva sesión; el futuro front deberá solicitar nuevo login.
+La revocación no cancela operaciones que ya habían sido autorizadas y estaban
+cursando antes del COMMIT del logout.
 
-Proponer GET/POST /login y POST /logout en Flask, gestión de usuarios/roles y
-asignaciones con rutas propias. API sigue decidiendo permisos; front solo adapta
-mensajes y navegación. No devolver tokens en URLs ni guardar sesión autenticada
-en una variable global. Ante 401 pedir login; ante 403 mostrar acceso denegado;
-ante API caída mostrar aviso sin datos. Validar destino de redirección de vuelta
-para impedir redirecciones externas. Formulario de logout con protección CSRF.
-El almacenamiento definitivo del token y revocación siguen pendientes.
+## Errores
+
+Sobre común `{estado,mensaje,detalle}`; 422 añade `errores` traducidos, sin
+copiar el cuerpo ni los valores sensibles. 401 incorpora WWW-Authenticate: Bearer.
+
+- 401: Credenciales inválidas / Autenticación requerida; identidad no vigente.
+- 403: Acceso denegado; identidad válida sin permisos suficientes.
+- 422: JSON inválido, campos faltantes/adicionales o longitudes inválidas.
+- 500: fallo interno, texto genérico sin SQL, hashes, tokens ni excepciones completas.
+
+Los contratos existentes de v2 no se modifican. No están implementados todavía
+/api/usuario, /api/rol ni /api/rol_usuario; no hay middleware que proteja todas
+las rutas de dominio. La función de política interna permite administrador
+para lectura/escritura/seguridad y consulta solo para lectura de investigación.

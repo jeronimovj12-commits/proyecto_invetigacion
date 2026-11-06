@@ -1,7 +1,9 @@
 # Plan por etapas — v3
 
-Estado: planificación documental anticipada, no implementación autorizada.
-Alcance y fuentes en [2_spec.md](2_spec.md). No cierra v2.
+Estado inicial: planificación documental anticipada. El usuario autorizó luego
+la primera implementación de backend descrita en [2_spec.md](2_spec.md).
+No cierra v2. Las etapas siguientes conservan el plan completo de v3;
+el estado real de cada parte está en [8_tasks.md](8_tasks.md).
 
 ## Etapas propuestas y sus entregables
 
