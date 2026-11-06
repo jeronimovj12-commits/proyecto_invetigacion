@@ -1,47 +1,41 @@
-# Tareas pendientes — v3
+# Tareas y evidencia — primera entrega v3
 
-Borrador del 5 de noviembre de 2026. Todas las tareas de aprobación,
-implementación y aceptación permanecen pendientes; inspeccionar y documentar
-no acredita que la autenticación funcione. Hallazgos reales en 4_research.md.
+Fecha: 5 de noviembre de 2026. Las casillas completadas acreditan únicamente
+esta parte de backend. Detalles de ejecución en VERIFICACION_V3.md.
 
-## Acuerdos y especificación
+## Políticas y preparación
 
-- [ ] Resolver con el equipo la preparación anticipada frente a art. 1 y metodología, manteniendo v2 abierta.
-- [ ] Completar pruebas manuales, integración de aportes y firmas de v2 en su propio seguimiento.
-- [ ] Revisar este alcance contra los originales del profesor y aprobar el spec kit.
-- [ ] Acordar matriz por recurso/verbo, roles múltiples, usuario sin roles y rutas públicas.
-- [ ] Definir bootstrap del primer administrador y responsable de credenciales.
-- [ ] Definir alta administrada, invitaciones o registro público, sin asumir este último.
-- [ ] Definir duración, inactividad, renovación, concurrencia y alcance del logout.
-- [ ] Definir recuperación de acceso y protección del último administrador.
-- [ ] Resolver borrado lógico de rol_usuario sin borrar físicamente por omisión.
-- [ ] Tramitar enmiendas necesarias: secuencia, dependencias, 401/403 y cualquier excepción de esquema.
-- [ ] Cerrar DTO, normalización/unicidad, errores, contraseña y reasignaciones de 6_contracts.md.
+- [x] Registrar las políticas explícitas del usuario y distinguirlas de los requisitos del profesor. Evidencia: 2_spec.md y GUIA_IA3.md.
+- [x] Inspeccionar esquema local antes de migrar, sin consultar credenciales. Evidencia: 4_research.md y db/migraciones/README_V3.md.
+- [x] Preparar y probar migración inicial/repetida y rechazo incompatible en PostgreSQL aislado; conservar inactivos y versiones. Evidencia: README_V3.md de migraciones.
+- [x] Preparar entorno Docker y secretos externos independientes de v2. Evidencia: docker-compose.v3.yml, .env.example y 7_quickstart.md.
 
-## Implementación futura (fuera de este pedido)
+## Backend parcial
 
-- [ ] Seleccionar bibliotecas de hash y JWT tras revisar mantenimiento y compatibilidad.
-- [ ] Configurar secretos obligatorios por entorno y .env.example sin valores reales.
-- [ ] Implementar interfaces, servicios, adaptadores y repositorios SQL parametrizados.
-- [ ] Integrar middleware de autenticación/autorización y composición de dependencias.
-- [ ] Implementar login, sesión, logout y CRUD administrativo con contratos aprobados.
-- [ ] Implementar login/logout, menú y pantallas administrativas en Flask por HTTP.
-- [ ] Resolver almacenamiento del token, aislamiento de sesiones, CSRF y cookies.
+- [x] Implementar interfaces, servicio, repositorio parametrizado y adaptadores PyJWT/Argon2id. Evidencia: api_investigacion/seguridad/, servicio_autenticacion.py y repositorio_autenticacion_postgresql.py.
+- [x] Implementar los tres contratos login/sesion/logout sin exponer hash o password. Evidencia: autenticacion_controller.py y 6_contracts.md.
+- [x] Consultar actividad y versión persistidas, roles y asignaciones activos por solicitud. Evidencia: consulta SQL y pruebas HTTP.
+- [x] Incrementar versión atómicamente y comprobar revocación después de reinicio. Evidencia: prueba_autenticacion_v3.py.
+- [x] Preparar bootstrap transaccional con getpass, sin predeterminados, rechazo de cuentas/conflictos y terminal obligatoria. Evidencia: comandos/crear_administrador.py y pruebas del servicio/comando no interactivo.
 
-## Verificación y aceptación futura
+## Verificaciones realmente ejecutadas
 
-- [ ] Probar servicios con repositorios falsos y reloj controlado.
-- [ ] Verificar hash seguro y ausencia de password/hash/token en respuestas y logs improcedentes.
-- [ ] Verificar login válido e inválido y usuario/rol inactivos o nulos.
-- [ ] Verificar 401 sin token, vencido, alterado y algoritmo no permitido.
-- [ ] Verificar 403 de consulta al escribir y de no-admin al gestionar seguridad, sin cambios en BD.
-- [ ] Verificar permisos de cada recurso y cambios de rol con token ya emitido.
-- [ ] Verificar logout y reutilización del token conforme a la política acordada.
-- [ ] Verificar dos sesiones aisladas y comportamiento después de reiniciar.
-- [ ] Ejecutar regresión v1–v2 con identidades autorizadas y catálogos existentes.
-- [ ] Revisar manualmente login, errores, expiración, menú, URL directa, CRUD y logout.
-- [ ] Registrar comandos, resultados y evidencia manual real; no sustituirla por automatización.
-- [ ] Revisar e integrar aportes de compañeros, obtener firmas y evaluar aceptación final.
+- [x] Login válido/inválido, usuario inexistente/inactivo/nulo, ausencia/alteración/firma/algoritmo/vencimiento/claims inválidos y roles insuficientes: 14 pruebas HTTP y de política pasaron. Evidencia: VERIFICACION_V3.md.
+- [x] Exclusión de rol y asignación inactivos, logout concurrente, revocación de múltiples tokens y persistencia al reiniciar. Evidencia: misma suite.
+- [x] Bootstrap real del servicio en base nueva y rechazo posterior conservando cuentas; comando sin terminal rechazado. Evidencia: misma suite. No acredita recorrido manual del prompt oculto.
+- [x] Regresión en memoria: prueba_capas.py y las 12 pruebas de prueba_v2.py. Evidencia: VERIFICACION_V3.md.
+- [x] Comprobar por lectura que investigacion_local sigue sin columnas v3 y sin cuentas/roles/asignaciones. Evidencia: VERIFICACION_V3.md.
 
-No crear tags ni fusionar con main mediante esta preparación. No hay tareas
-de implementación marcadas como realizadas ni pruebas de v3 ejecutadas.
+## Pendientes que esta entrega no certifica
+
+- [ ] Aplicar migración a la base local compartida: expresamente fuera del pedido actual.
+- [ ] Proteger todas las rutas de investigación y seguridad por recurso/verbo, con middleware/autorización.
+- [ ] Implementar CRUD administrativo y endpoints de retiro lógico de asignaciones.
+- [ ] Implementar pantallas Flask, Bearer, expiración, logout, menú y CSRF.
+- [ ] Validar manualmente el bootstrap con entrada oculta y todas las pantallas futuras.
+- [ ] Resolver y verificar protección del último administrador, límites de login y recuperación operativa.
+- [ ] Implementar restitución de asignaciones retiradas o recuperación automática por correo: fuera de esta primera entrega.
+- [ ] Completar regresión integrada de dominio y revisión manual; las pruebas en memoria no la sustituyen.
+- [ ] Ratificar formalmente las enmiendas y revisar/integrar aportes del equipo.
+- [ ] Completar pendientes manuales de v2 y obtener firmas; v2 sigue abierta.
+- [ ] Completar aceptación de v3; no declarar esta entrega completamente protegida.
