@@ -48,5 +48,26 @@ class PruebasFormularioAcLinea(unittest.TestCase):
         self.assertNotRegex(html, r'<button[^>]*disabled')
 
 
+class PruebasListadoAcLinea(unittest.TestCase):
+    def setUp(self):
+        modulo.app.config.update(TESTING=True)
+        self.cliente = modulo.app.test_client()
+
+    def test_listado_muestra_nombres_y_codigos_de_referencia(self):
+        with patch.object(modulo.cliente_api, 'listar_ac_linea', return_value=(
+            True, [{'linea_investigacion': 1902000001, 'area_conocimiento': '1A02'}], []
+        )), patch.object(modulo.cliente_api, 'listar_linea_investigacion', return_value=(
+            True, [{'id': 1902000001, 'nombre': 'Línea ficticia de prueba'}], []
+        )), patch.object(modulo.cliente_api, 'listar_areas_conocimiento', return_value=(
+            True, [{'id': '1A02', 'disciplina': 'Matemáticas aplicadas'}], []
+        )):
+            respuesta = self.cliente.get('/ac-linea')
+
+        html = respuesta.get_data(as_text=True)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIn('Línea ficticia de prueba (1902000001)', html)
+        self.assertIn('Matemáticas aplicadas (1A02)', html)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
