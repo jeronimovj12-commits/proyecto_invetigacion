@@ -757,10 +757,16 @@ def _opciones_ac_linea():
     if not ok:
         _avisar(errores)
         disponibles = False
+    elif not filas:
+        _avisar(["No hay líneas de investigación activas para asociar."])
+        disponibles = False
     ok, filas, errores = cliente_api.listar_areas_conocimiento()
     opciones["area_conocimiento"] = filas
     if not ok:
         _avisar(errores)
+        disponibles = False
+    elif not filas:
+        _avisar(["No hay áreas de conocimiento activas para asociar."])
         disponibles = False
     return opciones, disponibles
 
