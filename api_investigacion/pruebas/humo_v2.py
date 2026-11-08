@@ -45,8 +45,27 @@ async def main():
         for caso in CASOS:
             tabla, claves = caso['tabla'], caso['claves']
             datos = {k: numero if v == '__ID__' else v for k,v in caso['datos'].items()}
+            area_inexistente = None
             if tabla == 'ac_linea':
                 datos['area_conocimiento'] = areas_activas[0]
+                while True:
+                    area_inexistente = 'ZZ' + str(random.randint(0, 9999)).zfill(4)
+                    async with motor.connect() as conexion:
+                        existe = await conexion.scalar(text(
+                            "SELECT EXISTS (SELECT 1 FROM area_conocimiento WHERE id = :id)"
+                        ), {'id': area_inexistente})
+                    if not existe:
+                        break
+                pedir('POST', '/api/ac_linea', {
+                    **datos,
+                    'area_conocimiento': area_inexistente,
+                }, esperado=400)
+                async with motor.connect() as conexion:
+                    insertada = await conexion.scalar(text(
+                        "SELECT EXISTS (SELECT 1 FROM ac_linea "
+                        "WHERE linea_investigacion = :linea AND area_conocimiento = :area)"
+                    ), {'linea': numero, 'area': area_inexistente})
+                assert insertada is False, 'Se insertó ac_linea con un área inexistente'
             coleccion = '/api/' + tabla
             ruta = coleccion + '/' + '/'.join(str(datos[k]) for k in claves)
             pedir('POST', coleccion, datos)
@@ -58,6 +77,9 @@ async def main():
             pedir('PATCH', ruta, {}, esperado=400)
             pedir('PATCH', ruta, {caso['fk']: -999999999}, esperado=400)
             assert pedir('GET', ruta) == fila, f'PATCH inválido modificó {tabla}'
+            if tabla == 'ac_linea':
+                pedir('PATCH', ruta, {'area_conocimiento': area_inexistente}, esperado=400)
+                assert pedir('GET', ruta) == fila, 'PATCH con área inexistente modificó ac_linea'
             if tabla == 'grupo_investigacion':
                 pedir('PATCH', ruta, {'universidsad': numero-1}, esperado=400)
             pedir('PATCH', ruta, {caso['mutables'][0]: cuerpo[caso['mutables'][0]]})
