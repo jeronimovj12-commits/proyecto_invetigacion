@@ -31,14 +31,22 @@ def pedir(metodo, ruta, datos=None, esperado=200):
 async def main():
     numero = random.randint(1_000_000_000, 2_000_000_000)
     motor = create_async_engine(os.environ['DB_POSTGRES'])
+    async with motor.connect() as conexion:
+        areas_activas = (await conexion.execute(text(
+            "SELECT id FROM area_conocimiento WHERE activo IS TRUE ORDER BY id LIMIT 2"
+        ))).scalars().all()
+    assert len(areas_activas) == 2, 'Se necesitan dos áreas activas para probar ac_linea'
     async with motor.begin() as conexion:
         await conexion.execute(text("INSERT INTO universidad (id, nombre, tipo, ciudad, activo) VALUES (:id, 'Universidad de PRUEBA V2', 'Prueba', 'Prueba', TRUE), (:inactiva, 'Universidad inactiva de PRUEBA V2', 'Prueba', 'Prueba', FALSE)"), {'id': numero, 'inactiva': numero-1})
         await conexion.execute(text("INSERT INTO linea_investigacion (id, nombre, descripcion, activo) VALUES (:id, 'Línea de PRUEBA V2', 'Registro exclusivo del smoke test', TRUE)"), {'id': numero})
     creados = []
+    area_protegida = None
     try:
         for caso in CASOS:
             tabla, claves = caso['tabla'], caso['claves']
             datos = {k: numero if v == '__ID__' else v for k,v in caso['datos'].items()}
+            if tabla == 'ac_linea':
+                datos['area_conocimiento'] = areas_activas[0]
             coleccion = '/api/' + tabla
             ruta = coleccion + '/' + '/'.join(str(datos[k]) for k in claves)
             pedir('POST', coleccion, datos)
@@ -56,12 +64,37 @@ async def main():
             parcial = dict(cuerpo)
             parcial.pop(caso['mutables'][0])
             pedir('PUT', ruta, parcial, esperado=422)
+            if tabla == 'ac_linea':
+                nueva_area = areas_activas[1]
+                area_anterior = datos['area_conocimiento']
+                ruta_anterior = ruta
+                pedir('PATCH', ruta_anterior, {'area_conocimiento': nueva_area})
+                pedir('GET', ruta_anterior, esperado=404)
+                ruta = coleccion + '/' + str(datos['linea_investigacion']) + '/' + str(nueva_area)
+                actualizada = pedir('GET', ruta)
+                assert actualizada == {
+                    'linea_investigacion': datos['linea_investigacion'],
+                    'area_conocimiento': nueva_area,
+                }, f'Cambiar el área alteró la relación de ac_linea: {actualizada}'
+
+                async with motor.connect() as conexion:
+                    anterior_activa = await conexion.scalar(text(
+                        "SELECT EXISTS (SELECT 1 FROM ac_linea "
+                        "WHERE linea_investigacion = :linea "
+                        "AND area_conocimiento = :area AND activo IS TRUE)"
+                    ), {'linea': datos['linea_investigacion'], 'area': area_anterior})
+                assert anterior_activa is False, 'La combinación anterior de ac_linea sigue activa'
+
+                datos['area_conocimiento'] = nueva_area
+                creados[-1] = (caso, datos, ruta)
+                area_protegida = nueva_area
             pagina = urlopen('http://front-flask:8078/' + tabla.replace('_','-') + '/nuevo', timeout=15).read().decode()
             assert '<select' in pagina and str(numero) in pagina, f'Desplegables ausentes en {tabla}'
             print('[OK]', tabla, 'API y desplegables')
         for tabla in ['docente','grupo_investigacion','semillero']:
             pedir('DELETE', '/api/' + tabla + '/' + str(numero), esperado=400)
-        pedir('DELETE', '/api/area_conocimiento/1A01', esperado=400)
+        assert area_protegida is not None, 'No se probó el cambio de área de ac_linea'
+        pedir('DELETE', '/api/area_conocimiento/' + str(area_protegida), esperado=400)
         for caso, datos, ruta in reversed(creados):
             pedir('DELETE', ruta)
             pedir('GET', ruta, esperado=404)
