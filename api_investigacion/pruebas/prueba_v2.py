@@ -104,14 +104,17 @@ class PruebasIntegridad(unittest.IsolatedAsyncioTestCase):
 
     async def test_clave_compuesta_y_cambio_de_relacion(self):
         repo = RepositorioFalso(('linea_investigacion', 'area_conocimiento'))
-        repo.referencias = {'linea_investigacion': {1, 2}, 'area_conocimiento': {'1A01'}}
+        repo.referencias = {'linea_investigacion': {1}, 'area_conocimiento': {'1A01', '1A02'}}
         servicio = ServicioAcLinea(repo)
         identidad = {'linea_investigacion': 1, 'area_conocimiento': '1A01'}
         await servicio.crear(identidad)
-        await servicio.actualizar(identidad, {'linea_investigacion': 2})
+        await servicio.actualizar(identidad, {'area_conocimiento': '1A02'})
         with self.assertRaises(LookupError):
             await servicio.obtener(identidad)
-        self.assertEqual((await servicio.obtener({**identidad, 'linea_investigacion': 2}))['area_conocimiento'], '1A01')
+        actualizada = await servicio.obtener({'linea_investigacion': 1, 'area_conocimiento': '1A02'})
+        self.assertEqual(actualizada, {'linea_investigacion': 1, 'area_conocimiento': '1A02'})
+        self.assertEqual(len(repo.filas), 1)
+        self.assertTrue(repo.filas[0]['activo'])
 
     async def test_limite_y_patch_vacio(self):
         with self.assertRaises(ValueError):

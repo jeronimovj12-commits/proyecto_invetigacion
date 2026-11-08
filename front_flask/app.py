@@ -757,10 +757,16 @@ def _opciones_ac_linea():
     if not ok:
         _avisar(errores)
         disponibles = False
+    elif not filas:
+        _avisar(["No hay líneas de investigación activas para asociar."])
+        disponibles = False
     ok, filas, errores = cliente_api.listar_areas_conocimiento()
     opciones["area_conocimiento"] = filas
     if not ok:
         _avisar(errores)
+        disponibles = False
+    elif not filas:
+        _avisar(["No hay áreas de conocimiento activas para asociar."])
         disponibles = False
     return opciones, disponibles
 
@@ -775,6 +781,18 @@ def listar_ac_linea():
     ok, filas, errores = cliente_api.listar_ac_linea()
     if not ok:
         _avisar(errores)
+    if filas:
+        ok_lineas, lineas, errores_lineas = cliente_api.listar_linea_investigacion()
+        ok_areas, areas, errores_areas = cliente_api.listar_areas_conocimiento()
+        if not ok_lineas:
+            _avisar(errores_lineas)
+        if not ok_areas:
+            _avisar(errores_areas)
+        nombres_linea = {fila['id']: fila.get('nombre') for fila in lineas}
+        nombres_area = {fila['id']: fila.get('disciplina') for fila in areas}
+        for fila in filas:
+            fila['linea_nombre'] = nombres_linea.get(fila['linea_investigacion'])
+            fila['area_nombre'] = nombres_area.get(fila['area_conocimiento'])
     return render_template("ac_linea/lista.html", filas=filas)
 
 
