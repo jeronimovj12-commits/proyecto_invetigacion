@@ -1,0 +1,379 @@
+{
+  "info": {
+    "name": "Investigación (Python) — v1 (area_conocimiento)",
+    "description": "Los 7 endpoints de la v1, en el orden del smoke test de 7_quickstart.md. La tabla arranca con 218 filas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8025"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Diagnóstico",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            ""
+          ]
+        },
+        "description": "Responde 200 con version v1."
+      }
+    },
+    {
+      "name": "2. Listar",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ]
+        },
+        "description": "Responde 200 con total 218. Si no hubiera filas activas: 204 SIN cuerpo."
+      }
+    },
+    {
+      "name": "3. Listar con límite",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento?limite=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ],
+          "query": [
+            {
+              "key": "limite",
+              "value": "5"
+            }
+          ]
+        },
+        "description": "limite=0 o negativo responde 400: la forma es válida, la regla no."
+      }
+    },
+    {
+      "name": "4. Obtener por código",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/1A01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "1A01"
+          ]
+        },
+        "description": "El id es TEXTO, no un entero: los datos son códigos como 1A01 (C1)."
+      }
+    },
+    {
+      "name": "5. Crear",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ]
+        },
+        "description": "Responde 200. Repetirlo da 500: la llave la defiende la base.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"9Z01\",\n  \"granArea\": \"Ingenieria\",\n  \"area\": \"Ingenieria de Sistemas\",\n  \"disciplina\": \"Ingenieria de Software\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "6. Reemplazar (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "Reemplazar es poner TODO de nuevo: los tres campos son obligatorios.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"granArea\": \"Ingenieria y Tecnologia\",\n  \"area\": \"Ingenieria de Sistemas\",\n  \"disciplina\": \"Ingenieria de Software y Datos\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "7. PUT sin granArea → 422",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "LA LECCIÓN: este MISMO cuerpo responde 200 en la petición 8.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"area\": \"Ingenieria de Sistemas\",\n  \"disciplina\": \"Ingenieria de Software y Datos\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "8. PATCH mismo cuerpo → 200",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "Lo decide el tipo del cuerpo, no un if en el servicio.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"area\": \"Ingenieria de Sistemas\",\n  \"disciplina\": \"Ingenieria de Software y Datos\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "9. PATCH un solo campo",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "Solo se escribe lo que llegó.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"disciplina\": \"Ingenieria de Datos\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "10. PATCH vacío → 400",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "Sin campos no hay nada que actualizar: 400, no 404.",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "11. 422 — id demasiado largo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento"
+          ]
+        },
+        "description": "Pydantic lo rechaza antes de tocar la base.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"DEMASIADO\",\n  \"granArea\": \"Ingenieria\",\n  \"area\": \"Ingenieria de Sistemas\",\n  \"disciplina\": \"Ingenieria de Software\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "12. 404 — no existe",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/NADA",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "NADA"
+          ]
+        },
+        "description": ""
+      }
+    },
+    {
+      "name": "13. Eliminar (LÓGICO)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "La fila NO se borra: queda con activo = FALSE y sale del listado."
+      }
+    },
+    {
+      "name": "14. Eliminar otra vez → 404",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/area_conocimiento/9Z01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "area_conocimiento",
+            "9Z01"
+          ]
+        },
+        "description": "Ya está inactiva: para la API no existe."
+      }
+    }
+  ]
+}
