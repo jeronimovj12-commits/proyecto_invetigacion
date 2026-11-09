@@ -151,3 +151,40 @@ La política de logout quedó concretada: incremento atómico condicional de la
 versión en PostgreSQL. Se verificó con HTTP, dos logouts concurrentes y reinicio
 real del proceso uvicorn de prueba; no depende de memoria de la API. Las
 operaciones ya autorizadas antes del logout no se cancelan retroactivamente.
+
+## Implementación completa del alcance autorizado — 9 de noviembre de 2026
+
+El nuevo pedido autoriza completar API, CRUD y Flask, proteger el último administrador
+y publicar en origin/v3-desarrollo. Sustituye las restricciones de la primera entrega
+que dejaban estas partes pendientes y prohibían push. Se conserva v2 abierta.
+
+Se consultaron [seguridad de Flask](https://flask.palletsprojects.com/en/stable/web-security/)
+y [transacciones SQLAlchemy](https://docs.sqlalchemy.org/en/20/core/connections.html).
+La cookie firmada no cifra datos: solo contiene identificador opaco, CSRF y avisos.
+Los JWT residen en SQLite del servidor, archivo 0600, directorio de creación 0700,
+volumen separado y expiración limitada al TTL devuelto por API. No se renueva.
+SQLite usa transacciones, conexión por operación y cierre explícito; no agrega
+paquetes ni acceso al motor del módulo desde Flask. La cookie es HttpOnly y SameSite=Lax;
+Secure se habilita con COOKIE_SECURE=1 al usar HTTPS. Los formularios comparan un
+CSRF aleatorio con compare_digest; login y logout también lo requieren.
+
+El middleware cierra por defecto `/api/` salvo login y las dos rutas que verifican
+su propio Bearer. La política se aplica antes de validar el body o ejecutar la
+operación, y se probó desde solicitudes HTTP directas sobre las 90 operaciones
+actuales de investigación y administración. Diagnóstico y OpenAPI siguen públicos.
+
+La protección del último administrador requiere atomicidad entre tres tablas.
+Las mutaciones administrativas toman LOCK TABLE usuario, rol, rol_usuario IN
+EXCLUSIVE MODE antes de leer, con aislamiento READ COMMITTED; después de esperar
+ven el último commit. Comprueban administradores efectivos antes y después, y
+hacen rollback si la operación deja cero. Incluye retirar cuenta, rol o asignación.
+Las cuentas/roles no se reactivan; los nombres de roles iniciales son inmutables.
+Cambiar password o desactivar cuenta incrementa version_sesion. No se almacenan
+ni retornan hashes en contratos de consulta administrativa.
+
+La migración sigue sin cambiar la base compartida. El servicio migrar-v3 corre
+antes de API tanto con volumen nuevo como existente; falla cerrado si detecta
+incompatibilidad. requirements-v3.lock fija las dependencias realmente instaladas;
+los arranques v2 conservan su opción original de requisitos. No se declara v4,
+protección frente a fuerza bruta ni producción pública. Evidencia y pendientes
+en VERIFICACION_V3.md; no se inventan pruebas manuales ni firmas.

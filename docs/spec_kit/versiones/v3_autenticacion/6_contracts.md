@@ -1,8 +1,8 @@
-﻿# Contratos implementados — backend parcial v3
+# Contratos implementados — v3
 
 Estos tres contratos son políticas autorizadas por el usuario. El profesor
 confirma POST /api/login con JWT y logout, pero no estos cuerpos, tiempos o claims.
-El resto del CRUD y la protección global siguen pendientes.
+Actualizado el 9 de noviembre de 2026: CRUD y protección global implementados.
 
 ## POST /api/login
 
@@ -58,7 +58,7 @@ responde 401, sin perder el incremento. Token vigente de usuario que perdió sus
 roles aún permite cerrar sus propias sesiones; no concede acceso de investigación.
 
 Cambiar TTL, emisor, audiencia o secreto puede invalidar tokens existentes.
-El vencimiento no renueva sesión; el futuro front deberá solicitar nuevo login.
+El vencimiento no renueva sesión; Flask solicita nuevo login.
 La revocación no cancela operaciones que ya habían sido autorizadas y estaban
 cursando antes del COMMIT del logout.
 
@@ -72,7 +72,71 @@ copiar el cuerpo ni los valores sensibles. 401 incorpora WWW-Authenticate: Beare
 - 422: JSON inválido, campos faltantes/adicionales o longitudes inválidas.
 - 500: fallo interno, texto genérico sin SQL, hashes, tokens ni excepciones completas.
 
-Los contratos existentes de v2 no se modifican. No están implementados todavía
-/api/usuario, /api/rol ni /api/rol_usuario; no hay middleware que proteja todas
-las rutas de dominio. La función de política interna permite administrador
-para lectura/escritura/seguridad y consulta solo para lectura de investigación.
+## Protección de investigación
+
+Todas las rutas `/api/` de investigación existentes conservan sus contratos v2
+para identidades autorizadas: administrador lee/escribe; consulta solo GET/HEAD/OPTIONS.
+La autorización ocurre antes de ejecutar operaciones y también en solicitudes
+directas. Seguridad requiere administrador para cualquier verbo. Usuario válido
+sin rol efectivo: 403. Token ausente/inválido/inactivo/revocado: 401.
+Públicos: POST /api/login, GET / y documentación /docs, /redoc, /openapi.json.
+/api/sesion y /api/logout validan su propio Bearer.
+
+## Administración
+
+Bearer de administrador en todas estas rutas. Todas las lecturas filtran activo IS TRUE.
+Listados y detalles: 200 con `{tabla,limite,total,datos:[...]}`. Listas vacías: 200,
+datos `[]`; detalle inexistente/inactivo: 404. limite predeterminado 100, rango 1–1000;
+detalles usan limite=1. Campos públicos:
+
+- usuario: id, username, email, nombre_completo, activo.
+- rol: id, nombre, descripcion, activo.
+- rol_usuario: usuario_id, rol_id, activo.
+
+| Recurso | Operaciones |
+|---|---|
+| /api/usuario | GET listado; POST crea, 201 con objeto público |
+| /api/usuario/{id} | GET detalle; PUT reemplazo, PATCH parcial, 200 con objeto; DELETE lógico, 200 `{estado:200,mensaje:"Cuenta retirada."}` |
+| /api/rol | GET listado; POST crea, 201 con objeto público |
+| /api/rol/{id} | GET detalle; PUT reemplazo, PATCH parcial, 200 con objeto; DELETE lógico, 200 `{estado:200,mensaje:"Rol retirado."}` |
+| /api/rol_usuario | GET listado; POST asigna, 201 con objeto público |
+| /api/rol_usuario/{usuario_id}/{rol_id} | GET detalle; DELETE lógico, 200 `{estado:200,mensaje:"Asignación retirada."}` |
+
+POST/PUT usuario: username (1–100), email (1–150), password (12–1024) obligatorios;
+nombre_completo opcional/null (máximo 200). PUT exige también contraseña; cambiarla
+revoca sesiones. PATCH admite los mismos campos presentes, sin password obligatorio;
+null solo se admite en nombre_completo. No se expone version_sesion ni hash.
+
+POST/PUT rol: nombre obligatorio (1–100), descripcion opcional/null (máximo 2000).
+PATCH parcial con esos campos; nombre no admite null. Se recortan espacios en
+los textos administrativos (las contraseñas no se recortan).
+
+POST asignación: `{usuario_id: entero positivo, rol_id: entero positivo}`;
+ambos padres activos. Clave compuesta inmutable: no existe PUT/PATCH para alterar
+una asignación; cambiarla se expresa retirando y creando otra distinta. Pares
+retirados no se reactivan. Roles arbitrarios no conceden permisos v3.
+
+Campos extra, activo, valores nulos no permitidos o límites inválidos: 422.
+PATCH vacío: 409. Duplicados (incluidos registros inactivos), FK inexistentes o
+inactivas, renombrar administrador/consulta y perder el último administrador
+efectivo: 409 `{estado:409,mensaje:"Operación rechazada.",detalle:<motivo público>}`.
+Baja repetida/inexistente: 404. No hay reactivación ni borrado físico. La protección
+del último administrador se evalúa transaccionalmente frente a mutaciones concurrentes.
+
+## Contrato del navegador
+
+GET/POST /login; POST /logout. Todas las rutas de investigación requieren sesión;
+las de crear/editar/retirar y /seguridad/* requieren administrador. Administración:
+/seguridad/usuarios, /seguridad/roles, /seguridad/asignaciones (GET/POST) y
+/seguridad/{recurso}/{claves}/retirar (POST; par de asignación con guion).
+La pantalla usa PATCH para edición, omite contraseña vacía y no la repinta.
+
+Todo POST exige csrf_token del formulario vinculado a cookie firmada; omisión o
+alteración: 400. Cookie HttpOnly, SameSite=Lax, Secure configurable para HTTPS;
+JWT solo en servidor y Authorization agregado por cliente_api. Se rota identificador
+y CSRF al entrar; se invalida sesión local tras confirmar logout global en API.
+Si logout falla por caída de API se informa y permite reintentar, sin afirmar revocación.
+
+401/vencimiento/invalidación: limpia sesión y redirige a login con aviso; 403:
+pantalla de acceso denegado sin datos; API caída al comprobar sesión: 503 sin datos
+de investigación. GET logout: 405. Respuestas front y API protegidas: no-store.

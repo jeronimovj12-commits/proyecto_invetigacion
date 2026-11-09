@@ -1,3 +1,93 @@
+# Verificación ejecutada — implementación v3
+
+Fecha: 9 de noviembre de 2026. Rama v3-desarrollo; v2 abierta. No acredita pruebas
+manuales, firmas, aceptación del equipo ni cierre de versión. El registro anterior
+se conserva al final como evidencia histórica del backend parcial.
+
+## Estado auditado y alcance
+
+Al inicio: Git limpio, v3-desarrollo tres commits por delante de origin (ee05b39,
+9c34ba9 y 7ed5594). Se conservaron. Se revisaron constitución y todos los documentos
+v3, capas, migración y front. Faltaban protección global, administración, último
+administrador, Flask autenticado y arranque completo. Estas partes se implementaron.
+No se editaron prueba_permisos_v3_equipo.py, VERIFICACION_API_V3_EQUIPO.md ni
+VERIFICACION_FRONT_V3_EQUIPO.md. No se migró investigacion_local ni se cerró v2.
+
+## Comando final ejecutado y resultado
+
+Desde la raíz:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verificar_v3.ps1
+```
+
+Terminó con código 0 y «Verificaciones automáticas v3 completadas». Construyó las
+imágenes con requirements-v3.lock y ejecutó secuencialmente estas comprobaciones:
+
+| Comprobación | Resultado de la ejecución final |
+|---|---|
+| prueba_migracion_v3.py | Datos anteriores inactivos conservados, repetición, versión=7 y asignación retirada conservadas; esquema incompatible rechazado |
+| prueba_autenticacion_v3.py | 14 pruebas, OK, 6.462 s |
+| prueba_administracion_v3.py | 4 pruebas, OK, 2.488 s; matriz de 90 operaciones HTTP |
+| prueba_capas.py | Recorrido de capas v1 en memoria, todos los pasos OK |
+| prueba_v2.py | 12 pruebas en memoria, OK, 0.071 s |
+| prueba_front_seguro_v3.py | 5 pruebas Flask, OK, 0.453 s; transporte simulado |
+| prueba_integracion_v3.py | 1 recorrido real Flask→HTTP→API→PostgreSQL, OK, 1.298 s |
+
+Bases aleatorias creadas en esa ejecución (servidor postgres-v3 aislado):
+pruebas_migracion_v3_af744bf4b8fe41a8bafa44212008d214,
+pruebas_v3_1ec677d8cc4f48f08cb4b2a6d2b7bcf2 y
+pruebas_v3_2848a5cce6a84ae4bac3fbb1355972a9. La integración usa otra base nueva
+creada por servidor_integracion_v3.py. Las bases y volúmenes se conservan; el script
+detuvo el servidor API de pruebas al terminar, sin borrar datos ni usar cuentas reales.
+Credenciales efímeras en memoria o fixture-v3 con archivo 0600, nunca en Git ni informe.
+
+## Cobertura y límites de la evidencia
+
+- Login, claims/firma/algoritmo/expiración, inactividad, ausencia de rol, exclusión de roles/asignaciones inactivos, no exposición de password/hash y configuración externa.
+- Logout concurrente con incremento único; dos tokens invalidados y rechazo después de reiniciar el proceso uvicorn. Bootstrap del servicio crea la primera cuenta y rechaza otra inicialización; CLI sin terminal rechazada. No se recorrió manualmente getpass.
+- Matriz generada desde OpenAPI: 90 operaciones de dominio/seguridad rechazan acceso anónimo; consulta rechaza toda escritura y toda seguridad; lecturas de investigación autorizadas. OpenAPI declara Bearer en todas esas operaciones para Swagger Authorize.
+- CRUD administrativo, unicidad, FK activas, no reactivación, PUT obligatorio/PATCH parcial, password revoca tokens y DELETE conserva filas inactivas. Bajas de cuenta, rol o asignación del último administrador: 409; dos retiros concurrentes dejan un administrador efectivo. Nombres de roles iniciales inmutables.
+- Regresión HTTP con administrador de las diez entidades/relaciones de humo_v2, comprobando PUT/PATCH, FK inválidas sin cambios, dependientes y borrado lógico; también creación/cambio/retiro de área de conocimiento v1. No se ejecutó humo_v2.py sin adaptar contra la base compartida.
+- Cliente Flask: login con CSRF, rotación, HttpOnly/SameSite, cookie sin JWT, token solo en servidor, menús/URL directas, todos los formularios GET sin argumentos renderizados, 400 sin CSRF, 401/403, vencimiento local, caída y 500 de sesión. Estas cinco pruebas simulan HTTP.
+- Integración sin mocks: login consulta y admin, catálogo real, ausencia de acciones de consulta, URL denegada, renderizado de listados y formularios de alta sin parámetros, creación de usuario/rol/asignación desde Flask, usuario creado puede autenticarse, aviso de último administrador y logout que invalida el token en API.
+
+Se corrigieron fallos encontrados durante las ejecuciones: lector de pruebas que
+intentaba parsear JSON de un 204, semillas de regresión sin campos obligatorios o
+con código demasiado largo, manejo de 500/JSON inesperado de sesión y ausencia de
+Bearer en OpenAPI. Las suites finales anteriores se ejecutaron después de corregirlos.
+Una auditoría adicional de solo lectura no detectó otros fallos críticos.
+
+## Pendientes reales
+
+Recorrido humano del prompt oculto y navegador (incluido vencimiento/botón atrás),
+revisión/aportes del equipo, enmiendas formales, firmas y aceptación. V2 sigue abierta.
+No hay registro público, recuperación por correo, refresh, restitución de asignaciones
+ni funciones v4. No se incorporó limitación de intentos; compose solo publica en loopback.
+Las pruebas automáticas no certifican un despliegue público ni aceptación humana.
+Comandos de arranque y actualización: [7_quickstart.md](7_quickstart.md).
+
+## Comprobaciones finales del entorno
+
+El arranque final `docker compose -p investigacion-v3 --env-file v3-local.env -f
+docker-compose.v3.yml up -d --build` volvió a terminar con código 0: migración
+previa completada, API en 127.0.0.1:8026, Flask en 127.0.0.1:8079 y PostgreSQL
+sin puerto publicado. Se comprobó la ausencia de valores de JWT_SECRET,
+V3_DB_PASSWORD y CLAVE_SESION locales en los archivos publicables, sin mostrarlos.
+
+Tras el arranque se consultó GET / de la API: version=v3; GET /login de Flask:
+200; GET /api/usuario sin credencial: 401. Inspección por importlib.util en la
+imagen del front confirmó ausencia de asyncpg, sqlalchemy y fastapi. No se usó
+navegador ni se declara aceptación humana. git diff --check pasó; se corrigió
+un espacio final en una prueba antes de crear los commits.
+
+---
+
+# Registro histórico — 5 de noviembre de 2026
+
+Lo siguiente describe exclusivamente el estado previo, superado por la implementación
+y evidencia del 9 de noviembre documentadas arriba.
+
 # Verificación ejecutada — backend parcial v3
 
 Fecha: 5 de noviembre de 2026. No es cierre de v2/v3 ni revisión manual.

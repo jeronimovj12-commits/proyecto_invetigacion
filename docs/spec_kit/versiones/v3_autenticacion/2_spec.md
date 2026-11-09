@@ -1,70 +1,53 @@
-﻿# Especificación — primera entrega backend v3
+﻿# Especificación — autenticación y administración v3
 
-Estado: implementación parcial en v3-desarrollo, 5 de noviembre de 2026.
-V2 continúa abierta: pruebas manuales restantes, integración de aportes de
-compañeros y firmas pendientes. No hay merge, tags ni cierre de versión.
+Estado: implementación API y front en `v3-desarrollo`, 9 de noviembre de 2026.
+V2 sigue abierta. No hay merge a main, tag v3 ni aceptación manual atribuida al equipo.
 
-## Requisitos originales confirmados
+## Fuentes y políticas autorizadas
 
-- [Módulo Investigación §3](../../../../ProyectosDeAula/docs/modulo_investigacion.md):
-  POST /api/login con JWT, autenticación/autorización, menú por roles, CRUD de
-  usuario/rol/rol_usuario solo para administradores y logout; consulta no escribe.
-- [Metodología §2, §5 y §6](../../../../ProyectosDeAula/docs/0_METODOLOGIA.md):
-  sesiones, Bearer desde el front, contraseñas hasheadas, secretos externos y
-  regresión de versiones previas.
-- [Constitución](../../1_constitution.md): interfaces entre capas, SQL
-  parametrizado sin ORM, front separado por HTTP y borrado lógico.
+- [Módulo Investigación §3](../../../../ProyectosDeAula/docs/modulo_investigacion.md): login JWT, autorización, menú por roles, administración de usuario/rol/rol_usuario y logout.
+- [Metodología](../../../../ProyectosDeAula/docs/0_METODOLOGIA.md) y [constitución](../../1_constitution.md): capas con interfaces, front independiente por HTTP, SQL parametrizado y borrado lógico.
+- El usuario autorizó continuar v3 conservando v2 abierta. Los dos roles, TTL, Argon2id, HS256 y version_sesion son políticas de esta implementación, sin inventar aprobación del profesor.
 
-Las fuentes no fijan los dos roles iniciales, 30 minutos, Argon2, HS256 ni
-version_sesion. Son decisiones del usuario para esta implementación.
-
-## Políticas autorizadas para esta entrega
-
-| Tema | Política de implementación |
+| Tema | Comportamiento |
 |---|---|
-| Roles | administrador lee/escribe investigación y seguridad; consulta solo lee investigación |
-| Identidad | Usuario activo, version_sesion coincidente y roles/asignaciones activos leídos desde PostgreSQL por solicitud |
-| Permisos | Sin roles iniciales efectivos: 403; credencial/token inválido, inactividad o versión revocada: 401 |
-| Alta | Primer administrador mediante comando local; futuro CRUD solo por admin; no registro público |
-| Contraseña | Argon2id mediante pwdlib; entrada oculta y sin valores predeterminados |
-| Sesión | 30 minutos configurables; HS256; sin refresh token ni renovación automática |
-| Logout | Incremento atómico y persistente de version_sesion: invalida todas las sesiones anteriores del usuario |
-| Asignaciones | Columna activo para borrado lógico; no restitución de retiradas en esta entrega |
-| Recuperación | Correo automático fuera de esta entrega |
+| Administrador | Lee y escribe investigación y administra seguridad |
+| Consulta | Solo lectura de investigación; seguridad denegada |
+| Sin roles efectivos | 403; roles arbitrarios no otorgan permisos |
+| Autenticación | Usuario activo, firma/claims/vencimiento válidos y versión persistida coincidente; fallo: 401 |
+| Roles | Se consultan roles y asignaciones activos por solicitud; no se confía en roles del JWT |
+| Contraseña | Argon2id; altas y cambios: 12–1024 caracteres; nunca se devuelve hash |
+| Sesión | 30 minutos configurables, sin refresh ni renovación automática |
+| Logout | Invalida todas las sesiones anteriores mediante incremento atómico persistente |
+| Primer administrador | Comando local con entrada oculta, transacción y rechazo de cuentas/conflictos existentes |
+| Administración | CRUD de cuentas/roles; asignación por alta, lectura y retiro lógico, sin reactivar ni cambiar su clave compuesta |
+| Último administrador | Rechazo 409 y rollback de bajas que eliminen el último administrador efectivo; nombres de roles iniciales inmutables |
+| Cambios de clave | Incrementan version_sesion; baja de cuenta también revoca |
+| Navegador | Cookie firmada con identificador opaco y CSRF; JWT solo en almacenamiento del servidor; no localStorage ni campos HTML con JWT |
 
-## Alcance realmente implementado
+## Entrega
 
-Migración explícita con precondiciones; interfaces, servicio, repositorio y
-adaptadores de seguridad; POST /api/login, GET /api/sesion y POST /api/logout;
-comando local transaccional del primer administrador; pruebas HTTP con base
-nueva y reinicio de la API de prueba. Contratos exactos en 6_contracts.md.
+`main_v3:app` protege todas las rutas `/api/` de investigación y seguridad.
+Públicos: login, diagnóstico y documentación OpenAPI. Sesión y logout verifican
+su propia credencial. Las solicitudes directas reciben los mismos controles.
 
-El arranque v3 es `main_v3:app`, con compose independiente, PostgreSQL propio y
-puerto local 8026. `main:app` y el compose de v2 permanecen sin modificar.
-La base compartida investigacion_local no recibió las migraciones.
+`app_v3.py` integra login/logout, menú, gestión administrativa, lectura y acciones
+según permisos, comprobación de sesión por solicitud y manejo de 401/403/caída.
+Los formularios POST, incluido login y logout, exigen CSRF. No hay acceso a PostgreSQL
+desde Flask; SQLite local guarda únicamente sesiones del front, en volumen separado.
 
-## Límites y pendientes explícitos
+Compose v3 usa puertos 8026/8079 en loopback, PostgreSQL y volúmenes independientes.
+La migración idempotente es un servicio previo obligatorio de la API; init.sql solo
+inicializa volúmenes nuevos. Guía para bases existentes y nuevas en 7_quickstart.md.
 
-**Las rutas existentes de investigación todavía NO están protegidas**, incluso
-si se consultan a través del arranque parcial v3. La función de política de
-permisos no equivale a middleware global. No hay pantallas Flask de seguridad,
-CRUD administrativo, registro público ni recuperación por correo. No hay todavía
-endpoint para retirar asignaciones: se preparó el esquema y su filtro efectivo.
-No usar este backend parcial como sistema completamente protegido.
+## Límites y aceptación
 
-Quedan pendientes protección de cada recurso/verbo, control del último admin,
-limitación de intentos de login, tratamiento de claves/secretos comprometidos,
-front, aceptación del equipo y revisión manual. No se asume conformidad total
-con la rúbrica por aprobar pruebas automáticas parciales.
+Fuera de alcance: registro público, recuperación por correo, refresh, restitución
+de asignaciones retiradas y funciones de v4. No se añadió limitación de intentos
+de login; el compose es local y no constituye un despliegue público de producción.
+No se migró la base compartida de v2. Pendientes: revisión humana de pantallas y
+prompt oculto, aportes y firmas del equipo, aceptación y enmiendas formales.
 
-## Secuencia y cambios respecto de la constitución
-
-Art. 1, mapa y metodología exigen cerrar la versión anterior antes de la siguiente.
-Se registra la instrucción explícita del usuario de adelantar primero documentación
-y ahora esta primera implementación sin cerrar v2. No se atribuye aprobación
-al profesor ni se altera el estado de v2.
-
-Conforme al art. 11, en 4_research.md quedan descritos el motivo y consecuencias
-de añadir columnas (art. 5), bibliotecas de seguridad (art. 2) y 401/403 (art. 10).
-El usuario autorizó esas políticas para esta entrega; no se modificó el texto de
-la constitución ni se inventaron firmas o ratificación formal del equipo.
+Las ampliaciones de los artículos 2, 5 y 10 se justifican en 4_research.md. Esta
+implementación sigue la autorización del usuario; no cambia la constitución ni
+certifica ratificación formal. Evidencia automatizada en VERIFICACION_V3.md.

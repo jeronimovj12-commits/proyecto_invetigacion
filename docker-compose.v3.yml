@@ -15,8 +15,21 @@ services:
       interval: 2s
       timeout: 3s
       retries: 30
+  migrar-v3:
+    image: postgres:16
+    environment:
+      PGPASSWORD: ${V3_DB_PASSWORD:?}
+    volumes:
+      - ./db/migraciones:/migraciones:ro
+    command: psql -X -v ON_ERROR_STOP=1 -h postgres-v3 -U investigacion_v3 -d investigacion_v3 -f /migraciones/v3_001_sesiones_asignaciones.sql
+    depends_on:
+      postgres-v3:
+        condition: service_healthy
   api-v3:
-    build: ./api_investigacion
+    build:
+      context: ./api_investigacion
+      args:
+        ARCHIVO_REQUISITOS: requirements-v3.lock
     command: uvicorn main_v3:app --host 0.0.0.0 --port 8025 --no-access-log
     ports:
       - '127.0.0.1:8026:8025'
@@ -32,5 +45,24 @@ services:
     depends_on:
       postgres-v3:
         condition: service_healthy
+      migrar-v3:
+        condition: service_completed_successfully
+  front-v3:
+    build:
+      context: ./front_flask
+      args:
+        ARCHIVO_REQUISITOS: requirements-v3.lock
+    command: python app_v3.py
+    ports:
+      - '127.0.0.1:8079:8078'
+    environment:
+      URL_API_INVESTIGACION: http://api-v3:8025
+      CLAVE_SESION: ${CLAVE_SESION:?Configure CLAVE_SESION fuera de Git}
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
+      SESIONES_ARCHIVO: /sesiones/sesiones.sqlite3
+    volumes:
+      - ./front_flask:/app
+      - sesiones-v3:/sesiones
 volumes:
+  sesiones-v3:
   pgdata-v3:

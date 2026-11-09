@@ -95,3 +95,82 @@ completar pruebas manuales y firmar. La IA no constituye aceptación del profeso
 Faltan middleware/protección de rutas existentes, CRUD administrativo, front,
 prueba manual del bootstrap y aceptación integral de seguridad. La v2 sigue
 abierta y la v3 no se considera completa ni totalmente protegida.
+
+## Continuación autorizada — 9 de noviembre de 2026
+
+Los apartados anteriores son evidencia histórica del 5 de noviembre. Sus pendientes
+y la prohibición de push quedaron sustituidos por el siguiente pedido real:
+
+```text
+Necesito completar la implementación de v3. Revisa primero git status, los commits actuales, la constitución y todos los documentos de v3_autenticacion. Conserva los cambios existentes. Trabaja en v3-desarrollo; v2 sigue abierta.
+
+Audita lo implementado y completa únicamente lo que falta según los requisitos y las políticas ya documentadas:
+
+- Login JWT, contraseñas con hash, vencimiento y logout con invalidación de sesiones.
+- Creación segura del primer administrador.
+- CRUD administrativo de usuarios, roles y asignaciones, con borrado lógico.
+- Protección de todas las rutas de investigación y seguridad: administrador con los permisos acordados, consulta solo lectura y usuario sin roles sin acceso.
+- Validación de permisos en la API, incluyendo solicitudes directas.
+- Front Flask con login, logout, sesión, menú y acciones según permisos. Manejo de 401, 403 y vencimiento.
+- Sesión del navegador y formularios protegidos adecuadamente, sin exponer JWT ni secretos.
+- Arranque reproducible con Docker, migraciones y guía para instalaciones nuevas y existentes.
+
+Respeta las capas e interfaces existentes y el SQL parametrizado. Revisa que la administración no permita perder accidentalmente el último administrador activo. No incorpores recuperación por correo, registro público ni funciones de v4.
+
+Primero presenta una lista breve de lo que falta y continúa implementándolo. Ejecuta las verificaciones pertinentes y corrige los fallos. No declares pruebas manuales realizadas por mí.
+
+Actualiza contratos, quickstart, tareas, checklist y GUIA_IA3.md con evidencia real. No edites los archivos reservados a mis compañeros:
+- prueba_permisos_v3_equipo.py
+- VERIFICACION_API_V3_EQUIPO.md
+- VERIFICACION_FRONT_V3_EQUIPO.md
+
+Crea commits por cambios funcionales reales, con títulos breves que expliquen el resultado. Evita commits vacíos y no incluyas secretos. Publica el avance en origin/v3-desarrollo sin force push.
+
+Termina indicando los commits, pruebas ejecutadas, pendientes y comandos exactos para que mis compañeros arranquen y verifiquen la misma versión. No hagas merge a main ni crees el tag v3.
+```
+
+### Trabajo y decisiones reales
+
+Git comenzó limpio en v3-desarrollo, tres commits por delante de origin:
+ee05b39, 9c34ba9 y 7ed5594. Se conservaron. Se leyó la constitución y el spec kit,
+y se informó la lista de faltantes antes de implementar: protección global, CRUD,
+último administrador, Flask y arranque/evidencia. V2 permanece abierta.
+
+Se añadió administración por interfaces y SQL parametrizado; bajas lógicas y
+transacción con locks para conservar el último administrador. Los roles iniciales
+no se renombran. Asignaciones conservan clave compuesta y retiro sin restitución.
+Se mantuvo el bootstrap y autenticación anteriores, ampliando sus verificaciones.
+La API protege peticiones directas y publica el esquema Bearer en OpenAPI.
+
+Flask mantiene HTTP como única conexión con los datos del módulo. Guarda JWT en
+SQLite local del servidor; la cookie firmada solo contiene identificador opaco,
+CSRF y avisos. CSRF en login/logout y todos los POST; menú y rutas según permisos;
+401 limpia sesión, 403 deniega y caída/500 de sesión presenta 503 sin investigación.
+Se consultó documentación oficial de Flask y SQLAlchemy (4_research.md).
+
+Docker Desktop estaba detenido; se inició para verificar. Python por alias no
+funcionaba, se utilizó el Python instalado para ediciones y Docker para las suites.
+Se preservaron secretos existentes y se añadió únicamente la clave de sesión local
+faltante sin imprimirla. Dependencias v3 fijadas con las versiones verificadas.
+La migración es ahora un servicio obligatorio previo a la API; v2 sigue independiente.
+
+Se ejecutaron pruebas de autenticación, administración, migración, Flask, integración
+real y capas v1/v2. Se corrigieron fallos del lector de respuestas 204 y semillas de
+regresión que omitían campos obligatorios o excedían la longitud del código de área.
+Una auditoría adicional de solo lectura detectó dos fallos corregidos: manejo de
+500/JSON inesperado de sesión y Bearer ausente en OpenAPI para operaciones protegidas.
+Los resultados finales y límites se registran en VERIFICACION_V3.md.
+
+No se tocaron los tres archivos reservados. No se atribuyen pruebas manuales al
+usuario ni al equipo. Pendientes: revisión humana del prompt oculto/navegador,
+aportes, firmas y aceptación; sin merge a main ni tag v3. El push autorizado publica
+avance, no cierre de versión. Se conservan las propuestas de enmienda pendientes
+de ratificación; no se inventa aprobación del profesor.
+
+## Commits de continuación
+
+- 5454168: protege la API y administra usuarios y roles, con pruebas HTTP.
+- 1e92ff1: sesión segura y administración en Flask, con pruebas de presentación.
+- La automatización Docker, dependencias fijadas, pruebas integradas y esta evidencia
+  se agrupan en «Automatiza arranque y verificación de v3». Consultar `git log -6 --oneline`
+  para su identificador final y los tres commits anteriores conservados.

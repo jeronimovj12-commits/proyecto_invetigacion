@@ -32,3 +32,16 @@ previo se conservaron, version_sesion=7 no volvió a cero y la asignación retir
 no se reactivó. Al quitar NOT NULL de la columna nueva en esa base de prueba,
 la migración falló explícitamente con salida no cero. Se conserva esa base con
 la incompatibilidad intencional; no es la base de ejecución de la API.
+
+## Arranque actualizado — 9 de noviembre de 2026
+
+El compose v3 incluye ahora migrar-v3 como dependencia obligatoria previa a API.
+En instalaciones nuevas y existentes aplica el mismo SQL idempotente con
+ON_ERROR_STOP; si falla, la API no arranca. El compose v2 sigue sin incluirlo.
+Respaldar antes de actualizar una instalación existente, detener escrituras y
+seguir [quickstart v3](../../docs/spec_kit/versiones/v3_autenticacion/7_quickstart.md).
+No volver a aplicar init.sql ni borrar volúmenes para actualizar.
+
+La suite prueba_migracion_v3.py volvió a verificar filas anteriores inactivas,
+version_sesion=7, asignación retirada, repetición y rechazo al eliminar NOT NULL.
+Solo bases aleatorias de postgres-v3; no se migró investigacion_local compartida.

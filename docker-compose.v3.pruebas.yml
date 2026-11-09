@@ -1,0 +1,44 @@
+# Solo pruebas: otra base aleatoria, sin publicar puertos ni usar cuentas reales.
+services:
+  pruebas-api-v3:
+    build:
+      context: ./api_investigacion
+      args:
+        ARCHIVO_REQUISITOS: requirements-v3.lock
+    command: python pruebas/servidor_integracion_v3.py
+    environment:
+      PRUEBAS_V3: '1'
+      DB_POSTGRES: postgresql+asyncpg://investigacion_v3:${V3_DB_PASSWORD:?}@postgres-v3:5432/investigacion_v3
+      JWT_SECRET: ${JWT_SECRET:?}
+      JWT_ISSUER: investigacion-v3
+      JWT_AUDIENCE: investigacion-api
+    volumes:
+      - ./api_investigacion:/app
+      - ./db:/db-v3:ro
+      - fixture-v3:/fixture
+    depends_on:
+      postgres-v3:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8031/')"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  pruebas-front-v3:
+    build:
+      context: ./front_flask
+      args:
+        ARCHIVO_REQUISITOS: requirements-v3.lock
+    command: python -m unittest discover -s pruebas -p prueba_integracion_v3.py -v
+    environment:
+      URL_API_INVESTIGACION: http://pruebas-api-v3:8031
+      CLAVE_SESION: ${CLAVE_SESION:?}
+      SESIONES_ARCHIVO: /tmp/pruebas-front/sesiones.sqlite3
+    volumes:
+      - ./front_flask:/app
+      - fixture-v3:/fixture:ro
+    depends_on:
+      pruebas-api-v3:
+        condition: service_healthy
+volumes:
+  fixture-v3:

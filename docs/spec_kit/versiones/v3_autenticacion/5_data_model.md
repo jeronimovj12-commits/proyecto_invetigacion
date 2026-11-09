@@ -91,3 +91,21 @@ reactive filas. Tampoco se implementó todavía el endpoint para retirarlas.
 No se guarda JWT en PostgreSQL: solo la versión que permite invalidarlo.
 Roles y asignaciones se leen desde la base; no se confía en permisos del token.
 Véanse contratos implementados en 6_contracts.md y evidencia en VERIFICACION_V3.md.
+
+## Actualización de implementación — 9 de noviembre de 2026
+
+Los apartados anteriores conservan el diagnóstico del esquema original y la primera
+entrega. El esquema v3 continúa añadiendo solo version_sesion y activo de asignación.
+Ahora se implementan los endpoints administrativos y el retiro lógico. No hay
+migraciones nuevas ni tablas del módulo adicionales para las pantallas.
+
+Las lecturas administrativas omiten password y version_sesion. Las bajas de usuario
+revocan sus sesiones; cambiar contraseña también. Nombres de roles iniciales
+inmutables y transacción con bloqueo de las tres tablas impiden perder el último
+administrador efectivo. Una asignación inactiva conserva su PK y no se restituye.
+
+El front usa una tabla SQLite local de sesiones con id SHA-256 de identificador
+aleatorio, token y vence. No pertenece al modelo PostgreSQL ni guarda investigación;
+la cookie solo lleva identificador opaco firmado, CSRF y mensajes. La expiración
+no se extiende al usar la aplicación. Se elimina la fila al cerrar sesión o al
+limpiar una sesión inválida y se purgan vencidas al crear nuevas sesiones.

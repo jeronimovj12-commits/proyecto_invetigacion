@@ -15,8 +15,9 @@ WORKDIR /app
 
 # Primero las dependencias y después el código: mientras requirements.txt no
 # cambie, Docker reutiliza la capa del pip install.
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+ARG ARCHIVO_REQUISITOS=requirements.txt
+COPY requirements*.txt requirements*.lock ./
+RUN pip install --no-cache-dir -r ${ARCHIVO_REQUISITOS}
 
 COPY . .
 
