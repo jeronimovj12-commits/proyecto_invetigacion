@@ -85,7 +85,7 @@ async def error_http(_solicitud: Request, excepcion: StarletteHTTPException):
 async def diagnostico():
     """Responde sin tocar la base: sirve para saber si la API está viva."""
     return {"mensaje": "API Investigación — catálogos y relaciones",
-            "version": "v2", "contratos": "/docs"}
+            "version": app.version, "contratos": "/docs"}
 
 from controllers.docente_controller import router as router_docente
 app.include_router(router_docente)

@@ -41,7 +41,8 @@ def pedir(metodo, ruta, datos=None, token=None):
     except HTTPError as error:
         respuesta = error
     with respuesta:
-        cuerpo = json.loads(respuesta.read())
+        contenido = respuesta.read()
+        cuerpo = json.loads(contenido) if contenido else None
         return respuesta.status, cuerpo, respuesta.headers
 
 
@@ -192,7 +193,7 @@ class AutenticacionHTTP(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(pedir('POST', '/api/logout', token=token)[0], 200)
         self.assertEqual(pedir('GET', '/api/sesion', token=token)[0], 401)
 
-    async def test_permisos_politica_sin_afirmar_proteccion_global(self):
+    async def test_permisos_politica(self):
         ServicioAutenticacion.comprobar_permiso({'roles': ['consulta']})
         for politica in ({'escritura': True}, {'seguridad': True}):
             with self.assertRaises(PermisoInsuficiente):
@@ -221,16 +222,16 @@ class AutenticacionHTTP(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.sql('SELECT count(*) FROM usuario')).scalar_one(), antes)
         await repo._motor().dispose()
 
-    async def test_administrador_y_limite_de_entrega_parcial(self):
+    async def test_administrador_y_proteccion_global(self):
         await self.sql("""INSERT INTO rol_usuario(usuario_id,rol_id,activo)
             SELECT :id,id,TRUE FROM rol WHERE nombre='administrador'""", id=self.usuario)
         estado, datos, _ = self.login()
         self.assertEqual(estado, 200)
         self.assertEqual(datos['usuario']['roles'], ['administrador', 'consulta'])
         self.assertEqual(pedir('GET', '/api/sesion', token=datos['access_token'])[0], 200)
-        self.assertEqual(pedir('GET', '/api/usuario')[0], 404)
-        # Explicita el alcance parcial: esta colección aún no exige Bearer.
-        self.assertEqual(pedir('GET', '/api/area_conocimiento')[0], 200)
+        self.assertEqual(pedir('GET', '/api/usuario')[0], 401)
+        # Las colecciones de dominio también exigen Bearer.
+        self.assertEqual(pedir('GET', '/api/area_conocimiento')[0], 401)
 
     async def test_validacion_no_expone_secretos(self):
         for cuerpo in ({'username': self.nombre}, {'username': self.nombre, 'password': self.clave, 'activo': True}):
