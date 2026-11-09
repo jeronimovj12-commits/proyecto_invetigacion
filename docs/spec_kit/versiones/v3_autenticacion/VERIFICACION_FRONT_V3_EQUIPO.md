@@ -35,3 +35,17 @@ Después de ejecutar `scripts/configurar_v3.ps1`, Compose indicó que faltaba `J
 
 No se atribuyen capturas, resultados ni firmas que no se hayan observado o recibido. Las pruebas automáticas ya descritas en `VERIFICACION_V3.md` son evidencia técnica separada y no sustituyen este recorrido humano.
 
+## Recorrido de demostración pendiente
+
+Este guion explica qué se comprobará cuando el formulario de login funcione. Es una guía; los pasos todavía no se marcan como realizados.
+
+1. **Administrador:** iniciar sesión y comprobar que aparecen los enlaces Usuarios, Roles y Asignaciones, además de las pantallas de investigación.
+2. **Preparar consulta:** desde administración, crear un usuario de prueba, conservar el rol `consulta` creado por el bootstrap y asignarlo a ese usuario. No usar cuentas reales de compañeros.
+3. **Permisos de consulta:** cerrar sesión, entrar con el usuario de prueba y comprobar que puede leer investigación, que no ve controles de escritura y que una visita directa a `/seguridad/usuarios` es denegada.
+4. **Escrituras por URL:** con la cuenta consulta, intentar una operación de escritura desde una URL protegida; debe rechazarse y no modificar datos. Registrar el mensaje y el estado visible, sin capturar contraseñas ni tokens.
+5. **Administración:** volver a entrar como administrador y comprobar crear, editar y retirar registros de usuarios, roles y asignaciones con datos de prueba. Verificar los mensajes y que las filas retiradas no se presenten como activas.
+6. **Sesión:** cerrar sesión, volver a abrir una dirección protegida y comprobar que se solicita login. Para vencimiento, usar una duración local breve solo si se acuerda durante la prueba; anotar el tiempo configurado y el mensaje visible.
+7. **Credenciales incorrectas y errores:** en el login, probar deliberadamente una contraseña incorrecta y observar el aviso. Probar mensajes de vencimiento y de servicio no disponible cuando corresponda, sin provocar cambios en datos oficiales.
+
+La explicación sencilla para sustentar el recorrido es: primero se verifica quién entra; luego se compara lo que puede hacer una cuenta administradora con una cuenta de consulta; por último se cierra o deja vencer la sesión y se comprueba que las páginas protegidas vuelvan a exigir autenticación. Cada observación se añadirá aquí solo después de la confirmación del usuario.
+
