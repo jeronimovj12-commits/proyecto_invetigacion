@@ -16,6 +16,8 @@
 | Abrir `GET /login` en `http://127.0.0.1:8079/login` | `curl.exe` recibió HTTP 200. El log del front también registra `GET /login` con 200. | Confirmado |
 | Login con la cuenta administradora recién creada | Al enviar el formulario, el navegador mostró `Bad Request` y «El formulario venció. Recarga la página e intenta de nuevo». El log registra `POST /login` con 400. La validación CSRF rechaza la solicitud antes de comprobar las credenciales; por tanto, este resultado no permite concluir si usuario y contraseña son correctos. | Bloqueado; repetir cuando se resuelva CSRF |
 
+Reintento diagnóstico confirmado: el usuario informó que volvió a aparecer el mismo `Bad Request`. `curl.exe` obtuvo HTTP 200 para `GET /login`; en los registros, las solicitudes `POST /login` devuelven 400 y la carga posterior de `/login` devuelve 200. La aplicación está respondiendo; falta resolver por qué el navegador no envía un token CSRF coincidente. No se registró ni compartió ninguna credencial.
+
 ### Incidencia de preparación
 
 Después de ejecutar `scripts/configurar_v3.ps1`, Compose indicó que faltaba `JWT_SECRET`. Se corrigieron localmente los saltos de línea de `v3-local.env` sin mostrar ni guardar sus secretos en Git; después las imágenes y contenedores iniciaron. La configuración local está ignorada por Git. Queda pendiente revisar el script de configuración para evitar que se repita este problema. No se editó el script durante esta verificación.
