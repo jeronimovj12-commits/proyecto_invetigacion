@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Semilleros</h1>
+<form method="post">
+<p><label for="id">Id</label>
+<input id="id" name="id" type="number" value="{{ ficha.get('id') if ficha and ficha.get('id') is not none else '' }}" {{ 'readonly' if editando else '' }}>
+</p>
+<p><label for="nombre">Nombre</label>
+<input id="nombre" name="nombre" type="text" value="{{ ficha.get('nombre') if ficha and ficha.get('nombre') is not none else '' }}">
+</p>
+<p><label for="fecha_fundacion">Fecha fundacion</label>
+<input id="fecha_fundacion" name="fecha_fundacion" type="date" value="{{ ficha.get('fecha_fundacion') if ficha and ficha.get('fecha_fundacion') is not none else '' }}">
+</p>
+<p><label for="grupo_investigacion">Grupo investigacion</label>
+<select id="grupo_investigacion" name="grupo_investigacion">
+<option value="">Seleccione una opción</option>
+{% for opcion in opciones['grupo_investigacion'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('grupo_investigacion') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<button class="boton primario" name="verbo" value="completa" {{ 'disabled' if not disponibles else '' }}>Guardar la ficha completa</button>
+{% if editando %}<button class="boton" name="verbo" value="parcial" {{ 'disabled' if not disponibles else '' }}>Guardar solo lo que cambié</button>{% endif %}
+</form>{% endblock %}

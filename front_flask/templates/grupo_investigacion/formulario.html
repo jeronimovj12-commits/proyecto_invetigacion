@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Grupos de investigación</h1>
+<form method="post">
+<p><label for="id">Id</label>
+<input id="id" name="id" type="number" value="{{ ficha.get('id') if ficha and ficha.get('id') is not none else '' }}" {{ 'readonly' if editando else '' }}>
+</p>
+<p><label for="nombre">Nombre</label>
+<input id="nombre" name="nombre" type="text" value="{{ ficha.get('nombre') if ficha and ficha.get('nombre') is not none else '' }}">
+</p>
+<p><label for="url_gruplac">Dirección de GrupLAC</label>
+<input id="url_gruplac" name="url_gruplac" type="text" value="{{ ficha.get('url_gruplac') if ficha and ficha.get('url_gruplac') is not none else '' }}">
+</p>
+<p><label for="categoria">Categoria</label>
+<input id="categoria" name="categoria" type="text" value="{{ ficha.get('categoria') if ficha and ficha.get('categoria') is not none else '' }}">
+</p>
+<p><label for="convocatoria">Convocatoria</label>
+<input id="convocatoria" name="convocatoria" type="text" value="{{ ficha.get('convocatoria') if ficha and ficha.get('convocatoria') is not none else '' }}">
+</p>
+<p><label for="fecha_fundacion">Fecha fundacion</label>
+<input id="fecha_fundacion" name="fecha_fundacion" type="date" value="{{ ficha.get('fecha_fundacion') if ficha and ficha.get('fecha_fundacion') is not none else '' }}">
+</p>
+<p><label for="universidsad">Universidad</label>
+<select id="universidsad" name="universidsad">
+<option value="__nulo__">Seleccione una opción (opcional)</option>
+{% for opcion in opciones['universidsad'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('universidsad') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<p><label for="interno">Interno (0 o 1)</label>
+<input id="interno" name="interno" type="number" value="{{ ficha.get('interno') if ficha and ficha.get('interno') is not none else '' }}">
+</p>
+<p><label for="ambito">Ambito</label>
+<input id="ambito" name="ambito" type="text" value="{{ ficha.get('ambito') if ficha and ficha.get('ambito') is not none else '' }}">
+</p>
+<button class="boton primario" name="verbo" value="completa" {{ 'disabled' if not disponibles else '' }}>Guardar la ficha completa</button>
+{% if editando %}<button class="boton" name="verbo" value="parcial" {{ 'disabled' if not disponibles else '' }}>Guardar solo lo que cambié</button>{% endif %}
+</form>{% endblock %}

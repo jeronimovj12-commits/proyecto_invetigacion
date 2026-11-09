@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Grupos de investigación</h1>
+<a class="boton primario" href="{{ url_for('crear_grupo_investigacion') }}">Agregar ficha</a>
+<div class="tabla-scroll"><table><thead><tr><th>Id</th><th>Nombre</th><th>Dirección de GrupLAC</th><th>Categoria</th><th>Convocatoria</th><th>Fecha fundacion</th><th>Universidad</th><th>Interno (0 o 1)</th><th>Ambito</th><th>Acciones</th></tr></thead><tbody>
+{% for fila in filas %}<tr>
+<td>{{ fila["id"] if fila["id"] is not none else "" }}</td><td>{{ fila["nombre"] if fila["nombre"] is not none else "" }}</td><td>{{ fila["url_gruplac"] if fila["url_gruplac"] is not none else "" }}</td><td>{{ fila["categoria"] if fila["categoria"] is not none else "" }}</td><td>{{ fila["convocatoria"] if fila["convocatoria"] is not none else "" }}</td><td>{{ fila["fecha_fundacion"] if fila["fecha_fundacion"] is not none else "" }}</td><td>{{ fila["universidsad"] if fila["universidsad"] is not none else "" }}</td><td>{{ fila["interno"] if fila["interno"] is not none else "" }}</td><td>{{ fila["ambito"] if fila["ambito"] is not none else "" }}</td><td><a href="{{ url_for('editar_grupo_investigacion', id=fila["id"]) }}">Editar</a>
+<form method="post" action="{{ url_for('eliminar_grupo_investigacion', id=fila["id"]) }}"><button class="boton" type="submit">Retirar ficha</button></form></td>
+</tr>{% else %}<tr><td colspan="10">No hay fichas disponibles.</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

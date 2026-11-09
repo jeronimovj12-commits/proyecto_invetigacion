@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Áreas de las líneas</h1>
+<a class="boton primario" href="{{ url_for('crear_ac_linea') }}">Agregar ficha</a>
+<div class="tabla-scroll"><table><thead><tr><th>Línea de investigación</th><th>Área de conocimiento</th><th>Acciones</th></tr></thead><tbody>
+{% for fila in filas %}<tr>
+<td>{% if fila.get("linea_nombre") %}{{ fila["linea_nombre"] }} ({{ fila["linea_investigacion"] }}){% else %}{{ fila["linea_investigacion"] }}{% endif %}</td><td>{% if fila.get("area_nombre") %}{{ fila["area_nombre"] }} ({{ fila["area_conocimiento"] }}){% else %}{{ fila["area_conocimiento"] }}{% endif %}</td><td><a href="{{ url_for('editar_ac_linea', linea_investigacion=fila["linea_investigacion"], area_conocimiento=fila["area_conocimiento"]) }}">Editar</a>
+<form method="post" action="{{ url_for('eliminar_ac_linea', linea_investigacion=fila["linea_investigacion"], area_conocimiento=fila["area_conocimiento"]) }}"><button class="boton" type="submit">Retirar ficha</button></form></td>
+</tr>{% else %}<tr><td colspan="3">No hay fichas disponibles.</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

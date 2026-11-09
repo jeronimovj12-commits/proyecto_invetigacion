@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Docentes</h1>
+<form method="post">
+<p><label for="cedula">Cedula</label>
+<input id="cedula" name="cedula" type="number" value="{{ ficha.get('cedula') if ficha and ficha.get('cedula') is not none else '' }}" {{ 'readonly' if editando else '' }}>
+</p>
+<p><label for="nombres">Nombres</label>
+<input id="nombres" name="nombres" type="text" value="{{ ficha.get('nombres') if ficha and ficha.get('nombres') is not none else '' }}">
+</p>
+<p><label for="apellidos">Apellidos</label>
+<input id="apellidos" name="apellidos" type="text" value="{{ ficha.get('apellidos') if ficha and ficha.get('apellidos') is not none else '' }}">
+</p>
+<p><label for="genero">Genero</label>
+<input id="genero" name="genero" type="text" value="{{ ficha.get('genero') if ficha and ficha.get('genero') is not none else '' }}">
+</p>
+<p><label for="cargo">Cargo</label>
+<input id="cargo" name="cargo" type="text" value="{{ ficha.get('cargo') if ficha and ficha.get('cargo') is not none else '' }}">
+</p>
+<p><label for="fecha_nacimiento">Fecha nacimiento</label>
+<input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value="{{ ficha.get('fecha_nacimiento') if ficha and ficha.get('fecha_nacimiento') is not none else '' }}">
+</p>
+<p><label for="correo">Correo</label>
+<input id="correo" name="correo" type="text" value="{{ ficha.get('correo') if ficha and ficha.get('correo') is not none else '' }}">
+</p>
+<p><label for="telefono">Telefono</label>
+<input id="telefono" name="telefono" type="text" value="{{ ficha.get('telefono') if ficha and ficha.get('telefono') is not none else '' }}">
+</p>
+<p><label for="url_cvlac">Dirección de CvLAC</label>
+<input id="url_cvlac" name="url_cvlac" type="text" value="{{ ficha.get('url_cvlac') if ficha and ficha.get('url_cvlac') is not none else '' }}">
+</p>
+<p><label for="fecha_actualizacion">Fecha actualizacion</label>
+<input id="fecha_actualizacion" name="fecha_actualizacion" type="date" value="{{ ficha.get('fecha_actualizacion') if ficha and ficha.get('fecha_actualizacion') is not none else '' }}">
+</p>
+<p><label for="escalafon">Escalafon</label>
+<input id="escalafon" name="escalafon" type="text" value="{{ ficha.get('escalafon') if ficha and ficha.get('escalafon') is not none else '' }}">
+</p>
+<p><label for="perfil">Perfil</label>
+<input id="perfil" name="perfil" type="text" value="{{ ficha.get('perfil') if ficha and ficha.get('perfil') is not none else '' }}">
+</p>
+<p><label for="cat_minciencia">Categoría Minciencias</label>
+<input id="cat_minciencia" name="cat_minciencia" type="text" value="{{ ficha.get('cat_minciencia') if ficha and ficha.get('cat_minciencia') is not none else '' }}">
+</p>
+<p><label for="conv_minciencia">Convocatoria Minciencias</label>
+<input id="conv_minciencia" name="conv_minciencia" type="text" value="{{ ficha.get('conv_minciencia') if ficha and ficha.get('conv_minciencia') is not none else '' }}">
+</p>
+<p><label for="nacionalidaad">Nacionalidad</label>
+<input id="nacionalidaad" name="nacionalidaad" type="text" value="{{ ficha.get('nacionalidaad') if ficha and ficha.get('nacionalidaad') is not none else '' }}">
+</p>
+<p><label for="linea_investigacion_principal">Linea investigacion principal</label>
+<select id="linea_investigacion_principal" name="linea_investigacion_principal">
+<option value="__nulo__">Seleccione una opción (opcional)</option>
+{% for opcion in opciones['linea_investigacion_principal'] %}
+<option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('linea_investigacion_principal') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{% endfor %}</select>
+</p>
+<button class="boton primario" name="verbo" value="completa" {{ 'disabled' if not disponibles else '' }}>Guardar la ficha completa</button>
+{% if editando %}<button class="boton" name="verbo" value="parcial" {{ 'disabled' if not disponibles else '' }}>Guardar solo lo que cambié</button>{% endif %}
+</form>{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Semilleros</h1>
+<a class="boton primario" href="{{ url_for('crear_semillero') }}">Agregar ficha</a>
+<div class="tabla-scroll"><table><thead><tr><th>Id</th><th>Nombre</th><th>Fecha fundacion</th><th>Grupo investigacion</th><th>Acciones</th></tr></thead><tbody>
+{% for fila in filas %}<tr>
+<td>{{ fila["id"] if fila["id"] is not none else "" }}</td><td>{{ fila["nombre"] if fila["nombre"] is not none else "" }}</td><td>{{ fila["fecha_fundacion"] if fila["fecha_fundacion"] is not none else "" }}</td><td>{{ fila["grupo_investigacion"] if fila["grupo_investigacion"] is not none else "" }}</td><td><a href="{{ url_for('editar_semillero', id=fila["id"]) }}">Editar</a>
+<form method="post" action="{{ url_for('eliminar_semillero', id=fila["id"]) }}"><button class="boton" type="submit">Retirar ficha</button></form></td>
+</tr>{% else %}<tr><td colspan="5">No hay fichas disponibles.</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}
