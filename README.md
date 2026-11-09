@@ -171,3 +171,9 @@ pantalla lo cumpla.
 =======
 # proyecto_invetigacion
 >>>>>>> a6b24d29c69eb1e413f8289525d36bba80f1f2db
+
+## Guía para la sustentación (v1–v3)
+
+Para comprender los archivos reales, explicar las capas y seguir una petición desde Flask hasta PostgreSQL, consultar la [guía de exposición del proyecto](docs/GUIA_EXPOSICION_PROYECTO.md). Incluye autenticación, pruebas, comandos y preguntas posibles, distinguiendo lo implementado de lo verificado y lo pendiente.
+
+El [índice explicativo de Spec Kit](docs/spec_kit/README.md) orienta la lectura de requisitos, planes, contratos y evidencia. Para arrancar v3, seguir su [quickstart](docs/spec_kit/versiones/v3_autenticacion/7_quickstart.md); las instrucciones anteriores conservan contenido histórico del ejemplo.
