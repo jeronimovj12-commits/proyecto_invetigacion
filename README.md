@@ -1,6 +1,3 @@
-git add README.md
-git commit -m "Resolver conflicto del README"
-git push -u origin main<<<<<<< HEAD
 # Módulo Investigación — ejemplo de referencia (Python)
 
 Este repositorio contiene **dos cosas distintas**, y conviene no confundirlas:
@@ -8,7 +5,7 @@ Este repositorio contiene **dos cosas distintas**, y conviene no confundirlas:
 | | Qué es |
 |---|---|
 | [`ProyectosDeAula/`](ProyectosDeAula/) | **El material del curso**: la metodología, los documentos de módulo y los scripts de base de datos. Es lo que ya conocen |
-| Todo lo demás | **El ejemplo de referencia** del módulo Investigación: su versión 1, construida siguiendo esa metodología al pie de la letra |
+| Todo lo demás | **El ejemplo de referencia** del módulo Investigación, ampliado con relaciones v2 y autenticación v3; las versiones siguen pendientes de aceptación formal |
 
 El ejemplo no es un sistema para descargar: es un **molde de método**. Se
 ejecuta, se estudia, y se reconstruye.
@@ -19,41 +16,44 @@ demostración de que **la metodología y los contratos no dependen del stack**.
 
 ---
 
-## 1. Arranque: un solo comando
+## 1. Instalación actual: v3 en entorno separado
 
-Solo hace falta **Docker Desktop**. No hay que instalar Python ni PostgreSQL.
+La rama de trabajo es `v3-desarrollo`. La guía completa y única del procedimiento es
+[Arrancar y verificar v3](docs/spec_kit/versiones/v3_autenticacion/7_quickstart.md):
+prerrequisitos, configuración externa, base, migración, primer administrador y datos.
+Este README sirve como entrada; no repite la secuencia de actualización.
 
-```powershell
-git clone https://github.com/ccastro2050/proyecto_paradigmas_investigacion1.git
-cd proyecto_paradigmas_investigacion1
-docker compose up -d --build
-```
-
-Al terminar quedan corriendo la base de datos —con sus 19 tablas y sus
-catálogos— y la API:
-
-| Qué | Dónde |
+| Qué | Nombre o dirección real |
 |---|---|
-| **La pantalla** — empiece por aquí | **http://localhost:8078** |
-| **API — documentación interactiva** | http://localhost:8025/docs |
-| Diagnóstico | http://localhost:8025/ |
-| Listado de áreas | http://localhost:8025/api/area_conocimiento |
-| PostgreSQL (DBeaver o pgAdmin, opcional) | `localhost:15440` · `investigacion` |
+| Front v3 | http://localhost:8079/login |
+| API v3 y contratos | http://localhost:8026/ y http://localhost:8026/docs |
+| Proyecto Compose | `investigacion-v3`, archivo `docker-compose.v3.yml` |
+| Servicios | `postgres-v3`, `migrar-v3`, `api-v3`, `front-v3` |
+| Base | `investigacion_v3`; PostgreSQL v3 no publica puerto al equipo |
 
-Pruebe en `/docs`: un `PUT` sin `granArea` responde **422**; el **mismo
-cuerpo** por `PATCH` responde **200**. Esa diferencia es parte de lo que
-enseña la v1, y no la decide un `if`: la decide el tipo del cuerpo.
+1. Revisar `git status --short --branch` y `git log -1 --oneline` para conservar
+   cambios e identificar el código que se va a ejecutar.
+2. Si es una instalación **nueva**, seguir configuración y sección 2 del quickstart:
+   Docker inicializa el volumen vacío, ejecuta migración y permite crear el primer
+   administrador con entrada oculta. No hay cuenta ni contraseña predeterminadas.
+3. Si es una instalación **existente**, seguir la sección 3: detener escrituras,
+   respaldar y copiar el respaldo **antes** de ejecutar la migración o el arranque.
+   Conservar secretos/volúmenes; no volver a ejecutar init.sql ni borrar volúmenes.
+4. Para mostrar relaciones con datos, elegir en sección 4 las cargas oficiales y/o
+   demo. No vienen automáticamente en v3 y no son datos intercambiables con v2.
+5. Seguir sección 5 para disponibilidad y pruebas. Allí se distingue lo ejecutado
+   según [la evidencia](docs/spec_kit/versiones/v3_autenticacion/VERIFICACION_V3.md)
+   de las instrucciones aún pendientes de ensayo integral.
 
-### Los días siguientes
+Se necesita Git, PowerShell y Docker Desktop iniciado con contenedores Linux. Las
+imágenes instalan sus dependencias; no se necesita Python/PostgreSQL local. El script
+`scripts/configurar_v3.ps1` crea solo secretos faltantes en un archivo ignorado y
+preserva los existentes; no mostrar ni versionar ese archivo.
 
-```powershell
-docker compose up -d          # encender
-docker compose down           # apagar (los datos se conservan)
-docker compose down -v        # resetear la base a su estado original
-```
-
-Si edita un `.py`, **no hay que hacer nada**: el código está montado y
-`uvicorn --reload` recarga solo.
+El comando predeterminado `docker compose up -d --build` **sigue arrancando v2** en
+8025/8078, no v3. Sus volúmenes y base `investigacion_local` se conservan. En v3 las
+entradas son `main_v3:app` y `app_v3.py`; no se usa `--reload`, por lo que cambiar
+código requiere reiniciar/recrear según el quickstart. V2 continúa abierta.
 
 ## 2. Qué construye la versión 1
 
@@ -65,8 +65,8 @@ La tabla arranca con **218 filas** de catálogo, cargadas del Excel del
 módulo — incluidas las **48** donde la fuente decía *"Cienias Naturales"* y
 que este script corrige.
 
-**La v1 del curso pide ocho tablas sin clave foránea.** Este repositorio
-construye **una sola, completa**: es el molde. Las otras siete son el mismo
+**La v1 del módulo original pide seis tablas sin clave foránea.** Este repositorio
+construye **una sola, completa**: es el molde. Las otras cinco son el mismo
 patrón con otros nombres. El equipo que tome este ejemplo lo revisa y, **si
 está de acuerdo, lo retoma y lo completa; si no, lo rehace a su manera**. Lo
 que no puede es cambiar la especificación sin pasar por sus compuertas.
@@ -74,7 +74,7 @@ que no puede es cambiar la especificación sin pasar por sus compuertas.
 ## 3. Estructura
 
 ```
-proyecto_paradigmas_investigacion1/
+proyecto_invetigacion/
 ├── db/init.sql                         la base COMPLETA (artefacto DADO)
 ├── api_investigacion/
 │   ├── main.py                         arma la app y registra el router
@@ -168,9 +168,6 @@ tendría cualquier organización real.
 **Los colores no se cambian.** El artículo tercero de la resolución que
 adopta el manual es explícito, y la **versión 4** del proyecto evalúa que la
 pantalla lo cumpla.
-=======
-# proyecto_invetigacion
->>>>>>> a6b24d29c69eb1e413f8289525d36bba80f1f2db
 
 ## Guía para la sustentación (v1–v3)
 
