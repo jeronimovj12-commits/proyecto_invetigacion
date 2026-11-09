@@ -1,6 +1,6 @@
-﻿from typing import Annotated
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.administracion import UsuarioCrear, UsuarioEditar, RolCrear, RolEditar, AsignacionCrear
+from models.administracion import UsuarioCrear, UsuarioEditar, RolCrear, RolEditar, AsignacionCrear, AsignacionEditar
 from servicios.abstracciones.i_servicio_seguridad import IServicioSeguridad
 from servicios.ensamblador_seguridad import crear_servicio_seguridad
 from seguridad.errores_administracion import ConflictoSeguridad, SeguridadNoEncontrada
@@ -88,3 +88,12 @@ async def asignar(datos: AsignacionCrear, servicio: Servicio):
 async def retirar_asignacion(usuario_id: int, rol_id: int, servicio: Servicio):
     await ejecutar(servicio.retirar('rol_usuario', {'usuario_id': usuario_id, 'rol_id': rol_id}))
     return {'estado': 200, 'mensaje': 'Asignación retirada.'}
+
+
+@router.put('/rol_usuario/{usuario_id}/{rol_id}')
+async def reemplazar_asignacion(usuario_id: int, rol_id: int, datos: AsignacionCrear, servicio: Servicio):
+    return await ejecutar(servicio.guardar('rol_usuario', {'usuario_id': usuario_id, 'rol_id': rol_id}, datos.model_dump()))
+
+@router.patch('/rol_usuario/{usuario_id}/{rol_id}')
+async def editar_asignacion(usuario_id: int, rol_id: int, datos: AsignacionEditar, servicio: Servicio):
+    return await ejecutar(servicio.guardar('rol_usuario', {'usuario_id': usuario_id, 'rol_id': rol_id}, datos.model_dump(exclude_unset=True)))

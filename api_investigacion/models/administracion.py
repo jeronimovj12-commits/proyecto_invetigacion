@@ -1,4 +1,4 @@
-﻿from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 class Entrada(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
@@ -38,3 +38,14 @@ class RolEditar(Entrada):
 class AsignacionCrear(Entrada):
     usuario_id: int = Field(gt=0)
     rol_id: int = Field(gt=0)
+
+
+class AsignacionEditar(Entrada):
+    usuario_id: int | None = Field(default=None, gt=0)
+    rol_id: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode='after')
+    def no_nulos(self):
+        if any(getattr(self, c) is None for c in self.model_fields_set):
+            raise ValueError('Los identificadores no admiten null.')
+        return self

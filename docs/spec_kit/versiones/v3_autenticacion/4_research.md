@@ -170,7 +170,7 @@ CSRF aleatorio con compare_digest; login y logout también lo requieren.
 
 El middleware cierra por defecto `/api/` salvo login y las dos rutas que verifican
 su propio Bearer. La política se aplica antes de validar el body o ejecutar la
-operación, y se probó desde solicitudes HTTP directas sobre las 90 operaciones
+operación, y se probó desde solicitudes HTTP directas sobre las 92 operaciones
 actuales de investigación y administración. Diagnóstico y OpenAPI siguen públicos.
 
 La protección del último administrador requiere atomicidad entre tres tablas.
@@ -188,3 +188,9 @@ incompatibilidad. requirements-v3.lock fija las dependencias realmente instalada
 los arranques v2 conservan su opción original de requisitos. No se declara v4,
 protección frente a fuerza bruta ni producción pública. Evidencia y pendientes
 en VERIFICACION_V3.md; no se inventan pruebas manuales ni firmas.
+
+
+La revisión final completó PUT/PATCH de rol_usuario: conserva la fila original
+inactiva y crea el nuevo par en una transacción. Destino duplicado (activo o
+retirado), FK inválida o pérdida del último administrador provoca rollback y
+conserva origen activo. No-op conserva el par sin cambios. No agrega columnas.

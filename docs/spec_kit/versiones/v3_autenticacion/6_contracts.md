@@ -100,7 +100,7 @@ detalles usan limite=1. Campos públicos:
 | /api/rol | GET listado; POST crea, 201 con objeto público |
 | /api/rol/{id} | GET detalle; PUT reemplazo, PATCH parcial, 200 con objeto; DELETE lógico, 200 `{estado:200,mensaje:"Rol retirado."}` |
 | /api/rol_usuario | GET listado; POST asigna, 201 con objeto público |
-| /api/rol_usuario/{usuario_id}/{rol_id} | GET detalle; DELETE lógico, 200 `{estado:200,mensaje:"Asignación retirada."}` |
+| /api/rol_usuario/{usuario_id}/{rol_id} | GET detalle; PUT reemplazo, PATCH parcial, 200 con el nuevo objeto; DELETE lógico, 200 `{estado:200,mensaje:"Asignación retirada."}` |
 
 POST/PUT usuario: username (1–100), email (1–150), password (12–1024) obligatorios;
 nombre_completo opcional/null (máximo 200). PUT exige también contraseña; cambiarla
@@ -112,9 +112,13 @@ PATCH parcial con esos campos; nombre no admite null. Se recortan espacios en
 los textos administrativos (las contraseñas no se recortan).
 
 POST asignación: `{usuario_id: entero positivo, rol_id: entero positivo}`;
-ambos padres activos. Clave compuesta inmutable: no existe PUT/PATCH para alterar
-una asignación; cambiarla se expresa retirando y creando otra distinta. Pares
-retirados no se reactivan. Roles arbitrarios no conceden permisos v3.
+ambos padres activos. PUT requiere ambos identificadores; PATCH admite uno o ambos,
+sin null, y combina con los originales antes de validar padres. Un cambio retira
+lógicamente el par original y crea el nuevo en una sola transacción. El par anterior
+se conserva y no se reactiva; destino activo o retirado existente: 409 con rollback.
+Origen inexistente/inactivo: 404; par idéntico: 200 sin cambios; PATCH vacío: 409.
+La protección del último administrador comprueba el estado final antes de confirmar.
+Roles arbitrarios no conceden permisos v3.
 
 Campos extra, activo, valores nulos no permitidos o límites inválidos: 422.
 PATCH vacío: 409. Duplicados (incluidos registros inactivos), FK inexistentes o

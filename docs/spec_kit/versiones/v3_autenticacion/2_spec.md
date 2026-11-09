@@ -1,4 +1,4 @@
-﻿# Especificación — autenticación y administración v3
+# Especificación — autenticación y administración v3
 
 Estado: implementación API y front en `v3-desarrollo`, 9 de noviembre de 2026.
 V2 sigue abierta. No hay merge a main, tag v3 ni aceptación manual atribuida al equipo.
@@ -20,7 +20,7 @@ V2 sigue abierta. No hay merge a main, tag v3 ni aceptación manual atribuida al
 | Sesión | 30 minutos configurables, sin refresh ni renovación automática |
 | Logout | Invalida todas las sesiones anteriores mediante incremento atómico persistente |
 | Primer administrador | Comando local con entrada oculta, transacción y rechazo de cuentas/conflictos existentes |
-| Administración | CRUD de cuentas/roles; asignación por alta, lectura y retiro lógico, sin reactivar ni cambiar su clave compuesta |
+| Administración | CRUD de cuentas/roles; asignación por alta, lectura, edición transaccional y retiro lógico, sin reactivar pares retirados |
 | Último administrador | Rechazo 409 y rollback de bajas que eliminen el último administrador efectivo; nombres de roles iniciales inmutables |
 | Cambios de clave | Incrementan version_sesion; baja de cuenta también revoca |
 | Navegador | Cookie firmada con identificador opaco y CSRF; JWT solo en almacenamiento del servidor; no localStorage ni campos HTML con JWT |

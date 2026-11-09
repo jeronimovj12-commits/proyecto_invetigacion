@@ -27,17 +27,17 @@ imágenes con requirements-v3.lock y ejecutó secuencialmente estas comprobacion
 | Comprobación | Resultado de la ejecución final |
 |---|---|
 | prueba_migracion_v3.py | Datos anteriores inactivos conservados, repetición, versión=7 y asignación retirada conservadas; esquema incompatible rechazado |
-| prueba_autenticacion_v3.py | 14 pruebas, OK, 6.462 s |
-| prueba_administracion_v3.py | 4 pruebas, OK, 2.488 s; matriz de 90 operaciones HTTP |
+| prueba_autenticacion_v3.py | 14 pruebas, OK, 6.592 s |
+| prueba_administracion_v3.py | 5 pruebas, OK, 2.843 s; matriz de 92 operaciones HTTP |
 | prueba_capas.py | Recorrido de capas v1 en memoria, todos los pasos OK |
-| prueba_v2.py | 12 pruebas en memoria, OK, 0.071 s |
-| prueba_front_seguro_v3.py | 5 pruebas Flask, OK, 0.453 s; transporte simulado |
-| prueba_integracion_v3.py | 1 recorrido real Flask→HTTP→API→PostgreSQL, OK, 1.298 s |
+| prueba_v2.py | 12 pruebas en memoria, OK, 0.072 s |
+| prueba_front_seguro_v3.py | 5 pruebas Flask, OK, 0.472 s; transporte simulado |
+| prueba_integracion_v3.py | 1 recorrido real Flask→HTTP→API→PostgreSQL, OK, 1.377 s |
 
 Bases aleatorias creadas en esa ejecución (servidor postgres-v3 aislado):
-pruebas_migracion_v3_af744bf4b8fe41a8bafa44212008d214,
-pruebas_v3_1ec677d8cc4f48f08cb4b2a6d2b7bcf2 y
-pruebas_v3_2848a5cce6a84ae4bac3fbb1355972a9. La integración usa otra base nueva
+pruebas_migracion_v3_83a65586c7aa4d50be34de476333842a,
+pruebas_v3_373e27c5e8f340bdb51738d55ccda743 y
+pruebas_v3_6869e2d13ee645028341b7d6b05efc51. La integración usa otra base nueva
 creada por servidor_integracion_v3.py. Las bases y volúmenes se conservan; el script
 detuvo el servidor API de pruebas al terminar, sin borrar datos ni usar cuentas reales.
 Credenciales efímeras en memoria o fixture-v3 con archivo 0600, nunca en Git ni informe.
@@ -46,8 +46,9 @@ Credenciales efímeras en memoria o fixture-v3 con archivo 0600, nunca en Git ni
 
 - Login, claims/firma/algoritmo/expiración, inactividad, ausencia de rol, exclusión de roles/asignaciones inactivos, no exposición de password/hash y configuración externa.
 - Logout concurrente con incremento único; dos tokens invalidados y rechazo después de reiniciar el proceso uvicorn. Bootstrap del servicio crea la primera cuenta y rechaza otra inicialización; CLI sin terminal rechazada. No se recorrió manualmente getpass.
-- Matriz generada desde OpenAPI: 90 operaciones de dominio/seguridad rechazan acceso anónimo; consulta rechaza toda escritura y toda seguridad; lecturas de investigación autorizadas. OpenAPI declara Bearer en todas esas operaciones para Swagger Authorize.
+- Matriz generada desde OpenAPI: 92 operaciones de dominio/seguridad rechazan acceso anónimo; consulta rechaza toda escritura y toda seguridad; lecturas de investigación autorizadas. OpenAPI declara Bearer en todas esas operaciones para Swagger Authorize.
 - CRUD administrativo, unicidad, FK activas, no reactivación, PUT obligatorio/PATCH parcial, password revoca tokens y DELETE conserva filas inactivas. Bajas de cuenta, rol o asignación del último administrador: 409; dos retiros concurrentes dejan un administrador efectivo. Nombres de roles iniciales inmutables.
+- PUT/PATCH de asignaciones: baja/alta atómica, par idéntico sin mutación, origen retirado 404, null/PUT incompleto 422, PATCH vacío 409, destino activo/retirado 409 y rollback conservando origen; cambio que pierde último administrador rechazado. Edición desde Flask incluida en recorrido real.
 - Regresión HTTP con administrador de las diez entidades/relaciones de humo_v2, comprobando PUT/PATCH, FK inválidas sin cambios, dependientes y borrado lógico; también creación/cambio/retiro de área de conocimiento v1. No se ejecutó humo_v2.py sin adaptar contra la base compartida.
 - Cliente Flask: login con CSRF, rotación, HttpOnly/SameSite, cookie sin JWT, token solo en servidor, menús/URL directas, todos los formularios GET sin argumentos renderizados, 400 sin CSRF, 401/403, vencimiento local, caída y 500 de sesión. Estas cinco pruebas simulan HTTP.
 - Integración sin mocks: login consulta y admin, catálogo real, ausencia de acciones de consulta, URL denegada, renderizado de listados y formularios de alta sin parámetros, creación de usuario/rol/asignación desde Flask, usuario creado puede autenticarse, aviso de último administrador y logout que invalida el token en API.

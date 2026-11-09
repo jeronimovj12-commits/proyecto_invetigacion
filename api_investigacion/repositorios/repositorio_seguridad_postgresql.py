@@ -1,4 +1,4 @@
-﻿"""SQL manual: identificadores exclusivamente de listas internas; valores parametrizados."""
+"""SQL manual: identificadores exclusivamente de listas internas; valores parametrizados."""
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -65,6 +65,13 @@ class RepositorioSeguridadPostgreSQL(ConexionPostgreSQL):
                 await self._bloquear(conexion)
                 anteriores = await self._administradores(conexion)
                 if recurso == 'rol_usuario':
+                    if not crear:
+                        if not datos:
+                            raise ConflictoSeguridad('Envía al menos un campo.')
+                        anterior = (await conexion.execute(text('SELECT usuario_id, rol_id, activo FROM rol_usuario WHERE usuario_id=:usuario_id AND rol_id=:rol_id AND activo IS TRUE'), claves)).mappings().first()
+                        if anterior is None:
+                            raise SeguridadNoEncontrada()
+                        datos = {**claves, **datos}
                     for tabla, campo in (('usuario', 'usuario_id'), ('rol', 'rol_id')):
                         existe = (await conexion.execute(text(f'SELECT id FROM {tabla} WHERE id=:valor AND activo IS TRUE'), {'valor': datos[campo]})).first()
                         if not existe:
@@ -73,7 +80,13 @@ class RepositorioSeguridadPostgreSQL(ConexionPostgreSQL):
                     nombre = (await conexion.execute(text('SELECT nombre FROM rol WHERE id=:id AND activo IS TRUE'), claves)).scalar_one_or_none()
                     if nombre in ('administrador', 'consulta') and datos.get('nombre', nombre) != nombre:
                         raise ConflictoSeguridad('Los nombres de los roles iniciales no se cambian.')
-                if crear:
+                if recurso == 'rol_usuario' and not crear:
+                    if datos == claves:
+                        return dict(anterior)
+                    # Cambiar un par conserva la fila anterior como retirada. Si el
+                    # destino existe o falla la regla del admin, todo hace rollback.
+                    await conexion.execute(text('UPDATE rol_usuario SET activo=FALSE WHERE usuario_id=:usuario_id AND rol_id=:rol_id'), claves)
+                if crear or recurso == 'rol_usuario':
                     columnas = ', '.join(datos)
                     valores = ', '.join(':' + c for c in datos)
                     sql = f'INSERT INTO {recurso} ({columnas}) VALUES ({valores}) RETURNING {campos}'

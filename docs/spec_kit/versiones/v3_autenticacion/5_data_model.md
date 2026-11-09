@@ -109,3 +109,9 @@ aleatorio, token y vence. No pertenece al modelo PostgreSQL ni guarda investigac
 la cookie solo lleva identificador opaco firmado, CSRF y mensajes. La expiración
 no se extiende al usar la aplicación. Se elimina la fila al cerrar sesión o al
 limpiar una sesión inválida y se purgan vencidas al crear nuevas sesiones.
+
+
+La revisión final completó PUT/PATCH de rol_usuario: conserva la fila original
+inactiva y crea el nuevo par en una transacción. Destino duplicado (activo o
+retirado), FK inválida o pérdida del último administrador provoca rollback y
+conserva origen activo. No-op conserva el par sin cambios. No agrega columnas.

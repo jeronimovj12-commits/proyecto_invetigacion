@@ -174,3 +174,14 @@ de ratificación; no se inventa aprobación del profesor.
 - La automatización Docker, dependencias fijadas, pruebas integradas y esta evidencia
   se agrupan en «Automatiza arranque y verificación de v3». Consultar `git log -6 --oneline`
   para su identificador final y los tres commits anteriores conservados.
+
+
+### Edición de asignaciones en la revisión final
+
+Antes de finalizar se detectó que el alcance CRUD exigía también editar una
+asignación activa. Se completaron PUT/PATCH y el formulario Flask: baja lógica
+del par anterior y alta del nuevo en la misma transacción, sin reactivar pares
+retirados. Se añadió cobertura de par idéntico, null/cuerpo vacío, origen retirado,
+destino activo o retirado, rollback y protección del último administrador; también
+edición real desde Flask. La matriz pasó a 92 operaciones y la suite administrativa
+a cinco casos. El commit adicional se titula «Permite editar asignaciones sin borrar vínculos».

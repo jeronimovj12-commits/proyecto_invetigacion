@@ -76,6 +76,42 @@ class AdministracionHTTP(base.AutenticacionHTTP):
         self.assertEqual(self.api('PATCH', '/api/usuario/999999', {'email':'x@example.invalid'})[0], 404)
         self.assertEqual(self.api('PATCH', '/api/rol/999999', {})[0], 409)
 
+    async def test_edicion_logica_asignaciones(self):
+        consulta = (await self.sql("SELECT id FROM rol WHERE nombre='consulta'")).scalar_one()
+        admin = (await self.sql("SELECT id FROM rol WHERE nombre='administrador'")).scalar_one()
+        token = self.token()
+        origen = f'/api/rol_usuario/{self.usuario}/{consulta}'
+        # Sin cambio es idempotente; cuerpos parciales y tipos conservan contrato.
+        self.assertEqual(self.api('PATCH', origen, {'rol_id':consulta})[0], 200)
+        self.assertEqual(self.api('PUT', origen, {'rol_id':consulta})[0], 422)
+        self.assertEqual(self.api('PATCH', origen, {'rol_id':None})[0], 422)
+        self.assertEqual(self.api('PATCH', origen, {})[0], 409)
+        self.assertEqual(self.api('PATCH', origen, {'rol_id':999999})[0], 409)
+        rid = self.api('POST', '/api/rol', {'nombre':'R_'+secrets.token_hex(6)})[1]['id']
+        self.assertEqual(self.api('PATCH', origen, {'rol_id':rid})[0], 200)
+        self.assertEqual(self.api('GET', origen)[0], 404)
+        self.assertFalse((await self.sql('SELECT activo FROM rol_usuario WHERE usuario_id=:id AND rol_id=:rid', id=self.usuario,rid=consulta)).scalar_one())
+        self.assertEqual(base.pedir('GET','/api/sesion',token=token)[0],403)
+        nuevo = f'/api/rol_usuario/{self.usuario}/{rid}'
+        # Destino retirado no se reactiva; el origen se conserva ante conflicto.
+        self.assertEqual(self.api('PATCH', nuevo, {'rol_id':consulta})[0], 409)
+        self.assertEqual(self.api('GET', nuevo)[0], 200)
+        nombre = 'DESTINO_'+secrets.token_hex(6)
+        uid = self.api('POST','/api/usuario', {'username':nombre,'email':nombre+'@example.invalid','password':secrets.token_urlsafe(24)})[1]['id']
+        self.assertEqual(self.api('PUT', nuevo, {'usuario_id':uid,'rol_id':consulta})[0],200)
+        self.assertEqual(self.api('GET',nuevo)[0],404)
+        self.assertEqual(self.api('GET',f'/api/rol_usuario/{uid}/{consulta}')[0],200)
+        # Un destino activo también hace rollback y no pierde la asignación original.
+        self.assertEqual(self.api('POST','/api/rol_usuario', {'usuario_id':uid,'rol_id':rid})[0],201)
+        destino = f'/api/rol_usuario/{uid}/{rid}'
+        self.assertEqual(self.api('PATCH',destino,{'rol_id':consulta})[0],409)
+        self.assertEqual(self.api('GET',destino)[0],200)
+        self.assertEqual(self.api('PATCH',origen,{'rol_id':admin})[0],404)
+        # Cambiar el último administrador a consulta no confirma ni retira el original.
+        ultimo = f'/api/rol_usuario/1/{admin}'
+        self.assertEqual(self.api('PATCH',ultimo,{'rol_id':consulta})[0],409)
+        self.assertEqual(self.api('GET',ultimo)[0],200)
+
     async def test_regresion_crud_dominio_con_administrador(self):
         from humo_v2 import CASOS
         import random

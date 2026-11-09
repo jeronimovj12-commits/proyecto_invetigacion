@@ -14,15 +14,13 @@
 {% for fila in filas %}
 <article>
 <p>{% for campo, valor in fila.items() %}{{ etiquetas[campo] }}: {{ valor if valor is not none else '' }} {% endfor %}</p>
-{% if recurso != 'rol_usuario' %}
 <form method="post">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<input type="hidden" name="id" value="{{ fila.id }}">
+<input type="hidden" name="id" value="{{ (fila.usuario_id|string ~ '/' ~ fila.rol_id|string) if recurso == 'rol_usuario' else fila.id }}">
 {% for campo in campos %}
-<label>{{ etiquetas[campo] }} <input name="{{ campo }}" type="{{ 'password' if campo == 'password' else 'text' }}" value="{{ '' if campo == 'password' else fila[campo] or '' }}" {% if campo == 'password' %}minlength="12" autocomplete="new-password"{% endif %}></label>
+<label>{{ etiquetas[campo] }} <input name="{{ campo }}" type="{{ 'password' if campo == 'password' else 'number' if campo.endswith('_id') else 'text' }}" value="{{ '' if campo == 'password' else fila[campo] or '' }}" {% if campo == 'password' %}minlength="12" autocomplete="new-password"{% endif %}></label>
 {% endfor %}{% if recurso == 'usuario' %}<p>Deja la contraseña vacía para conservarla.</p>{% endif %}<button>Guardar cambios</button>
 </form>
-{% endif %}
 <form method="post" action="{{ url_for('seguridad_retirar', recurso=recurso, claves=(fila.usuario_id|string ~ '-' ~ fila.rol_id|string) if recurso == 'rol_usuario' else fila.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Retirar</button>
 </form>

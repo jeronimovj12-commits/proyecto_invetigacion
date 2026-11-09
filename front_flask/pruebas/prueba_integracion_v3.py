@@ -51,8 +51,12 @@ class IntegracionCompleta(unittest.TestCase):
         roles = requests.get(URL_API+'/api/rol', headers=cabecera, timeout=10).json()['datos']
         rid = next(r['id'] for r in roles if r['nombre']=='consulta')
         admin = next(r['id'] for r in roles if r['nombre']=='administrador')
+        rol_creado = next(r['id'] for r in roles if r['nombre']==nombre)
         self.assertEqual(self.post('/seguridad/asignaciones', {'usuario_id':uid,'rol_id':rid}).status_code, 302)
         self.assertEqual(requests.post(URL_API+'/api/login', json={'username':nombre,'password':clave}, timeout=10).status_code, 200)
+        self.assertEqual(self.post('/seguridad/asignaciones', {'id':f'{uid}/{rid}', 'usuario_id':uid, 'rol_id':rol_creado}).status_code, 302)
+        self.assertEqual(requests.post(URL_API+'/api/login', json={'username':nombre,'password':clave}, timeout=10).status_code, 403)
+        self.assertEqual(requests.get(URL_API+f'/api/rol_usuario/{uid}/{rid}', headers=cabecera, timeout=10).status_code, 404)
         # El error de último administrador se presenta dentro de la aplicación.
         respuesta = self.post(f'/seguridad/rol/{admin}/retirar', {}, '/seguridad/roles')
         self.assertEqual(respuesta.status_code, 302)

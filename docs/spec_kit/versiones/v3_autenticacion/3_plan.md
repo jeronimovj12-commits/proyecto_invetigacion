@@ -1,4 +1,4 @@
-﻿# Plan y resultado — v3
+# Plan y resultado — v3
 
 Actualizado: 9 de noviembre de 2026. V2 permanece abierta.
 
@@ -13,8 +13,9 @@ Actualizado: 9 de noviembre de 2026. V2 permanece abierta.
 
 ## Decisiones de integración
 
-La clave compuesta de rol_usuario identifica una asignación inmutable. Cambiarla
-requiere retirar y crear otra, sin reactivar pares retirados. No se expone activo
+PUT/PATCH de rol_usuario cambia un par activo mediante retiro lógico y alta de
+otro par en la misma transacción. La fila original conserva su clave e historial;
+no se reactivan pares retirados. Un par sin cambios responde 200 sin mutaciones. No se expone activo
 en peticiones administrativas; DELETE siempre es lógico. Los roles arbitrarios
 pueden administrarse, pero solo administrador/consulta conceden permisos v3.
 Los nombres de esos dos roles se conservan para evitar cambiar permisos al renombrar.

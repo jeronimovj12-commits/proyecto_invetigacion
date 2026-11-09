@@ -92,7 +92,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Verificación fallida' }
 ```
 
 El script construye con versiones fijadas, verifica migración, 14 pruebas de
-credenciales/sesiones, 4 casos de administración (matriz de 90 operaciones HTTP,
+credenciales/sesiones, 5 casos de administración (matriz de 92 operaciones HTTP,
 CRUD, concurrencia y regresión integrada de dominio), capas v1, 12 pruebas v2, 5 casos Flask y un recorrido real
 Flask→HTTP→API→PostgreSQL. Crea bases aleatorias aisladas y credenciales efímeras;
 no usa la cuenta real creada con bootstrap. No imprime tokens ni contraseñas.
