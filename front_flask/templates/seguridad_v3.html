@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block contenido %}
+{% set etiquetas = {'username':'Usuario','email':'Correo','nombre_completo':'Nombre completo','password':'Contraseña','nombre':'Nombre','descripcion':'Descripción','usuario_id':'Identificador de usuario','rol_id':'Identificador de rol','id':'Identificador','activo':'Activo'} %}
+<h1>{{ {'usuario':'Usuarios', 'rol':'Roles', 'rol_usuario':'Asignaciones'}[recurso] }}</h1>
+<p>Solo se muestran registros activos. Las asignaciones retiradas se conservan y no se reactivan.</p>
+<h2>Crear</h2>
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% for campo in campos %}
+<label>{{ etiquetas[campo] }}
+<input name="{{ campo }}" type="{{ 'password' if campo == 'password' else 'number' if campo.endswith('_id') else 'text' }}" {% if campo == 'password' %}minlength="12" autocomplete="new-password"{% endif %} {% if campo not in ('nombre_completo','descripcion') %}required{% endif %}></label>
+{% endfor %}<button>Crear</button></form>
+<h2>Registros activos</h2>
+{% for fila in filas %}
+<article>
+<p>{% for campo, valor in fila.items() %}{{ etiquetas[campo] }}: {{ valor if valor is not none else '' }} {% endfor %}</p>
+{% if recurso != 'rol_usuario' %}
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input type="hidden" name="id" value="{{ fila.id }}">
+{% for campo in campos %}
+<label>{{ etiquetas[campo] }} <input name="{{ campo }}" type="{{ 'password' if campo == 'password' else 'text' }}" value="{{ '' if campo == 'password' else fila[campo] or '' }}" {% if campo == 'password' %}minlength="12" autocomplete="new-password"{% endif %}></label>
+{% endfor %}{% if recurso == 'usuario' %}<p>Deja la contraseña vacía para conservarla.</p>{% endif %}<button>Guardar cambios</button>
+</form>
+{% endif %}
+<form method="post" action="{{ url_for('seguridad_retirar', recurso=recurso, claves=(fila.usuario_id|string ~ '-' ~ fila.rol_id|string) if recurso == 'rol_usuario' else fila.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Retirar</button>
+</form>
+</article>
+{% else %}<p>No hay registros disponibles.</p>{% endfor %}
+{% endblock %}

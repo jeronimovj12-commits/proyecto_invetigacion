@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block contenido %}
 <h1>Áreas de las líneas</h1>
-<form method="post">
+<form method="post">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 <p><label for="linea_investigacion">Linea investigacion</label>
 <select id="linea_investigacion" name="linea_investigacion">
 <option value="">Seleccione una opción</option>

@@ -34,6 +34,7 @@
     {# EL MENÚ, con un enlace por pantalla. Cuando la v2 traiga más tablas
        se agrega aquí, y aparece en todas las pantallas. La clase `activo`
        sale del endpoint, que es la dirección de verdad. #}
+    {% if not seguridad_v3|default(false) or usuario_sesion %}
     <nav class="menu">
       <div class="contenedor menu-interno">
         <a href="{{ url_for('inicio') }}"
@@ -52,7 +53,16 @@
 <a href="{{ url_for('listar_ac_linea') }}">Áreas de las líneas</a>
 <a href="{{ url_for('listar_ods_linea') }}">Objetivos de las líneas</a>
 <a href="{{ url_for('listar_aa_linea') }}">Aplicaciones de las líneas</a>
-    </nav>
+    {% if seguridad_v3|default(false) %}
+{% if puede_escribir %}
+<a href="{{ url_for('seguridad_usuarios') }}">Usuarios</a>
+<a href="{{ url_for('seguridad_roles') }}">Roles</a>
+<a href="{{ url_for('seguridad_asignaciones') }}">Asignaciones</a>
+{% endif %}
+<span>{{ usuario_sesion.username }}</span>
+<form method="post" action="{{ url_for('logout_v3') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Cerrar sesión</button></form>
+{% endif %}
+</nav>{% endif %}
   </header>
 
   <main class="contenedor">

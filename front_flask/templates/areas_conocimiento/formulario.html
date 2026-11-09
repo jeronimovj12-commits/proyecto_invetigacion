@@ -24,7 +24,7 @@
   <a class="boton" href="{{ url_for('listar_areas_conocimiento') }}">Volver</a>
 </div>
 
-<form method="post" class="tarjeta-formulario">
+<form method="post" class="tarjeta-formulario">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 
   {# LA LLAVE. Al editar va de solo lectura: es la identidad de la ficha, lo
      que la base llama llave primaria. Un campo que el usuario puede escribir

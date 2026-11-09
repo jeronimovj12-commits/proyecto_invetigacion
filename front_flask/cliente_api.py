@@ -55,10 +55,20 @@ def _llamar(metodo: str, ruta: str, **kwargs):
     es distinto de «respondió con un error». Un 404 es la API funcionando y
     diciendo que esa ficha no existe; un None es que no hay con quién hablar.
     """
+    from flask import g, has_request_context
+    from errores_seguridad import SesionTerminada, AccesoDenegado
+    if has_request_context() and getattr(g, 'token_api', None):
+        kwargs['headers'] = {**kwargs.get('headers', {}), 'Authorization': 'Bearer ' + g.token_api}
     try:
-        return requests.request(
+        respuesta = requests.request(
             metodo, f"{URL_API}{ruta}", timeout=TIEMPO_MAXIMO, **kwargs
         )
+        if has_request_context() and getattr(g, 'token_api', None):
+            if respuesta.status_code == 401:
+                raise SesionTerminada()
+            if respuesta.status_code == 403:
+                raise AccesoDenegado()
+        return respuesta
     except requests.RequestException:
         return None
 

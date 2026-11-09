@@ -2,7 +2,7 @@
 {% block contenido %}
 <h1>Aplicaciones de las líneas</h1>
 {% if mensaje_opciones %}<p class="aviso error">{{ mensaje_opciones }}</p>{% endif %}
-<form method="post">
+<form method="post">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 <p><label for="area_aplicacion">Area aplicacion</label>
 <select id="area_aplicacion" name="area_aplicacion" required>
 <option value="">Seleccione una opción</option>

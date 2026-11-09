@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block contenido %}
 <h1>Docentes</h1>
-<form method="post">
+<form method="post">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 <p><label for="cedula">Cedula</label>
 <input id="cedula" name="cedula" type="number" value="{{ ficha.get('cedula') if ficha and ficha.get('cedula') is not none else '' }}" {{ 'readonly' if editando else '' }}>
 </p>

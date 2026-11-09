@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block contenido %}
 <h1>Semilleros</h1>
-<form method="post">
+<form method="post">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 <p><label for="id">Id</label>
 <input id="id" name="id" type="number" value="{{ ficha.get('id') if ficha and ficha.get('id') is not none else '' }}" {{ 'readonly' if editando else '' }}>
 </p>

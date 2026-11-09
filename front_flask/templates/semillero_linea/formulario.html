@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block contenido %}
 <h1>Líneas de semilleros</h1>
-<form method="post">
+<form method="post">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 <p><label for="semillero">Semillero</label>
 <select id="semillero" name="semillero">
 <option value="">Seleccione una opción</option>

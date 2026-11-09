@@ -19,7 +19,7 @@
       ya quedó registrado con ellas se conserva.
     </p>
   </div>
-  <a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>
+  {% if puede_escribir|default(true) %}<a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>{% endif %}
 </div>
 
 {% if filas %}
@@ -42,15 +42,15 @@
           <td>{{ fila["area"] if fila["area"] is not none else "—" }}</td>
           <td>{{ fila["disciplina"] if fila["disciplina"] is not none else "—" }}</td>
           <td class="acciones">
-            <a class="boton" href="{{ url_for('editar_area_conocimiento', id=fila['id']) }}">Editar</a>
+            {% if puede_escribir|default(true) %}<a class="boton" href="{{ url_for('editar_area_conocimiento', id=fila['id']) }}">Editar</a>{% endif %}
 
             {# POST y no un enlace: un GET que borra lo puede disparar el
                navegador solo al precargar la página. #}
-            <form method="post"
+            {% if puede_escribir|default(true) %}<form method="post"
                   action="{{ url_for('eliminar_area_conocimiento', id=fila['id']) }}"
-                  onsubmit="return confirm('¿Retirar la ficha {{ fila['id'] }}?');">
+                  onsubmit="return confirm('¿Retirar la ficha {{ fila['id'] }}?');">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
               <button class="boton peligro" type="submit">Retirar</button>
-            </form>
+            </form>{% endif %}
           </td>
         </tr>
         {% endfor %}
@@ -66,7 +66,7 @@
   <div class="vacio">
     <p>Todavía no hay areas conocimiento.</p>
     <p class="nota">Use «Agregar» para crear la primera ficha.</p>
-    <a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>
+    {% if puede_escribir|default(true) %}<a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>{% endif %}
   </div>
 {% endif %}
 

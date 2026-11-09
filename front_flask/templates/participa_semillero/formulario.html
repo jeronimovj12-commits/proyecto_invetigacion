@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block contenido %}
 <h1>Participación en semilleros</h1>
-<form method="post">
+<form method="post">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 <p><label for="docente">Docente</label>
 <select id="docente" name="docente">
 <option value="">Seleccione una opción</option>
