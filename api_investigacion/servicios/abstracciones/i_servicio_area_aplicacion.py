@@ -1,0 +1,6 @@
+from typing import Protocol
+
+
+class IServicioAreaAplicacion(Protocol):
+    async def listar(self, limite: int) -> list[dict]: ...
+    async def obtener(self, identidad: dict) -> dict: ...
