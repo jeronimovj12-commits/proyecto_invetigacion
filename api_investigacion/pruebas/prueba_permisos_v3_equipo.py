@@ -128,6 +128,21 @@ class PermisosEquipoHTTP(base.AutenticacionHTTP):
         )[0]
         self.assertEqual(estado, 200)
 
+    def test_head_y_options_no_omiten_permisos_de_seguridad(self):
+        consulta = self.token()
+        administrador = TokensJWT(base.CONFIG).emitir(1, 0)
+        for metodo in ('HEAD', 'OPTIONS'):
+            sin_token = pedir_con_cabeceras(metodo, '/api/usuario')[0]
+            denegado = pedir_con_cabeceras(
+                metodo, '/api/usuario', cabeceras={'Authorization': 'Bearer ' + consulta}
+            )[0]
+            permitido = pedir_con_cabeceras(
+                metodo, '/api/usuario', cabeceras={'Authorization': 'Bearer ' + administrador}
+            )[0]
+            self.assertEqual(sin_token, 401, metodo)
+            self.assertEqual(denegado, 403, metodo)
+            self.assertNotIn(permitido, (401, 403), metodo)
+
     def test_sin_token_alterado_vencido_y_revocado(self):
         self.assertEqual(base.pedir('GET', '/api/sesion')[0], 401)
         self.assertEqual(base.pedir('GET', '/api/area_conocimiento')[0], 401)
