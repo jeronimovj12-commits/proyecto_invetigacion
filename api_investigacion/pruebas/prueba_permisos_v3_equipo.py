@@ -143,6 +143,30 @@ class PermisosEquipoHTTP(base.AutenticacionHTTP):
             self.assertEqual(denegado, 403, metodo)
             self.assertNotIn(permitido, (401, 403), metodo)
 
+    async def test_respuestas_de_rechazo_no_se_cachean_ni_alteran_sesion(self):
+        token = self.token()
+        antes = (await self.sql(
+            'SELECT version_sesion FROM usuario WHERE id=:id', id=self.usuario
+        )).scalar_one()
+        no_autenticado = pedir_con_cabeceras('GET', '/api/area_conocimiento')
+        denegado = pedir_con_cabeceras(
+            'POST', '/api/usuario',
+            {'username': 'NO_AUTORIZADO', 'email': 'no@example.invalid', 'password': secrets.token_urlsafe(18)},
+            {'Authorization': 'Bearer ' + token},
+        )
+
+        self.assertEqual(no_autenticado[0], 401)
+        self.assertEqual(no_autenticado[2]['Cache-Control'], 'no-store')
+        self.assertEqual(no_autenticado[2]['WWW-Authenticate'], 'Bearer')
+        self.assertEqual(denegado[0], 403)
+        self.assertEqual(denegado[2]['Cache-Control'], 'no-store')
+        self.assertNotIn('WWW-Authenticate', denegado[2])
+        self.assertNotIn(token, json.dumps(no_autenticado[1]))
+        despues = (await self.sql(
+            'SELECT version_sesion FROM usuario WHERE id=:id', id=self.usuario
+        )).scalar_one()
+        self.assertEqual(despues, antes)
+
     def test_sin_token_alterado_vencido_y_revocado(self):
         self.assertEqual(base.pedir('GET', '/api/sesion')[0], 401)
         self.assertEqual(base.pedir('GET', '/api/area_conocimiento')[0], 401)
