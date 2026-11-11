@@ -1,14 +1,35 @@
 """Permisos HTTP v3 y reglas de sesión con repositorio falso."""
 import asyncio
+import json
 import re
 import secrets
 import time
 import unittest
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 import prueba_autenticacion_v3 as base
 from seguridad.adaptadores import TokensJWT
 from seguridad.errores import AutenticacionFallida, PermisoInsuficiente
 from servicios.servicio_autenticacion import ServicioAutenticacion
+
+
+def pedir_con_cabeceras(metodo, ruta, datos=None, cabeceras=None):
+    encabezados = {'Content-Type': 'application/json', **(cabeceras or {})}
+    peticion = Request(
+        base.URL + ruta,
+        data=json.dumps(datos).encode() if datos is not None else None,
+        headers=encabezados,
+        method=metodo,
+    )
+    try:
+        respuesta = urlopen(peticion, timeout=15)
+    except HTTPError as error:
+        respuesta = error
+    with respuesta:
+        contenido = respuesta.read()
+        cuerpo = json.loads(contenido) if contenido else None
+        return respuesta.status, cuerpo, respuesta.headers
 
 
 class RepositorioFalso:
@@ -83,6 +104,17 @@ class ReglasConRepositorioFalso(unittest.IsolatedAsyncioTestCase):
 
 
 class PermisosEquipoHTTP(base.AutenticacionHTTP):
+    def test_token_en_url_o_cookie_no_autentica(self):
+        token = self.token()
+        estado_url = pedir_con_cabeceras(
+            'GET', f'/api/area_conocimiento?access_token={token}'
+        )[0]
+        estado_cookie = pedir_con_cabeceras(
+            'GET', '/api/area_conocimiento', cabeceras={'Cookie': f'access_token={token}'}
+        )[0]
+        self.assertEqual(estado_url, 401)
+        self.assertEqual(estado_cookie, 401)
+
     def test_sin_token_alterado_vencido_y_revocado(self):
         self.assertEqual(base.pedir('GET', '/api/sesion')[0], 401)
         self.assertEqual(base.pedir('GET', '/api/area_conocimiento')[0], 401)
