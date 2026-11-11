@@ -115,6 +115,19 @@ class PermisosEquipoHTTP(base.AutenticacionHTTP):
         self.assertEqual(estado_url, 401)
         self.assertEqual(estado_cookie, 401)
 
+    def test_esquemas_bearer_malformados_se_rechazan(self):
+        token = self.token()
+        for valor in ('Basic ' + token, 'Bearer', 'Token ' + token, 'Bearer malformado'):
+            estado = pedir_con_cabeceras(
+                'GET', '/api/area_conocimiento', cabeceras={'Authorization': valor}
+            )[0]
+            self.assertEqual(estado, 401, valor.split(' ', 1)[0])
+
+        estado = pedir_con_cabeceras(
+            'GET', '/api/sesion', cabeceras={'Authorization': 'bEaReR ' + token}
+        )[0]
+        self.assertEqual(estado, 200)
+
     def test_sin_token_alterado_vencido_y_revocado(self):
         self.assertEqual(base.pedir('GET', '/api/sesion')[0], 401)
         self.assertEqual(base.pedir('GET', '/api/area_conocimiento')[0], 401)
