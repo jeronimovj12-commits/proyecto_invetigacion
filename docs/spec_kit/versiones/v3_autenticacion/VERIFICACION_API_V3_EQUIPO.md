@@ -1,49 +1,50 @@
 # Verificación de seguridad de la API v3 — equipo
 
-Fecha: 11 de noviembre de 2026. Versión probada: `origin/v3-desarrollo` en
-`367f8b3` (`docs(v3): registrar verificacion API del equipo`). La identidad
-local de Git se verificó antes del trabajo. La rama solicitada
-`pruebas-seguridad-v3` y el PR #4 ya existían; el head del PR estaba basado en
-una revisión anterior y GitHub lo reportaba no mergeable. Se volvió a basar la
-rama de trabajo en `origin/v3-desarrollo`; el PR existente se actualizará.
+Fecha: 11 de noviembre de 2026. Versión de implementación probada:
+`origin/v3-desarrollo` en `367f8b3`; no se modificó producción. Se verificaron
+la identidad local de Git y el estado del repositorio antes del trabajo. Los
+siete commits de esta entrega se incorporan directamente en `v3-desarrollo`.
+El PR #4 preexistente permanece abierto y no se fusionó.
 
 ## Alcance
 
-Se amplió `api_investigacion/pruebas/prueba_permisos_v3_equipo.py` sin modificar
-código de producción, controladores ni servicios. La suite usa la clase HTTP de
-autenticación existente, una base PostgreSQL aleatoria para casos de integración
-y un repositorio falso para comprobar reglas de sesión del servicio.
+Se amplió `api_investigacion/pruebas/prueba_permisos_v3_equipo.py` con la base
+HTTP compartida de las pruebas existentes, una base PostgreSQL aleatoria para
+integración y un repositorio falso para reglas del servicio.
 
-La cobertura añadida comprueba:
+La suite verifica:
 
-- Sesión y recursos protegidos sin token; token alterado, vencido y revocado.
-- Matriz de OpenAPI: consulta puede leer las rutas de dominio y recibe 403 al
-  escribir o administrar usuarios, roles y asignaciones; el administrador no
-  recibe 401/403 en las operaciones declaradas.
-- CRUD permitido de usuario, rol y asignación con administrador.
-- Usuario inactivo (401), y rol o asignación inactivos (403).
-- Conteos y valores antes/después de intentos denegados, para demostrar que no
-  se modifican usuario, rol, asignación ni área de conocimiento.
-- Login, lectura de sesión y revocación de versión con repositorio falso.
+- Token ausente, alterado, vencido o revocado; los tokens en URL o cookie no
+  autentican. Los esquemas Authorization inválidos se rechazan y el esquema
+  Bearer acepta diferencias de mayúsculas.
+- La consulta lee rutas de dominio y recibe 403 al escribir o administrar
+  usuarios, roles y asignaciones. El administrador ejecuta CRUD permitido.
+- HEAD y OPTIONS no evaden los permisos de seguridad.
+- Usuario inactivo devuelve 401; rol o asignación inactivos devuelven 403.
+  Retirar una asignación con administrador deniega de inmediato el token de
+  consulta ya emitido.
+- Los rechazos conservan los datos y la versión de sesión; las respuestas 401
+  y 403 usan `Cache-Control: no-store`.
+- Matriz de las 92 operaciones de OpenAPI y reglas de login, sesión y logout
+  con repositorio falso.
 
 ## Aislamiento y comandos
 
 Se revisaron `docker-compose.v3.yml`, `docker-compose.v3.pruebas.yml`,
-`scripts/verificar_v3.ps1` y `7_quickstart.md`. `prueba_autenticacion_v3.py`
-requiere `PRUEBAS_V3=1`, host `postgres-v3` y base inicial `investigacion_v3`,
-y crea después una base con nombre aleatorio. Las pruebas no apuntaron a
-`investigacion_local` ni al volumen v2.
+`scripts/verificar_v3.ps1` y `7_quickstart.md`. La suite de autenticación exige
+`PRUEBAS_V3=1`, el host `postgres-v3` y la base inicial `investigacion_v3`; crea
+una base aleatoria por ejecución. Las pruebas no utilizaron `investigacion_local`
+ni volúmenes compartidos de v2.
 
 Se usó el proyecto Docker exclusivo
 `investigacion-v3-seguridad-final-20261111`, con volumen
-`investigacion-v3-seguridad-final-20261111_pgdata-v3`. La composición de prueba
-no publica puertos. `V3_DB_PASSWORD` se tomó de `v3-local.env`; `JWT_SECRET` y
-`CLAVE_SESION` se generaron efímeros en el proceso. No se registraron secretos.
-Los contenedores se detuvieron al terminar; los volúmenes y bases aleatorias se
-conservaron.
+`investigacion-v3-seguridad-final-20261111_pgdata-v3`. El compose de pruebas no
+publica puertos. `V3_DB_PASSWORD` provino de `v3-local.env`; `JWT_SECRET` y
+`CLAVE_SESION` se generaron efímeros en el proceso, sin imprimirlos ni guardarlos
+en el repositorio. Los contenedores quedaron detenidos y el volumen aislado se
+conservó.
 
-Comandos ejecutados desde la raíz en PowerShell (las variables secretas se
-prepararon en el proceso y no se imprimieron):
+Comandos ejecutados desde la raíz en PowerShell:
 
 ```powershell
 $bytes = New-Object byte[] 48
@@ -62,27 +63,28 @@ docker compose @compose run --rm -T -e PRUEBAS_V3=1 api-v3 python pruebas/prueba
 
 ## Resultados reales
 
-Las tres suites terminaron con código 0:
+Las tres suites terminaron con código 0 contra el PostgreSQL aislado:
 
 | Suite | Resultado | Base aislada |
 |---|---|---|
-| `prueba_autenticacion_v3.py` | 14 pruebas OK, 7.686 s. Migración repetida y bootstrap/conflicto OK. | `pruebas_v3_c446543e91e54aeda82e064063fde137` |
-| `prueba_administracion_v3.py` | 5 pruebas OK, 3.491 s; matriz de 92 operaciones. | `pruebas_v3_e237d76c078f4363b1b909d9fc19d954` |
-| `prueba_permisos_v3_equipo.py` | 7 pruebas OK, 2.968 s; matriz de 92 operaciones. | `pruebas_v3_76911f788be442ddbdb08c23d6854f43` |
+| `prueba_autenticacion_v3.py` | 14 pruebas OK, 8.269 s. Migración repetida y bootstrap/conflicto OK. | `pruebas_v3_e69e1e5ade9b439698e073dcaf6604ca` |
+| `prueba_administracion_v3.py` | 5 pruebas OK, 3.873 s; matriz de 92 operaciones. | `pruebas_v3_cc5013e85ab7487fb9d430b14dec14d2` |
+| `prueba_permisos_v3_equipo.py` | 12 pruebas OK, 4.433 s; matriz de 92 operaciones. | `pruebas_v3_7441a34361af4fd98c59eaf51a01bd62` |
 
-En el primer intento sobre el volumen nuevo, Compose inició `migrar-v3` mientras
-PostgreSQL reiniciaba el servidor temporal de `initdb`; `psql` recibió
-`Connection refused` y esa ejecución no llegó a las pruebas. Se reintentó la
-migración una vez PostgreSQL estuvo listo; terminó con `COMMIT`. Las tres suites
-se ejecutaron después y pasaron. Esto se registra como una intermitencia de
-arranque del entorno Docker; no se cambió Compose ni producción.
+En esta ejecución la migración repetida terminó con `COMMIT`. En una ejecución
+anterior sobre un volumen recién creado, PostgreSQL reinició el servidor
+temporal de `initdb` después de que Compose lo reportó saludable; `psql` recibió
+`Connection refused`. Esa invocación no llegó a ejecutar pruebas. Reintentar la
+migración cuando PostgreSQL terminó de inicializar funcionó y las suites
+pasaron. La incidencia fue de arranque del entorno aislado; no se cambió Compose
+ni producción.
 
-No se encontraron fallos de permisos en estas ejecuciones. La matriz usa las
-92 operaciones de OpenAPI presentes en la versión `367f8b3`. Esto no acredita
-pruebas manuales ni aceptación de otros integrantes.
+No se encontraron fallos de permisos. La evidencia cubre la implementación v3
+publicada en `367f8b3` y la suite ampliada en esta rama. No acredita pruebas
+manuales ni aceptación de otros integrantes.
 
-## Preparación de la entrega
+## Cambios directos en v3
 
-Los cambios reales se dividirán en commits de prueba y documentación. El archivo
-local ajeno `er.name` se conserva intacto y fuera de Git. No se hará merge ni se
-crearán etiquetas.
+Los commits separan cobertura ya verificada de cinco pruebas HTTP adicionales;
+el último commit añade además este informe actualizado. `er.name` se conserva
+intacto y fuera de Git. No se hizo merge ni se crearon etiquetas.

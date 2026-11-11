@@ -271,6 +271,17 @@ class PermisosEquipoHTTP(base.AutenticacionHTTP):
         self.assertEqual(base.pedir('GET', '/api/sesion', token=token)[0], 403)
         self.assertEqual(base.pedir('GET', '/api/area_conocimiento', token=token)[0], 403)
 
+    async def test_retiro_admin_de_asignacion_deniega_token_existente(self):
+        token_consulta = self.token()
+        token_administrador = TokensJWT(base.CONFIG).emitir(1, 0)
+        consulta_id = (await self.sql("SELECT id FROM rol WHERE nombre='consulta'")).scalar_one()
+
+        self.assertEqual(base.pedir(
+            'DELETE', f'/api/rol_usuario/{self.usuario}/{consulta_id}', token=token_administrador
+        )[0], 200)
+        self.assertEqual(base.pedir('GET', '/api/sesion', token=token_consulta)[0], 403)
+        self.assertEqual(base.pedir('GET', '/api/area_conocimiento', token=token_consulta)[0], 403)
+
     async def test_administrador_realiza_crud_de_seguridad_permitido(self):
         token = TokensJWT(base.CONFIG).emitir(1, 0)
         nombre = 'ADMIN_' + secrets.token_hex(4)
