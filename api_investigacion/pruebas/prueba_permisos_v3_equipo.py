@@ -319,6 +319,11 @@ class PermisosEquipoHTTP(base.AutenticacionHTTP):
         )[0], 200)
         self.assertEqual(base.pedir('GET', '/api/usuario', token=token_consulta)[0], 403)
 
+    def test_ruta_con_barra_final_no_omite_autorizacion(self):
+        token_consulta = self.token()
+        self.assertEqual(pedir_con_cabeceras('GET', '/api/usuario/')[0], 401)
+        self.assertEqual(base.pedir('GET', '/api/usuario/', token=token_consulta)[0], 403)
+
     async def test_administrador_realiza_crud_de_seguridad_permitido(self):
         token = TokensJWT(base.CONFIG).emitir(1, 0)
         nombre = 'ADMIN_' + secrets.token_hex(4)
