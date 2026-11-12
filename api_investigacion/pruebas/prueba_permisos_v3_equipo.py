@@ -295,6 +295,16 @@ class PermisosEquipoHTTP(base.AutenticacionHTTP):
         self.assertEqual(sesion['roles'], ['consulta'])
         self.assertEqual(base.pedir('GET', '/api/usuario', token=token_consulta)[0], 403)
 
+    async def test_rol_admin_inactivo_deniega_token_existente(self):
+        token_administrador = TokensJWT(base.CONFIG).emitir(1, 0)
+        admin_id = (await self.sql("SELECT id FROM rol WHERE nombre='administrador'")).scalar_one()
+        await self.sql('UPDATE rol SET activo=FALSE WHERE id=:id', id=admin_id)
+        try:
+            self.assertEqual(base.pedir('GET', '/api/sesion', token=token_administrador)[0], 403)
+            self.assertEqual(base.pedir('GET', '/api/usuario', token=token_administrador)[0], 403)
+        finally:
+            await self.sql('UPDATE rol SET activo=TRUE WHERE id=:id', id=admin_id)
+
     async def test_administrador_realiza_crud_de_seguridad_permitido(self):
         token = TokensJWT(base.CONFIG).emitir(1, 0)
         nombre = 'ADMIN_' + secrets.token_hex(4)
