@@ -282,6 +282,19 @@ class PermisosEquipoHTTP(base.AutenticacionHTTP):
         self.assertEqual(base.pedir('GET', '/api/sesion', token=token_consulta)[0], 403)
         self.assertEqual(base.pedir('GET', '/api/area_conocimiento', token=token_consulta)[0], 403)
 
+    async def test_asignacion_admin_inactiva_no_eleva_consulta(self):
+        token_consulta = self.token()
+        admin_id = (await self.sql("SELECT id FROM rol WHERE nombre='administrador'")).scalar_one()
+        await self.sql(
+            'INSERT INTO rol_usuario(usuario_id,rol_id,activo) VALUES (:uid,:rid,FALSE)',
+            uid=self.usuario, rid=admin_id,
+        )
+
+        estado, sesion, _ = base.pedir('GET', '/api/sesion', token=token_consulta)
+        self.assertEqual(estado, 200)
+        self.assertEqual(sesion['roles'], ['consulta'])
+        self.assertEqual(base.pedir('GET', '/api/usuario', token=token_consulta)[0], 403)
+
     async def test_administrador_realiza_crud_de_seguridad_permitido(self):
         token = TokensJWT(base.CONFIG).emitir(1, 0)
         nombre = 'ADMIN_' + secrets.token_hex(4)
