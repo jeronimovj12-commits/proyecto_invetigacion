@@ -1,9 +1,11 @@
 # Verificación de seguridad de la API v3 — equipo
 
 Fecha: 11 de noviembre de 2026. Versión de implementación probada:
-`origin/v3-desarrollo` en `367f8b3`; no se modificó producción. Se verificaron
+`v3-desarrollo` en `ec7dcf5`; no se modificó producción. Se verificaron
 la identidad local de Git y el estado del repositorio antes del trabajo. Los
-siete commits de esta entrega se incorporan directamente en `v3-desarrollo`.
+siete commits anteriores y cinco commits nuevos de esta ampliación se incorporan
+directamente en `v3-desarrollo`. El commit base de implementación comprobado fue
+`ec7dcf5`; los commits nuevos amplían únicamente pruebas y este informe.
 El PR #4 preexistente permanece abierto y no se fusionó.
 
 ## Alcance
@@ -22,7 +24,10 @@ La suite verifica:
 - HEAD y OPTIONS no evaden los permisos de seguridad.
 - Usuario inactivo devuelve 401; rol o asignación inactivos devuelven 403.
   Retirar una asignación con administrador deniega de inmediato el token de
-  consulta ya emitido.
+  consulta ya emitido. También se rechaza una asignación de administrador
+  inactiva, un rol administrador inactivo y cambios de permisos reflejados en
+  tokens ya emitidos.
+- La ruta `/api/usuario/` con barra final no omite la autorización.
 - Los rechazos conservan los datos y la versión de sesión; las respuestas 401
   y 403 usan `Cache-Control: no-store`.
 - Matriz de las 92 operaciones de OpenAPI y reglas de login, sesión y logout
@@ -63,13 +68,18 @@ docker compose @compose run --rm -T -e PRUEBAS_V3=1 api-v3 python pruebas/prueba
 
 ## Resultados reales
 
-Las tres suites terminaron con código 0 contra el PostgreSQL aislado:
+Las suites terminaron con código 0 contra el PostgreSQL aislado:
 
 | Suite | Resultado | Base aislada |
 |---|---|---|
-| `prueba_autenticacion_v3.py` | 14 pruebas OK, 8.269 s. Migración repetida y bootstrap/conflicto OK. | `pruebas_v3_e69e1e5ade9b439698e073dcaf6604ca` |
-| `prueba_administracion_v3.py` | 5 pruebas OK, 3.873 s; matriz de 92 operaciones. | `pruebas_v3_cc5013e85ab7487fb9d430b14dec14d2` |
-| `prueba_permisos_v3_equipo.py` | 12 pruebas OK, 4.433 s; matriz de 92 operaciones. | `pruebas_v3_7441a34361af4fd98c59eaf51a01bd62` |
+| `prueba_autenticacion_v3.py` | 14 pruebas OK, 22.322 s. Migración repetida y bootstrap/conflicto OK. | `pruebas_v3_6532b264e3e64ff982f232cf0d5d40c2` |
+| `prueba_administracion_v3.py` | 5 pruebas OK, 10.243 s; matriz de 92 operaciones. | `pruebas_v3_b786e58c43fc44138fd4248edd226f57` |
+| `prueba_permisos_v3_equipo.py` | 16 pruebas OK, 15.856 s; matriz de 92 operaciones. | `pruebas_v3_490f050afe7c48ee80dd1975fea51253` |
+
+En la primera ejecución de la suite de permisos ampliada, 15 pruebas pasaron y
+una terminó con `NameError` porque el bloque de una prueba había quedado bajo el
+método de ruta con barra final. Se corrigió la ubicación del bloque y se repitió
+la suite completa; las 16 pruebas pasaron. No se oculta el primer resultado.
 
 En esta ejecución la migración repetida terminó con `COMMIT`. En una ejecución
 anterior sobre un volumen recién creado, PostgreSQL reinició el servidor
@@ -79,12 +89,19 @@ migración cuando PostgreSQL terminó de inicializar funcionó y las suites
 pasaron. La incidencia fue de arranque del entorno aislado; no se cambió Compose
 ni producción.
 
-No se encontraron fallos de permisos. La evidencia cubre la implementación v3
-publicada en `367f8b3` y la suite ampliada en esta rama. No acredita pruebas
-manuales ni aceptación de otros integrantes.
+No se encontraron fallos de permisos en la ejecución corregida. La evidencia
+cubre la implementación v3 publicada en `ec7dcf5` y la suite ampliada en esta
+rama. No acredita pruebas manuales ni aceptación de otros integrantes.
 
 ## Cambios directos en v3
 
-Los commits separan cobertura ya verificada de cinco pruebas HTTP adicionales;
-el último commit añade además este informe actualizado. `er.name` se conserva
-intacto y fuera de Git. No se hizo merge ni se crearon etiquetas.
+Los cinco commits nuevos son:
+
+1. `test(v3): rechazar asignacion admin inactiva`
+2. `test(v3): denegar admin con rol inactivo`
+3. `test(v3): aplicar cambios de rol a sesiones activas`
+4. `test(v3): proteger rutas con barra final`
+5. `docs(v3): registrar pruebas de permisos ampliadas`
+
+`er.name` se conserva intacto y fuera de Git. No se hizo merge ni se crearon
+etiquetas.
