@@ -1,6 +1,9 @@
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% extends "base.html" %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block titulo %}{{ "Editar" if editando else "Agregar" }} — Áreas de conocimiento{% endblock %}
 
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block contenido %}
 
 {# El formulario de el área de conocimiento: sirve para agregar y para editar.
@@ -9,47 +12,81 @@
    sitios: la llave va de solo lectura al editar, y aparecen DOS botones de
    guardar en vez de uno. #}
 
+{# Crea el elemento HTML div con los atributos declarados. #}
 <div class="encabezado">
+  {# Crea el elemento HTML div con los atributos declarados. #}
   <div>
+    {# Crea el elemento HTML h1 con los atributos declarados. #}
     <h1>{{ "Editar" if editando else "Agregar" }} el área de conocimiento</h1>
+    {# Crea el elemento HTML p con los atributos declarados. #}
     <p class="nota">
+      {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
       {% if editando %}
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         Código identifica la ficha y no se cambia. Si está mal, se
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         agrega otra y se retira ésta.
+      {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
       {% else %}
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         Un código corto como «1A01». Es TEXTO, no un número.
+      {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
       {% endif %}
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </p>
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </div>
+  {# Crea el elemento HTML a con los atributos declarados. #}
   <a class="boton" href="{{ url_for('listar_areas_conocimiento') }}">Volver</a>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </div>
 
+{# Crea el elemento HTML form con los atributos declarados. #}
 <form method="post" class="tarjeta-formulario">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
 
   {# LA LLAVE. Al editar va de solo lectura: es la identidad de la ficha, lo
      que la base llama llave primaria. Un campo que el usuario puede escribir
      pero el sistema no puede cambiar es una promesa falsa. #}
+  {# Crea el elemento HTML label con los atributos declarados. #}
   <label>
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     Código
+    {# Crea el elemento HTML input con los atributos declarados. #}
     <input type="text" name="id" maxlength="6" value="{{ ficha["id"] if ficha else "" }}"
+           {# Inserta en la pagina el dato o enlace calculado por Flask. #}
            {{ "readonly" if editando }}>
+    {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
     {% if not editando %}<span class="ayuda">Un código corto como «1A01». Es TEXTO, no un número.</span>{% endif %}
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </label>
 
+  {# Crea el elemento HTML label con los atributos declarados. #}
   <label>
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     Gran área
+    {# Crea el elemento HTML input con los atributos declarados. #}
     <input type="text" name="gran_area" maxlength="60" value="{{ ficha["gran_area"] if ficha and ficha["gran_area"] is not none else "" }}">
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </label>
 
+  {# Crea el elemento HTML label con los atributos declarados. #}
   <label>
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     Área
+    {# Crea el elemento HTML input con los atributos declarados. #}
     <input type="text" name="area" maxlength="60" value="{{ ficha["area"] if ficha and ficha["area"] is not none else "" }}">
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </label>
 
+  {# Crea el elemento HTML label con los atributos declarados. #}
   <label>
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     Disciplina
+    {# Crea el elemento HTML input con los atributos declarados. #}
     <input type="text" name="disciplina" maxlength="150" value="{{ ficha["disciplina"] if ficha and ficha["disciplina"] is not none else "" }}">
+    {# Crea el elemento HTML span con los atributos declarados. #}
     <span class="ayuda">El campo más largo de la tabla.</span>
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </label>
 
   {# ==============================================================
@@ -63,24 +100,43 @@
      El mismo formulario, dos comportamientos, y la diferencia no la decide
      ningún `if` de negocio: la decide QUÉ SE ENVÍA.
      ============================================================== #}
+  {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
   {% if editando %}
+    {# Crea el elemento HTML div con los atributos declarados. #}
     <div class="pareja">
+      {# Crea el elemento HTML button con los atributos declarados. #}
       <button class="boton primario" type="submit" name="verbo" value="completa">
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         Guardar la ficha completa
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       </button>
+      {# Crea el elemento HTML button con los atributos declarados. #}
       <button class="boton" type="submit" name="verbo" value="parcial">
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         Guardar solo lo que cambié
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       </button>
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </div>
+    {# Crea el elemento HTML span con los atributos declarados. #}
     <span class="ayuda">
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       «La ficha completa» exige que estén diligenciados gran área, área, disciplina.
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       «Solo lo que cambié» guarda lo que usted escribió y deja lo demás como
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       estaba.
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </span>
+  {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
   {% else %}
+    {# Crea el elemento HTML button con los atributos declarados. #}
     <button class="boton primario" type="submit">Agregar</button>
+  {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
   {% endif %}
 
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </form>
 
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endblock %}

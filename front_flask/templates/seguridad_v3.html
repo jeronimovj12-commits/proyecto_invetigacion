@@ -1,29 +1,59 @@
+{# Administra usuarios, roles y asignaciones; los campos se generan segun el recurso seleccionado y la contrasena vacia se conserva al editar. #}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% extends 'base.html' %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block contenido %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% set etiquetas = {'username':'Usuario','email':'Correo','nombre_completo':'Nombre completo','password':'Contraseña','nombre':'Nombre','descripcion':'Descripción','usuario_id':'Identificador de usuario','rol_id':'Identificador de rol','id':'Identificador','activo':'Activo'} %}
+{# Crea el elemento HTML h1 con los atributos declarados. #}
 <h1>{{ {'usuario':'Usuarios', 'rol':'Roles', 'rol_usuario':'Asignaciones'}[recurso] }}</h1>
+{# Crea el elemento HTML p con los atributos declarados. #}
 <p>Solo se muestran registros activos. Las asignaciones retiradas se conservan y no se reactivan.</p>
+{# Crea el elemento HTML h2 con los atributos declarados. #}
 <h2>Crear</h2>
+{# Crea el elemento HTML form con los atributos declarados. #}
 <form method="post">
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% for campo in campos %}
+{# Crea el elemento HTML label con los atributos declarados. #}
 <label>{{ etiquetas[campo] }}
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input name="{{ campo }}" type="{{ 'password' if campo == 'password' else 'number' if campo.endswith('_id') else 'text' }}" {% if campo == 'password' %}minlength="12" autocomplete="new-password"{% endif %} {% if campo not in ('nombre_completo','descripcion') %}required{% endif %}></label>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endfor %}<button>Crear</button></form>
+{# Crea el elemento HTML h2 con los atributos declarados. #}
 <h2>Registros activos</h2>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% for fila in filas %}
+{# Crea el elemento HTML article con los atributos declarados. #}
 <article>
+{# Crea el elemento HTML p con los atributos declarados. #}
 <p>{% for campo, valor in fila.items() %}{{ etiquetas[campo] }}: {{ valor if valor is not none else '' }} {% endfor %}</p>
+{# Crea el elemento HTML form con los atributos declarados. #}
 <form method="post">
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input type="hidden" name="id" value="{{ (fila.usuario_id|string ~ '/' ~ fila.rol_id|string) if recurso == 'rol_usuario' else fila.id }}">
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% for campo in campos %}
+{# Crea el elemento HTML label con los atributos declarados. #}
 <label>{{ etiquetas[campo] }} <input name="{{ campo }}" type="{{ 'password' if campo == 'password' else 'number' if campo.endswith('_id') else 'text' }}" value="{{ '' if campo == 'password' else fila[campo] or '' }}" {% if campo == 'password' %}minlength="12" autocomplete="new-password"{% endif %}></label>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endfor %}{% if recurso == 'usuario' %}<p>Deja la contraseña vacía para conservarla.</p>{% endif %}<button>Guardar cambios</button>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </form>
+{# Crea el elemento HTML form con los atributos declarados. #}
 <form method="post" action="{{ url_for('seguridad_retirar', recurso=recurso, claves=(fila.usuario_id|string ~ '-' ~ fila.rol_id|string) if recurso == 'rol_usuario' else fila.id) }}">
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Retirar</button>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </form>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </article>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% else %}<p>No hay registros disponibles.</p>{% endfor %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endblock %}

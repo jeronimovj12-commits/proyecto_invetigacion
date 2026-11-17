@@ -1,23 +1,47 @@
+{# Formulario de semillero para crear o editar; reutiliza la ficha recibida y agrega el token CSRF cuando la seguridad v3 esta activa. #}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% extends "base.html" %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block contenido %}
+{# Crea el elemento HTML h1 con los atributos declarados. #}
 <h1>Semilleros</h1>
+{# Crea el elemento HTML form con los atributos declarados. #}
 <form method="post">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+{# Crea el elemento HTML p con los atributos declarados. #}
 <p><label for="id">Id</label>
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input id="id" name="id" type="number" value="{{ ficha.get('id') if ficha and ficha.get('id') is not none else '' }}" {{ 'readonly' if editando else '' }}>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </p>
+{# Crea el elemento HTML p con los atributos declarados. #}
 <p><label for="nombre">Nombre</label>
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input id="nombre" name="nombre" type="text" value="{{ ficha.get('nombre') if ficha and ficha.get('nombre') is not none else '' }}">
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </p>
+{# Crea el elemento HTML p con los atributos declarados. #}
 <p><label for="fecha_fundacion">Fecha fundacion</label>
+{# Crea el elemento HTML input con los atributos declarados. #}
 <input id="fecha_fundacion" name="fecha_fundacion" type="date" value="{{ ficha.get('fecha_fundacion') if ficha and ficha.get('fecha_fundacion') is not none else '' }}">
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </p>
+{# Crea el elemento HTML p con los atributos declarados. #}
 <p><label for="grupo_investigacion">Grupo investigacion</label>
+{# Crea el elemento HTML select con los atributos declarados. #}
 <select id="grupo_investigacion" name="grupo_investigacion">
+{# Crea el elemento HTML option con los atributos declarados. #}
 <option value="">Seleccione una opción</option>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% for opcion in opciones['grupo_investigacion'] %}
+{# Crea el elemento HTML option con los atributos declarados. #}
 <option value="{{ opcion['id'] }}" {{ 'selected' if ficha and ficha.get('grupo_investigacion') == opcion['id'] else '' }}>{{ opcion['nombre'] }} ({{ opcion['id'] }})</option>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endfor %}</select>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </p>
+{# Crea el elemento HTML button con los atributos declarados. #}
 <button class="boton primario" name="verbo" value="completa" {{ 'disabled' if not disponibles else '' }}>Guardar la ficha completa</button>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% if editando %}<button class="boton" name="verbo" value="parcial" {{ 'disabled' if not disponibles else '' }}>Guardar solo lo que cambié</button>{% endif %}
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </form>{% endblock %}

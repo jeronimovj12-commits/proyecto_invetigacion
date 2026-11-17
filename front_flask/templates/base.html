@@ -1,11 +1,20 @@
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 <!doctype html>
+{# Crea el elemento HTML html con los atributos declarados. #}
 <html lang="es">
+{# Crea el elemento HTML head con los atributos declarados. #}
 <head>
+  {# Crea el elemento HTML meta con los atributos declarados. #}
   <meta charset="utf-8">
+  {# Crea el elemento HTML meta con los atributos declarados. #}
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  {# Crea el elemento HTML title con los atributos declarados. #}
   <title>{% block titulo %}Investigación{% endblock %}</title>
+  {# Crea el elemento HTML link con los atributos declarados. #}
   <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </head>
+{# Crea el elemento HTML body con los atributos declarados. #}
 <body>
 
   {# ==================================================================
@@ -20,71 +29,127 @@
      README, la constitución y el documento de contratos.
      ================================================================== #}
 
+  {# Crea el elemento HTML header con los atributos declarados. #}
   <header>
+    {# Crea el elemento HTML div con los atributos declarados. #}
     <div class="barra">
+      {# Crea el elemento HTML div con los atributos declarados. #}
       <div class="contenedor barra-interna">
+        {# Crea el elemento HTML a con los atributos declarados. #}
         <a class="marca" href="{{ url_for('inicio') }}">Investigación</a>
+        {# Crea el elemento HTML span con los atributos declarados. #}
         <span class="umv-logo">
+          {# Crea el elemento HTML img con los atributos declarados. #}
           <img src="{{ url_for('static', filename='logo-horizontal.png') }}"
+               {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
                alt="Universidad Monte Verde">
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         </span>
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       </div>
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </div>
 
     {# EL MENÚ, con un enlace por pantalla. Cuando la v2 traiga más tablas
        se agrega aquí, y aparece en todas las pantallas. La clase `activo`
        sale del endpoint, que es la dirección de verdad. #}
+    {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
     {% if not seguridad_v3|default(false) or usuario_sesion %}
+    {# Crea el elemento HTML nav con los atributos declarados. #}
     <nav class="menu">
+      {# Crea el elemento HTML div con los atributos declarados. #}
       <div class="contenedor menu-interno">
+        {# Crea el elemento HTML a con los atributos declarados. #}
         <a href="{{ url_for('inicio') }}"
+           {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
            class="{{ 'activo' if request.endpoint == 'inicio' }}">Inicio</a>
+        {# Crea el elemento HTML a con los atributos declarados. #}
         <a href="{{ url_for('listar_areas_conocimiento') }}"
+           {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
            class="{{ 'activo' if request.endpoint and 'area_conocimiento' in request.endpoint or request.endpoint == 'listar_areas_conocimiento' }}"
+           {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
            >Áreas de conocimiento</a>
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       </div>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_docente') }}">Docentes</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_grupo_investigacion') }}">Grupos de investigación</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_semillero') }}">Semilleros</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_participa_semillero') }}">Participación en semilleros</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_participa_grupo') }}">Participación en grupos</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_semillero_linea') }}">Líneas de semilleros</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_grupo_linea') }}">Líneas de grupos</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_ac_linea') }}">Áreas de las líneas</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_ods_linea') }}">Objetivos de las líneas</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('listar_aa_linea') }}">Aplicaciones de las líneas</a>
+    {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
     {% if seguridad_v3|default(false) %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% if puede_escribir %}
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('seguridad_usuarios') }}">Usuarios</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('seguridad_roles') }}">Roles</a>
+{# Crea el elemento HTML a con los atributos declarados. #}
 <a href="{{ url_for('seguridad_asignaciones') }}">Asignaciones</a>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endif %}
+{# Crea el elemento HTML span con los atributos declarados. #}
 <span>{{ usuario_sesion.username }}</span>
+{# Crea el elemento HTML form con los atributos declarados. #}
 <form method="post" action="{{ url_for('logout_v3') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Cerrar sesión</button></form>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endif %}
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </nav>{% endif %}
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </header>
 
+  {# Crea el elemento HTML main con los atributos declarados. #}
   <main class="contenedor">
 
     {# Los avisos que app.py dejó con flash(). Un párrafo por mensaje: cuando
        la API devuelve tres errores de validación, se ven los tres. #}
+    {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
     {% with avisos = get_flashed_messages(with_categories=true) %}
+      {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
       {% for categoria, mensaje in avisos %}
+        {# Crea el elemento HTML p con los atributos declarados. #}
         <p class="aviso {{ categoria }}">{{ mensaje }}</p>
+      {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
       {% endfor %}
+    {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
     {% endwith %}
 
+    {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
     {% block contenido %}{% endblock %}
 
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </main>
 
+  {# Crea el elemento HTML footer con los atributos declarados. #}
   <footer class="contenedor">
+    {# Crea el elemento HTML p con los atributos declarados. #}
     <p>
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       Vicerrectoría de Investigaciones<br>
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       Universidad de Ejemplo
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </p>
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </footer>
 
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </body>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </html>
