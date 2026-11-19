@@ -2,6 +2,9 @@ git add README.md
 git commit -m "Resolver conflicto del README"
 git push -u origin main<<<<<<< HEAD
 # Módulo Investigación — ejemplo de referencia (Python)
+Jeronimo velasquez
+samuel jimenez
+juen jose herrera
 
 Este repositorio contiene **dos cosas distintas**, y conviene no confundirlas:
 
