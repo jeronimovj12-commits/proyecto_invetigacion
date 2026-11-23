@@ -6,14 +6,26 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
+# Sitúa los módulos de FastAPI en el directorio de trabajo de la imagen.
 WORKDIR /app
+
+# Copia el archivo de dependencias fijadas de la API.
 COPY api_investigacion/requirements-v3.lock ./requirements-v3.lock
+
+# Instala exactamente las dependencias probadas para v3.
 RUN pip install --no-cache-dir -r requirements-v3.lock
+
+# Copia la API sin incluir variables locales ni archivos de entorno.
 COPY api_investigacion/ ./
+
+# Incluye el esquema de base y la migración versionada para su arranque seguro.
 COPY db/init.sql /db/init.sql
 COPY db/migraciones/v3_001_sesiones_asignaciones.sql /db/migraciones/v3_001_sesiones_asignaciones.sql
 COPY scripts/preparar_db_render.sql /db/preparar_db_render.sql
 COPY scripts/iniciar_api_render.sh /usr/local/bin/iniciar_api_render.sh
 
+# Declara el puerto HTTP predeterminado de Render.
 EXPOSE 10000
+
+# Arranca el servidor después de inicializar o migrar la base de datos.
 CMD ["sh", "/usr/local/bin/iniciar_api_render.sh"]
