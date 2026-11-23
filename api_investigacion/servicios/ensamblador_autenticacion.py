@@ -20,11 +20,11 @@ from servicios.servicio_autenticacion import ServicioAutenticacion
 # Define la funcion crear_servicio_autenticacion con los parametros declarados; su bloque realiza esta operacion.
 def crear_servicio_autenticacion() -> IServicioAutenticacion:
     # Asigna a cadena el valor calculado a la derecha.
-    cadena = os.environ.get('DB_POSTGRES')
+    cadena = os.environ.get('DB_POSTGRES') or os.environ.get('DATABASE_URL')
     # Ejecuta el bloque siguiente solo cuando se cumple: not cadena.
     if not cadena:
         # Lanza la excepcion indicada y detiene el flujo normal.
-        raise RuntimeError('Falta DB_POSTGRES en el entorno.')
+        raise RuntimeError('Falta DB_POSTGRES o DATABASE_URL en el entorno.')
     # Asigna a configuracion el valor calculado a la derecha.
     configuracion = ConfiguracionSeguridad.desde_entorno()
     # Devuelve al llamador el resultado de la expresion indicada.

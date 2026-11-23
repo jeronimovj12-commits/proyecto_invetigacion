@@ -1,0 +1,10 @@
+# Excluye secretos y datos locales de cualquier contexto Docker en la raíz.
+.git
+*.env
+**/*.env
+*.sqlite3
+*.log
+**/__pycache__
+**/.venv
+**/.pytest_cache
+respaldos

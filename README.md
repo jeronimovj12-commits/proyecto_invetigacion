@@ -23,6 +23,10 @@ La rama de trabajo es `v3-desarrollo`. La guía completa y única del procedimie
 prerrequisitos, configuración externa, base, migración, primer administrador y datos.
 Este README sirve como entrada; no repite la secuencia de actualización.
 
+Para publicar una demostración temporal en Render y compartir un enlace web,
+consulta la [Guía Render](docs/GUIA_RENDER_DEMO.md). Esta configuración aún requiere
+publicar sus archivos en la rama de GitHub y no significa que ya exista una URL pública.
+
 | Qué | Nombre o dirección real |
 |---|---|
 | Front v3 | http://localhost:8079/login |

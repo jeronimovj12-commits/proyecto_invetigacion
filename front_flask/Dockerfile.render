@@ -1,0 +1,20 @@
+# Imagen del front v3 para Render con un servidor WSGI de producción.
+FROM python:3.12-slim
+
+# Sitúa el código Flask en el directorio de trabajo de la imagen.
+WORKDIR /app
+
+# Copia las dependencias fijadas de la versión 3.
+COPY requirements-v3.lock ./requirements-v3.lock
+
+# Instala Flask, el cliente HTTP y Gunicorn según el archivo de versiones.
+RUN pip install --no-cache-dir -r requirements-v3.lock
+
+# Copia el front sin secretos ni archivos de configuración locales.
+COPY . ./
+
+# Declara el puerto HTTP que Render usa por defecto.
+EXPOSE 10000
+
+# Atiende la aplicación Flask con Gunicorn, no con el servidor de desarrollo.
+CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 4 --timeout 60 app_v3:app"]
