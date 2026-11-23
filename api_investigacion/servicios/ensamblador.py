@@ -35,13 +35,13 @@ _servicio_area_conocimiento: IServicioAreaConocimiento | None = None
 # Define la funcion _cadena_conexion con los parametros declarados; su bloque realiza esta operacion.
 def _cadena_conexion() -> str:
     # Asigna a cadena el valor calculado a la derecha.
-    cadena = os.environ.get("DB_POSTGRES")
+    cadena = os.environ.get("DB_POSTGRES") or os.environ.get("DATABASE_URL")
     # Ejecuta el bloque siguiente solo cuando se cumple: not cadena.
     if not cadena:
         # Lanza la excepcion indicada y detiene el flujo normal.
         raise RuntimeError(
             # Ejecuta la instruccion o llamada indicada dentro del bloque actual.
-            "Falta la variable de entorno DB_POSTGRES con la cadena de conexión.")
+            "Falta DB_POSTGRES o DATABASE_URL con la cadena de conexión.")
     # Devuelve al llamador el resultado de la expresion indicada.
     return cadena
 

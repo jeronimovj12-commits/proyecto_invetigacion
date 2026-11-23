@@ -1,8 +1,19 @@
+# Imagen de API para Render; el contexto de construcción es la raíz del repositorio.
 FROM python:3.12-slim
+
+# Instala psql para inicializar y migrar la base antes de arrancar la API.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY api_investigacion/requirements-v3.lock ./requirements-v3.lock
 RUN pip install --no-cache-dir -r requirements-v3.lock
 COPY api_investigacion/ ./
-COPY db/ /db/
+COPY db/init.sql /db/init.sql
+COPY db/migraciones/v3_001_sesiones_asignaciones.sql /db/migraciones/v3_001_sesiones_asignaciones.sql
+COPY scripts/preparar_db_render.sql /db/preparar_db_render.sql
+COPY scripts/iniciar_api_render.sh /usr/local/bin/iniciar_api_render.sh
+
 EXPOSE 10000
-CMD ["sh", "-c", "python comandos/preparar_render.py && uvicorn main_v3:app --host 0.0.0.0 --port ${PORT:-10000}"]
+CMD ["sh", "/usr/local/bin/iniciar_api_render.sh"]

@@ -11,18 +11,27 @@ from contextvars import ContextVar
 
 # Importa create_async_engine desde sqlalchemy.ext.asyncio para usar esas definiciones.
 from sqlalchemy.ext.asyncio import create_async_engine
+# Importa make_url para aceptar tanto URLs locales como las URL de Render.
+from sqlalchemy.engine import make_url
 
 
 # Define la clase ConexionPostgreSQL y agrupa su estado y operaciones.
 class ConexionPostgreSQL:
     # Define la funcion __init__ con los parametros declarados; su bloque realiza esta operacion.
     def __init__(self, cadena_conexion: str):
-        # Render y otros proveedores entregan la URL PostgreSQL estandar; SQLAlchemy async requiere asyncpg.
-        if cadena_conexion.startswith("postgres://"):
-            cadena_conexion = "postgresql+asyncpg://" + cadena_conexion[len("postgres://"):]
-        elif cadena_conexion.startswith("postgresql://"):
-            cadena_conexion = "postgresql+asyncpg://" + cadena_conexion[len("postgresql://"):]
-        self._cadena = cadena_conexion
+        # Normaliza el esquema general al controlador asíncrono usado por la API.
+        url = make_url(cadena_conexion)
+        if url.drivername in ('postgres', 'postgresql'):
+            url = url.set(drivername='postgresql+asyncpg')
+        if url.drivername != 'postgresql+asyncpg':
+            raise ValueError('La conexión debe usar PostgreSQL con asyncpg.')
+        # Render entrega sslmode=require y asyncpg recibe ssl=require en la URL.
+        consulta = dict(url.query)
+        modo_ssl = consulta.pop('sslmode', None)
+        if modo_ssl and 'ssl' not in consulta:
+            consulta['ssl'] = modo_ssl
+        # Guarda el URL con controlador y parámetros compatibles con asyncpg.
+        self._cadena = url.set(query=consulta).render_as_string(hide_password=False)
         # Guarda en self._engine el valor necesario para reutilizarlo en otros metodos.
         self._engine = None
         # Guarda en self._actual el valor necesario para reutilizarlo en otros metodos.

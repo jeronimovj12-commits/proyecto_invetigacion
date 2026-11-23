@@ -1,24 +1,19 @@
-databases:
-  - name: investigacion-v3-db
-    databaseName: investigacion_v3
-    user: investigacion_v3
-    plan: free
-    region: ohio
-    postgresMajorVersion: "16"
-
+# Render Blueprint de demostración; crea dos servicios web y una base PostgreSQL.
 services:
+  # API pública protegida por autenticación y permisos en cada ruta.
   - type: web
-    name: investigacion-v3-api
+    name: investigacion-api-v3-demo
     runtime: docker
     plan: free
-    region: ohio
+    region: virginia
+    branch: v3-desarrollo
     dockerfilePath: ./api_investigacion/Dockerfile.render
     dockerContext: .
-    autoDeployTrigger: commit
+    healthCheckPath: /
     envVars:
-      - key: DB_POSTGRES
+      - key: DATABASE_URL
         fromDatabase:
-          name: investigacion-v3-db
+          name: investigacion-postgres-v3-demo
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
@@ -31,20 +26,21 @@ services:
       - key: RENDER_PUBLIC_API
         value: "1"
 
+  # Front Flask público; Render termina HTTPS y el front activa cookies seguras.
   - type: web
-    name: investigacion-v3-front
+    name: investigacion-front-v3-demo
     runtime: docker
     plan: free
-    region: ohio
-    dockerfilePath: ./front_flask/Dockerfile
+    region: virginia
+    branch: v3-desarrollo
+    dockerfilePath: ./front_flask/Dockerfile.render
     dockerContext: ./front_flask
-    autoDeployTrigger: commit
     healthCheckPath: /login
     envVars:
       - key: URL_API_INVESTIGACION
         fromService:
-          name: investigacion-v3-api
           type: web
+          name: investigacion-api-v3-demo
           envVarKey: RENDER_EXTERNAL_URL
       - key: CLAVE_SESION
         generateValue: true
@@ -54,3 +50,12 @@ services:
         value: "75"
       - key: SESIONES_ARCHIVO
         value: /tmp/investigacion-v3/sesiones.sqlite3
+
+# El plan gratuito sirve para demostraciones y elimina la base al vencer a los 30 días.
+databases:
+  - name: investigacion-postgres-v3-demo
+    plan: free
+    region: virginia
+    postgresMajorVersion: "16"
+    databaseName: investigacion_v3
+    user: investigacion_v3

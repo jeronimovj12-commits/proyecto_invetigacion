@@ -18,4 +18,7 @@ from seguridad.adaptadores import ClavesArgon2
 # Define la funcion crear_servicio_seguridad con los parametros declarados; su bloque realiza esta operacion.
 def crear_servicio_seguridad() -> IServicioSeguridad:
     # Devuelve al llamador el resultado de la expresion indicada.
-    return ServicioSeguridad(RepositorioSeguridadPostgreSQL(os.environ['DB_POSTGRES']), ClavesArgon2())
+    cadena = os.environ.get('DB_POSTGRES') or os.environ.get('DATABASE_URL')
+    if not cadena:
+        raise RuntimeError('Falta DB_POSTGRES o DATABASE_URL en el entorno.')
+    return ServicioSeguridad(RepositorioSeguridadPostgreSQL(cadena), ClavesArgon2())
