@@ -28,6 +28,6 @@ if (-not ($lineas -match '^JWT_MINUTOS=')) { $lineas += 'JWT_MINUTOS=30' }
 # Ejecuta el bloque segun el resultado de la condicion.
 if (-not ($lineas -match '^COOKIE_SECURE=')) { $lineas += 'COOKIE_SECURE=0' }
 # Guarda en $lineas el resultado de la expresion asignada.
-$lineas | Set-Content -LiteralPath $ruta -Encoding ascii
+[System.IO.File]::WriteAllLines($ruta, [string[]]$lineas, [System.Text.Encoding]::ASCII)
 # Ejecuta la instruccion PowerShell indicada.
 Write-Output 'Configuración local lista; valores existentes conservados.'

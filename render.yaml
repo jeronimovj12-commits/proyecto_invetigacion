@@ -1,0 +1,57 @@
+databases:
+  - name: investigacion-v3-db
+    databaseName: investigacion_v3
+    user: investigacion_v3
+    plan: 0.1c-256mb
+    region: ohio
+    postgresMajorVersion: "16"
+
+services:
+  - type: pserv
+    name: investigacion-v3-api
+    runtime: docker
+    plan: 0.5c-512mb
+    region: ohio
+    dockerfilePath: ./api_investigacion/Dockerfile.render
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: DB_POSTGRES
+        fromDatabase:
+          name: investigacion-v3-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ISSUER
+        value: investigacion-v3
+      - key: JWT_AUDIENCE
+        value: investigacion-api
+      - key: JWT_MINUTOS
+        value: "30"
+
+  - type: web
+    name: investigacion-v3-front
+    runtime: docker
+    plan: 0.5c-512mb
+    region: ohio
+    dockerfilePath: ./front_flask/Dockerfile
+    dockerContext: ./front_flask
+    autoDeployTrigger: checksPass
+    numInstances: 1
+    disk:
+      name: sesiones-front
+      mountPath: /var/data
+      sizeGB: 1
+    healthCheckPath: /login
+    envVars:
+      - key: URL_API_INVESTIGACION
+        fromService:
+          name: investigacion-v3-api
+          type: pserv
+          property: hostport
+      - key: CLAVE_SESION
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: SESIONES_ARCHIVO
+        value: /var/data/sesiones.sqlite3

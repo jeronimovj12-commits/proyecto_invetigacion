@@ -345,4 +345,4 @@ def seguridad_retirar(recurso, claves):
 # Ejecuta el bloque siguiente solo cuando se cumple: __name__ == '__main__'.
 if __name__ == '__main__':
     # Ejecuta la instruccion o llamada indicada dentro del bloque actual.
-    app.run(host='0.0.0.0', port=int(os.environ.get('PUERTO', '8078')), debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', os.environ.get('PUERTO', '8078'))), debug=False)

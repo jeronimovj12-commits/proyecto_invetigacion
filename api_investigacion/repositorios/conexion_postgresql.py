@@ -17,7 +17,11 @@ from sqlalchemy.ext.asyncio import create_async_engine
 class ConexionPostgreSQL:
     # Define la funcion __init__ con los parametros declarados; su bloque realiza esta operacion.
     def __init__(self, cadena_conexion: str):
-        # Guarda en self._cadena el valor necesario para reutilizarlo en otros metodos.
+        # Render y otros proveedores entregan la URL PostgreSQL estandar; SQLAlchemy async requiere asyncpg.
+        if cadena_conexion.startswith("postgres://"):
+            cadena_conexion = "postgresql+asyncpg://" + cadena_conexion[len("postgres://"):]
+        elif cadena_conexion.startswith("postgresql://"):
+            cadena_conexion = "postgresql+asyncpg://" + cadena_conexion[len("postgresql://"):]
         self._cadena = cadena_conexion
         # Guarda en self._engine el valor necesario para reutilizarlo en otros metodos.
         self._engine = None

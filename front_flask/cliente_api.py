@@ -46,6 +46,8 @@ import requests
 # localhost es él mismo.
 # Asigna a URL_API el valor calculado a la derecha.
 URL_API = os.environ.get("URL_API_INVESTIGACION", "http://localhost:8025")
+if URL_API and "://" not in URL_API:
+    URL_API = "http://" + URL_API
 
 TIEMPO_MAXIMO = 10  # segundos
 
