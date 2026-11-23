@@ -13,6 +13,7 @@
    actualice su manual, se cambia este archivo y nada más.
    ========================================================================== */
 
+/* Abre las reglas del selector :root. */
 :root {
 
   /* --- PALETA INSTITUCIONAL (manual, punto 2) --------------------------
@@ -23,9 +24,13 @@
      Así que estos valores NO son una preferencia de quien programa: son
      una restricción, y quien los cambie está fuera de norma.             */
 
+  /* Asigna el valor CSS de la propiedad --umv-verde al selector actual. */
   --umv-verde:       #1F5E4C;   /* R:31  G:94  B:76  · contraste 7,60:1  */
+  /* Asigna el valor CSS de la propiedad --umv-ocre al selector actual. */
   --umv-ocre:        #C9822B;   /* R:201 G:130 B:43  · contraste 3,13:1  */
+  /* Asigna el valor CSS de la propiedad --umv-ocre-oscuro al selector actual. */
   --umv-ocre-oscuro: #A06822;   /* R:160 G:104 B:34  · contraste 4,67:1  */
+  /* Asigna el valor CSS de la propiedad --umv-grafito al selector actual. */
   --umv-grafito:     #232323;   /* R:35  G:35  B:35  · contraste 15,72:1 */
 
   /* --- LA REGLA DEL OCRE ------------------------------------------------
@@ -45,37 +50,50 @@
      institucionales para decir "correcto" o "error": un error en ocre se
      lee como decoración.                                                  */
 
+  /* Asigna el valor CSS de la propiedad --umv-blanco al selector actual. */
   --umv-blanco:      #FFFFFF;
+  /* Asigna el valor CSS de la propiedad --umv-gris-claro al selector actual. */
   --umv-gris-claro:  #F2F1EE;   /* fondos de tablas y tarjetas            */
+  /* Asigna el valor CSS de la propiedad --umv-gris-borde al selector actual. */
   --umv-gris-borde:  #D8D6D1;   /* líneas y separadores                   */
+  /* Asigna el valor CSS de la propiedad --umv-correcto al selector actual. */
   --umv-correcto:    #2E7D4F;   /* confirmaciones · contraste 5,05:1      */
+  /* Asigna el valor CSS de la propiedad --umv-alerta al selector actual. */
   --umv-alerta:      #B3382F;   /* errores        · contraste 5,96:1      */
 
   /* --- ESCALA DE GRISES (manual, punto 3) ------------------------------
      Para una tinta: el verde pasa a grafito y el ocre a una trama del
      grafito al 30 %. Se deja calculado para no volver a equivocarse.     */
 
+  /* Asigna el valor CSS de la propiedad --umv-ocre-una-tinta al selector actual. */
   --umv-ocre-una-tinta: color-mix(in srgb, var(--umv-grafito) 30%, white);
 
   /* --- TIPOGRAFÍA (manual, punto 4) ------------------------------------
      Ninguna otra familia está autorizada. Si no están disponibles, se cae
      a la genérica del sistema.                                            */
 
+  /* Asigna el valor CSS de la propiedad --umv-fuente-titulos al selector actual. */
   --umv-fuente-titulos: Merriweather, Georgia, "Times New Roman", serif;
+  /* Asigna el valor CSS de la propiedad --umv-fuente-texto al selector actual. */
   --umv-fuente-texto:   Inter, Lato, system-ui, "Segoe UI", sans-serif;
 
   /* --- TAMAÑO MÍNIMO DEL LOGOSÍMBOLO (manual, punto 5) -----------------
      Por debajo de esto el monte deja de distinguirse.                    */
 
+  /* Asigna el valor CSS de la propiedad --umv-logo-min-ancho al selector actual. */
   --umv-logo-min-ancho: 160px;  /* versión horizontal */
+  /* Asigna el valor CSS de la propiedad --umv-logo-min-alto al selector actual. */
   --umv-logo-min-alto:   48px;
+  /* Asigna el valor CSS de la propiedad --umv-isotipo-min al selector actual. */
   --umv-isotipo-min:     32px;
 
   /* --- ÁREA DE RESERVA (manual, punto 5) -------------------------------
      Espacio libre alrededor del logo: la altura de la «U» del logotipo.
      En esa franja no entra texto, ni bordes, ni otro logo.               */
 
+  /* Asigna el valor CSS de la propiedad --umv-area-reserva al selector actual. */
   --umv-area-reserva: 0.75rem;
+/* Cierra el bloque de estilos actual. */
 }
 
 /* ==========================================================================
@@ -86,15 +104,26 @@
    blanca detrás del logo.
    ========================================================================== */
 
+/* Abre las reglas del selector .umv-banda-logo. */
 .umv-banda-logo {
+  /* Asigna el valor CSS de la propiedad background al selector actual. */
   background: var(--umv-blanco);
+  /* Asigna el valor CSS de la propiedad display al selector actual. */
   display: inline-flex;
+  /* Asigna el valor CSS de la propiedad align-items al selector actual. */
   align-items: center;
+  /* Asigna el valor CSS de la propiedad padding al selector actual. */
   padding: var(--umv-area-reserva);
+  /* Asigna el valor CSS de la propiedad border-radius al selector actual. */
   border-radius: 4px;
+/* Cierra el bloque de estilos actual. */
 }
 
+/* Abre las reglas del selector .umv-banda-logo img. */
 .umv-banda-logo img {
+  /* Asigna el valor CSS de la propiedad min-width al selector actual. */
   min-width: var(--umv-logo-min-ancho);
+  /* Asigna el valor CSS de la propiedad height al selector actual. */
   height: auto;
+/* Cierra el bloque de estilos actual. */
 }

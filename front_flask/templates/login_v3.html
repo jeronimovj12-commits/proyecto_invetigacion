@@ -1,0 +1,21 @@
+{# Envia las credenciales al inicio de sesion e incluye el token CSRF requerido para el POST. #}
+﻿{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
+﻿{% extends 'base.html' %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
+{% block contenido %}
+{# Crea el elemento HTML h1 con los atributos declarados. #}
+<h1>Iniciar sesión</h1>
+{# Crea el elemento HTML form con los atributos declarados. #}
+<form method="post">
+{# Crea el elemento HTML input con los atributos declarados. #}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{# Crea el elemento HTML label con los atributos declarados. #}
+<label>Usuario <input name="username" required maxlength="100" autocomplete="username"></label>
+{# Crea el elemento HTML label con los atributos declarados. #}
+<label>Contraseña <input type="password" name="password" required maxlength="1024" autocomplete="current-password"></label>
+{# Crea el elemento HTML button con los atributos declarados. #}
+<button type="submit">Entrar</button>
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
+</form>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
+{% endblock %}

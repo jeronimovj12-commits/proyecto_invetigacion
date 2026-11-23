@@ -1,6 +1,9 @@
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% extends "base.html" %}
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block titulo %}Áreas de conocimiento{% endblock %}
 
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block contenido %}
 
 {# El listado de areas_conocimiento.
@@ -10,64 +13,116 @@
    una descripción, porque entonces esta pantalla no podría decir lo que
    solo vale para el área de conocimiento. #}
 
+{# Crea el elemento HTML div con los atributos declarados. #}
 <div class="encabezado">
+  {# Crea el elemento HTML div con los atributos declarados. #}
   <div>
+    {# Crea el elemento HTML h1 con los atributos declarados. #}
     <h1>Áreas de conocimiento</h1>
+    {# Crea el elemento HTML p con los atributos declarados. #}
     <p class="nota">
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       El catálogo jerárquico del conocimiento: gran área, área y disciplina.
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       Las fichas retiradas dejan de aparecer aquí, pero no se borran: lo que
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       ya quedó registrado con ellas se conserva.
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </p>
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </div>
-  <a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>
+  {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
+  {% if puede_escribir|default(true) %}<a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>{% endif %}
+{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </div>
 
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% if filas %}
+  {# Crea el elemento HTML div con los atributos declarados. #}
   <div class="tabla-scroll">
+    {# Crea el elemento HTML table con los atributos declarados. #}
     <table>
+      {# Crea el elemento HTML thead con los atributos declarados. #}
       <thead>
+        {# Crea el elemento HTML tr con los atributos declarados. #}
         <tr>
+          {# Crea el elemento HTML th con los atributos declarados. #}
           <th>Código</th>
+          {# Crea el elemento HTML th con los atributos declarados. #}
           <th>Gran área</th>
+          {# Crea el elemento HTML th con los atributos declarados. #}
           <th>Área</th>
+          {# Crea el elemento HTML th con los atributos declarados. #}
           <th>Disciplina</th>
+          {# Crea el elemento HTML th con los atributos declarados. #}
           <th></th>
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         </tr>
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       </thead>
+      {# Crea el elemento HTML tbody con los atributos declarados. #}
       <tbody>
+        {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
         {% for fila in filas %}
+        {# Crea el elemento HTML tr con los atributos declarados. #}
         <tr>
+          {# Crea el elemento HTML td con los atributos declarados. #}
           <td><span class="codigo">{{ fila["id"] }}</span></td>
+          {# Crea el elemento HTML td con los atributos declarados. #}
           <td>{{ fila["gran_area"] if fila["gran_area"] is not none else "—" }}</td>
+          {# Crea el elemento HTML td con los atributos declarados. #}
           <td>{{ fila["area"] if fila["area"] is not none else "—" }}</td>
+          {# Crea el elemento HTML td con los atributos declarados. #}
           <td>{{ fila["disciplina"] if fila["disciplina"] is not none else "—" }}</td>
+          {# Crea el elemento HTML td con los atributos declarados. #}
           <td class="acciones">
-            <a class="boton" href="{{ url_for('editar_area_conocimiento', id=fila['id']) }}">Editar</a>
+            {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
+            {% if puede_escribir|default(true) %}<a class="boton" href="{{ url_for('editar_area_conocimiento', id=fila['id']) }}">Editar</a>{% endif %}
 
             {# POST y no un enlace: un GET que borra lo puede disparar el
                navegador solo al precargar la página. #}
-            <form method="post"
+            {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
+            {% if puede_escribir|default(true) %}<form method="post"
+                  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
                   action="{{ url_for('eliminar_area_conocimiento', id=fila['id']) }}"
-                  onsubmit="return confirm('¿Retirar la ficha {{ fila['id'] }}?');">
+                  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
+                  onsubmit="return confirm('¿Retirar la ficha {{ fila['id'] }}?');">{% if seguridad_v3|default(false) %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+              {# Crea el elemento HTML button con los atributos declarados. #}
               <button class="boton peligro" type="submit">Retirar</button>
-            </form>
+            {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
+            </form>{% endif %}
+          {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
           </td>
+        {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
         </tr>
+        {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
         {% endfor %}
+      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       </tbody>
+    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </table>
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </div>
 
+  {# Crea el elemento HTML p con los atributos declarados. #}
   <p class="nota">{{ filas|length }} ficha(s).</p>
 
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% else %}
   {# Vacío NO es un error, y la pantalla lo distingue: si la API está caída,
      arriba hay además un aviso rojo. #}
+  {# Crea el elemento HTML div con los atributos declarados. #}
   <div class="vacio">
+    {# Crea el elemento HTML p con los atributos declarados. #}
     <p>Todavía no hay areas conocimiento.</p>
+    {# Crea el elemento HTML p con los atributos declarados. #}
     <p class="nota">Use «Agregar» para crear la primera ficha.</p>
-    <a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>
+    {# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
+    {% if puede_escribir|default(true) %}<a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>{% endif %}
+  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </div>
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endif %}
 
+{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endblock %}

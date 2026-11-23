@@ -10,48 +10,78 @@
 # No hay que instalar Python, ni PostgreSQL, ni nada: solo Docker.
 # ==============================================================
 
+# Configura la clave services con el valor o bloque indicado.
 services:
 
   # --- La base de datos ---------------------------------------------
+  # Configura la clave postgres con el valor o bloque indicado.
   postgres:
+    # Configura la clave image con el valor o bloque indicado.
     image: postgres:16
+    # Configura la clave container_name con el valor o bloque indicado.
     container_name: paradigmas-investigacion-postgres
+    # Configura la clave restart con el valor o bloque indicado.
     restart: unless-stopped
+    # Configura la clave environment con el valor o bloque indicado.
     environment:
+      # Configura la clave POSTGRES_USER con el valor o bloque indicado.
       POSTGRES_USER: investigacion
+      # Configura la clave POSTGRES_PASSWORD con el valor o bloque indicado.
       POSTGRES_PASSWORD: Investigacion123!
+      # Configura la clave POSTGRES_DB con el valor o bloque indicado.
       POSTGRES_DB: investigacion_local
+    # Configura la clave ports con el valor o bloque indicado.
     ports:
       - "15440:5432"          # para DBeaver o pgAdmin, opcional
+    # Configura la clave volumes con el valor o bloque indicado.
     volumes:
+      # Agrega este elemento a la lista de configuracion actual.
       - pgdata:/var/lib/postgresql/data
       # PostgreSQL ejecuta SOLO lo que encuentre aquí, y SOLO la primera vez
       # (cuando el volumen está vacío). Por eso no hace falta un contenedor
       # inicializador: el motor se encarga.
+      # Agrega este elemento a la lista de configuracion actual.
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    # Configura la clave healthcheck con el valor o bloque indicado.
     healthcheck:
       # La API arranca cuando la base RESPONDE, no cuando el contenedor existe
+      # Configura la clave test con el valor o bloque indicado.
       test: ["CMD-SHELL", "pg_isready -U investigacion -d investigacion_local"]
+      # Configura la clave interval con el valor o bloque indicado.
       interval: 5s
+      # Configura la clave timeout con el valor o bloque indicado.
       timeout: 5s
+      # Configura la clave retries con el valor o bloque indicado.
       retries: 20
 
   # --- La API: FastAPI ----------------------------------------------
+  # Configura la clave api-investigacion con el valor o bloque indicado.
   api-investigacion:
+    # Configura la clave build con el valor o bloque indicado.
     build: ./api_investigacion
+    # Configura la clave container_name con el valor o bloque indicado.
     container_name: paradigmas-investigacion-api
+    # Configura la clave restart con el valor o bloque indicado.
     restart: unless-stopped
+    # Configura la clave command con el valor o bloque indicado.
     command: uvicorn main:app --host 0.0.0.0 --port 8025 --reload
+    # Configura la clave ports con el valor o bloque indicado.
     ports:
       - "8025:8025"           # el MISMO número adentro y afuera
+    # Configura la clave volumes con el valor o bloque indicado.
     volumes:
       - ./api_investigacion:/app   # el código montado: guardar un .py recarga solo
+    # Configura la clave environment con el valor o bloque indicado.
     environment:
       # El host es el NOMBRE del servicio (postgres), nunca localhost: dentro
       # de un contenedor, localhost es él mismo.
+      # Configura la clave DB_POSTGRES con el valor o bloque indicado.
       DB_POSTGRES: postgresql+asyncpg://investigacion:Investigacion123!@postgres:5432/investigacion_local
+    # Configura la clave depends_on con el valor o bloque indicado.
     depends_on:
+      # Configura la clave postgres con el valor o bloque indicado.
       postgres:
+        # Configura la clave condition con el valor o bloque indicado.
         condition: service_healthy
 
   # --- El FRONT: Flask + Jinja2 ---
@@ -61,23 +91,34 @@ services:
   # código de la API desde el front. Este servicio la hace cumplir por donde
   # sí se puede — no recibe las credenciales de la base ni depende de ella —
   # y su imagen ni siquiera instala el driver de PostgreSQL.
+  # Configura la clave front-flask con el valor o bloque indicado.
   front-flask:
+    # Configura la clave build con el valor o bloque indicado.
     build: ./front_flask
+    # Configura la clave container_name con el valor o bloque indicado.
     container_name: paradigmas-investigacion-front
+    # Configura la clave restart con el valor o bloque indicado.
     restart: unless-stopped
+    # Configura la clave ports con el valor o bloque indicado.
     ports:
       - "8078:8078"           # http://localhost:8078
+    # Configura la clave volumes con el valor o bloque indicado.
     volumes:
       - ./front_flask:/app        # el código montado: guardar un .py recarga solo
+    # Configura la clave environment con el valor o bloque indicado.
     environment:
       # El NOMBRE del servicio, no localhost: dentro del contenedor del front,
       # localhost sería el front mismo.
+      # Agrega este elemento a la lista de configuracion actual.
       - URL_API_INVESTIGACION=http://api-investigacion:8025
+    # Configura la clave depends_on con el valor o bloque indicado.
     depends_on:
+      # Agrega este elemento a la lista de configuracion actual.
       - api-investigacion
       # NO depende de postgres, y eso no es un olvido: el front no tiene nada
       # que hacer con la base. Si algún día necesitara esa dependencia, sería
       # la señal de que alguien rompió la arquitectura.
 
+# Configura la clave volumes con el valor o bloque indicado.
 volumes:
   pgdata:                     # la "memoria" de la base entre reinicios
