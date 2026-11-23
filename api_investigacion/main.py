@@ -8,6 +8,8 @@ Arranque:  uvicorn main:app --port 8025 --reload
 Contratos: http://localhost:8025/docs
 """
 
+import os
+
 # Importa FastAPI, Request desde fastapi para usar esas definiciones.
 from fastapi import FastAPI, Request
 # Importa RequestValidationError desde fastapi.exceptions para usar esas definiciones.
@@ -28,6 +30,9 @@ app = FastAPI(
     description="Módulo Investigación — versión 2: relaciones y catálogos.",
     # Asigna a version el valor calculado a la derecha.
     version="v2",
+    docs_url=None if os.environ.get("RENDER_PUBLIC_API") == "1" else "/docs",
+    redoc_url=None if os.environ.get("RENDER_PUBLIC_API") == "1" else "/redoc",
+    openapi_url=None if os.environ.get("RENDER_PUBLIC_API") == "1" else "/openapi.json",
 # Cierra la estructura abierta en las lineas anteriores.
 )
 

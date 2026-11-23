@@ -1,18 +1,26 @@
 # Despliegue v3 en Render
 
-El Blueprint está en [`render.yaml`](../render.yaml). Define una base PostgreSQL,
-una API privada y el front Flask público. El front usa `PORT`, y conserva sus
-sesiones SQLite bajo `/var/data` en un disco persistente de una sola instancia.
-La API recibe `DATABASE_URL` desde Render como `DB_POSTGRES`; el repositorio
-convierte el esquema estándar a `postgresql+asyncpg`.
+El Blueprint está en [`render.yaml`](../render.yaml). La opción de costo cero usa
+una base PostgreSQL gratuita y dos servicios web gratuitos. Para permitir que el
+front gratuito llegue a la API, la API tiene URL pública; sus rutas de datos exigen
+Bearer y la documentación OpenAPI se desactiva en Render. Ambos servicios usan
+`PORT` y el front obtiene la URL pública de la API desde Render.
+
+Es una instancia de demostración temporal. El API puede tardar cerca de un minuto
+en despertar tras 15 minutos sin tráfico; el front espera hasta 75 segundos para
+la llamada. Render borra los archivos del front al dormir o reiniciar, así que las
+sesiones del navegador se invalidarán y habrá que iniciar sesión de nuevo. La base
+PostgreSQL gratuita vence a los 30 días y no incluye backups; exportar datos antes
+de esa fecha si se quieren conservar. Render documenta estas limitaciones en sus
+[planes gratuitos](https://render.com/docs/free) y su [red privada](https://render.com/docs/private-network).
 
 ## Preparación y creación
 
 1. Subir `v3-desarrollo` actualizado al remoto y revisar el commit de la rama.
 2. En Render, crear un Blueprint desde ese repositorio y elegir `v3-desarrollo`.
-   Revisar los recursos y el costo que muestra el panel antes de confirmar.
-3. Confirmar que DB, API y front queden en la misma región (`ohio`). El endpoint
-   público es solo el front; la API es privada.
+   Elegir plan Free para API, front y PostgreSQL.
+3. Confirmar que DB, API y front queden en la misma región (`ohio`). La API es
+   pública en el nivel gratuito; no compartir su URL como interfaz de usuario.
 4. Render genera `JWT_SECRET` y `CLAVE_SESION`. No copiar `v3-local.env` ni poner
    contraseñas en este archivo. Las claves locales se quedan fuera del repo.
 
@@ -26,21 +34,31 @@ migración no es compatible, el servicio no inicia: investigar antes de reparar;
 no borrar la base ni volver a ejecutar `init.sql` manualmente.
 
 Esto automatiza el primer esquema de una base vacía. No copia los datos locales
-ni crea el administrador inicial. Después del primer deploy, abrir una consola
-interactiva del servicio API y ejecutar:
+ni crea el administrador inicial. El plan gratuito no ofrece Shell en el servicio.
+Para crear el administrador, ejecutar el comando desde una copia local del repo,
+con Python 3 y las dependencias v3 instaladas, usando el URL externo de PostgreSQL
+copiado del panel de Render:
 
-```sh
-python -m comandos.crear_administrador
+```powershell
+$secureUrl = Read-Host 'URL externo temporal de PostgreSQL en Render' -AsSecureString
+$pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureUrl)
+try {
+  $env:DB_POSTGRES = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+  Set-Location api_investigacion
+  python -m comandos.crear_administrador
+} finally {
+  Remove-Item Env:\DB_POSTGRES -ErrorAction SilentlyContinue
+  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
+}
 ```
 
 El comando solicita usuario, correo y contraseña de forma interactiva y no
 imprime la contraseña. Elegir una clave nueva para la demo; no reutilizar claves
 locales. Luego entrar en `/login` desde el URL del servicio front.
 
-La base configurada usa un plan pagado de entrada para que no venza como una
-instancia gratuita. El front también necesita plan pagado por su disco persistente;
-Render requiere ese disco porque el almacén de sesiones actual es SQLite. El costo
-final y los límites deben confirmarse en la pantalla del Blueprint antes de crear.
+El URL externo contiene credenciales: no guardarlo en archivos, historial de shell,
+capturas o repositorio. El bloque anterior pide el URL oculto y lo retira del entorno
+al terminar. Usar una contraseña demo nueva.
 
 ## Datos de demostración
 
@@ -56,8 +74,8 @@ local. No publicar usuarios o contraseñas reales.
 
 - `/login` responde 200; abrir el formulario en un navegador real y completar CSRF,
   login de administrador, login de consulta, permisos, logout y expiración.
-- La API privada responde al front; no abrir `/docs` públicamente.
-- Reiniciar el front y confirmar que la sesión se invalida o continúa según el TTL
-  guardado, y que el archivo permanece en `/var/data`.
+- La API pública responde al front; `/docs` y `/openapi.json` deben estar desactivados.
+- Tras el reposo o reinicio del plan gratuito, iniciar sesión otra vez: las sesiones
+  del front viven en almacenamiento temporal.
 - Conservar copia de respaldo antes de toda carga manual. Nunca aplicar `init.sql`
   sobre una base con tablas o datos.

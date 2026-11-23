@@ -49,7 +49,7 @@ URL_API = os.environ.get("URL_API_INVESTIGACION", "http://localhost:8025")
 if URL_API and "://" not in URL_API:
     URL_API = "http://" + URL_API
 
-TIEMPO_MAXIMO = 10  # segundos
+TIEMPO_MAXIMO = float(os.environ.get("TIEMPO_MAXIMO", "10"))  # segundos
 
 # Asigna a NO_DISPONIBLE el valor calculado a la derecha.
 NO_DISPONIBLE = ["El servicio no está disponible. ¿Está arriba la API?"]
