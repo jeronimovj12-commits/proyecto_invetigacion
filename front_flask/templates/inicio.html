@@ -1,61 +1,33 @@
-{# Muestra accesos a las pantallas de consulta del modulo. #}
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% extends "base.html" %}
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block titulo %}Investigación{% endblock %}
 
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block contenido %}
-{# Crea el elemento HTML div con los atributos declarados. #}
 <div class="portada">
-  {# Crea el elemento HTML h1 con los atributos declarados. #}
   <h1>Módulo de Investigación</h1>
-  {# Crea el elemento HTML p con los atributos declarados. #}
-  <p class="nota">Gestión de docentes, grupos, semilleros y sus relaciones.</p>
-{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
+  <p class="nota">El catálogo jerárquico del conocimiento: gran área, área y disciplina.</p>
 </div>
 
-{# Crea el elemento HTML div con los atributos declarados. #}
 <div class="tarjetas">
 
-  {# Crea el elemento HTML article con los atributos declarados. #}
   <article class="tarjeta">
-    {# Crea el elemento HTML h2 con los atributos declarados. #}
     <h2>Áreas de conocimiento</h2>
-    {# Crea el elemento HTML p con los atributos declarados. #}
     <p>El catálogo jerárquico del conocimiento: gran área, área y disciplina.</p>
-    {# Crea el elemento HTML a con los atributos declarados. #}
     <a class="boton primario" href="{{ url_for('listar_areas_conocimiento') }}">
-      {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
       Ver el listado
-    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     </a>
-  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </article>
 
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Docentes</h2><a class="boton primario" href="{{ url_for('listar_docente') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Grupos de investigación</h2><a class="boton primario" href="{{ url_for('listar_grupo_investigacion') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Semilleros</h2><a class="boton primario" href="{{ url_for('listar_semillero') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Participación en semilleros</h2><a class="boton primario" href="{{ url_for('listar_participa_semillero') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Participación en grupos</h2><a class="boton primario" href="{{ url_for('listar_participa_grupo') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Líneas de semilleros</h2><a class="boton primario" href="{{ url_for('listar_semillero_linea') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Líneas de grupos</h2><a class="boton primario" href="{{ url_for('listar_grupo_linea') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Áreas de las líneas</h2><a class="boton primario" href="{{ url_for('listar_ac_linea') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Objetivos de las líneas</h2><a class="boton primario" href="{{ url_for('listar_ods_linea') }}">Ver el listado</a></article>
-{# Crea el elemento HTML article con los atributos declarados. #}
-<article class="tarjeta"><h2>Aplicaciones de las líneas</h2><a class="boton primario" href="{{ url_for('listar_aa_linea') }}">Ver el listado</a></article>
+  {# La segunda tarjeta NO es un enlace, y es deliberado: dice lo que esta
+     versión NO hace. Un menú que promete pantallas que no existen es peor
+     que un menú corto. #}
+  <article class="tarjeta apagada">
+    <h2>Las demás tablas</h2>
+    <p>
+      Esta versión construye <strong>una</strong> tabla completa, de punta a
+      punta: su API y su pantalla. Las demás llegan en las versiones
+      siguientes, cada una con la suya.
+    </p>
+  </article>
 
-
-{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </div>
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endblock %}

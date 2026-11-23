@@ -1,26 +1,13 @@
-{# Vista de ruta inexistente con un enlace de retorno al inicio. #}
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% extends "base.html" %}
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block titulo %}Esa página no existe{% endblock %}
 
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% block contenido %}
-{# Crea el elemento HTML div con los atributos declarados. #}
 <div class="vacio">
-  {# Crea el elemento HTML h1 con los atributos declarados. #}
   <h1>Esa página no existe</h1>
-  {# Crea el elemento HTML p con los atributos declarados. #}
   <p class="nota">
-    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     La dirección que escribió no corresponde a ninguna pantalla de este
-    {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
     sistema.
-  {# Escribe el contenido que se mostrara en esta parte de la pagina. #}
   </p>
-  {# Crea el elemento HTML a con los atributos declarados. #}
   <a class="boton primario" href="{{ url_for('inicio') }}">Ir al inicio</a>
-{# Escribe el contenido que se mostrara en esta parte de la pagina. #}
 </div>
-{# Ejecuta la directiva Jinja indicada para controlar esta parte de la plantilla. #}
 {% endblock %}

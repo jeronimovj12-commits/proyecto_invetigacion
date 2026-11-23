@@ -1,4 +1,2 @@
-# Declara esta dependencia para instalarla en el entorno.
 flask==3.*
-# Declara esta dependencia para instalarla en el entorno.
 requests==2.*
