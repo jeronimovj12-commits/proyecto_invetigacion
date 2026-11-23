@@ -1,16 +1,6 @@
-# Declara esta dependencia para instalarla en el entorno.
 fastapi
-# Declara esta dependencia para instalarla en el entorno.
 uvicorn[standard]
-# Declara esta dependencia para instalarla en el entorno.
 sqlalchemy[asyncio]
-# Declara esta dependencia para instalarla en el entorno.
 asyncpg
-# Declara esta dependencia para instalarla en el entorno.
 greenlet
-# Declara esta dependencia para instalarla en el entorno.
 pydantic
-# Declara esta dependencia para instalarla en el entorno.
-PyJWT==2.15.1
-# Declara esta dependencia para instalarla en el entorno.
-pwdlib[argon2]==0.3.0

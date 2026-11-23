@@ -5,37 +5,23 @@
    Aquí va solo CÓMO se usan. Nunca se escribe un color a mano: se usa la
    variable, para que el día que cambie el manual se cambie un archivo.
    ========================================================================== */
-/* Define parte de una regla visual. */
 @import "marca.css";
 
-/* Define parte de una regla visual. */
 .barra { background: var(--umv-verde); color: #fff; }
 
 /* El logosímbolo va sobre BANDA BLANCA: el manual no contempla versión
    negativa, y sobre el verde el logo a color desaparece. */
-/* Abre las reglas del selector .umv-logo. */
 .umv-logo {
-  /* Asigna el valor CSS de la propiedad background al selector actual. */
   background: #fff;
-  /* Asigna el valor CSS de la propiedad padding al selector actual. */
   padding: 6px 10px;
-  /* Asigna el valor CSS de la propiedad border-radius al selector actual. */
   border-radius: 4px;
-  /* Asigna el valor CSS de la propiedad display al selector actual. */
   display: inline-flex;
-  /* Asigna el valor CSS de la propiedad align-items al selector actual. */
   align-items: center;
-/* Cierra el bloque de estilos actual. */
 }
-/* Abre las reglas del selector .umv-logo img. */
 .umv-logo img {
-  /* Asigna el valor CSS de la propiedad height al selector actual. */
   height: 30px;            /* por encima del mínimo del manual (28.3 px) */
-  /* Asigna el valor CSS de la propiedad width al selector actual. */
   width: auto;
-  /* Asigna el valor CSS de la propiedad display al selector actual. */
   display: block;
-/* Cierra el bloque de estilos actual. */
 }
 
 /* ==============================================================
@@ -46,224 +32,120 @@
    es CSS, y una hoja que nadie puede leer entera es una que nadie mantiene.
    ============================================================== */
 
-/* Abre las reglas del selector :root. */
 :root {
-  /* Asigna el valor CSS de la propiedad --tinta al selector actual. */
   --tinta: #1f2933;
-  /* Asigna el valor CSS de la propiedad --suave al selector actual. */
   --suave: #6b7480;
-  /* Asigna el valor CSS de la propiedad --borde al selector actual. */
   --borde: #d9d5cf;
-  /* Asigna el valor CSS de la propiedad --fondo al selector actual. */
   --fondo: #f7f6f3;
-  /* Asigna el valor CSS de la propiedad --acento al selector actual. */
   --acento: #1d4ed8;
-  /* Asigna el valor CSS de la propiedad --error al selector actual. */
   --error: #b42318;
-  /* Asigna el valor CSS de la propiedad --exito al selector actual. */
   --exito: #1a7f37;
-/* Cierra el bloque de estilos actual. */
 }
 
-/* Define parte de una regla visual. */
 * { box-sizing: border-box; }
 
-/* Abre las reglas del selector body. */
 body {
-  /* Asigna el valor CSS de la propiedad margin al selector actual. */
   margin: 0;
-  /* Asigna el valor CSS de la propiedad background al selector actual. */
   background: var(--fondo);
-  /* Asigna el valor CSS de la propiedad color al selector actual. */
   color: var(--tinta);
-  /* Asigna el valor CSS de la propiedad font al selector actual. */
   font: 15px/1.55 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
-/* Cierra el bloque de estilos actual. */
 }
 
-/* Define parte de una regla visual. */
 .contenedor { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
 
 /* --- la cabecera --- */
-/* Define parte de una regla visual. */
 .barra { background: #1f2933; color: #fff; }
-/* Abre las reglas del selector .barra-interna. */
 .barra-interna {
-  /* Asigna el valor CSS de la propiedad display al selector actual. */
   display: flex; align-items: center; justify-content: space-between;
-  /* Asigna el valor CSS de la propiedad padding al selector actual. */
   padding: 14px 20px;
-/* Cierra el bloque de estilos actual. */
 }
-/* Define parte de una regla visual. */
 .marca { color: #fff; text-decoration: none; font-weight: 600; font-size: 17px; }
-/* Define parte de una regla visual. */
 .dependencia { color: #b9c0c8; font-size: 13px; }
 
-/* Define parte de una regla visual. */
 .menu { background: #fff; border-bottom: 1px solid var(--borde); }
-/* Define parte de una regla visual. */
 .menu-interno { display: flex; gap: 4px; padding: 0 20px; }
-/* Abre las reglas del selector .menu a. */
 .menu a {
-  /* Asigna el valor CSS de la propiedad padding al selector actual. */
   padding: 11px 14px; color: var(--suave); text-decoration: none;
-  /* Asigna el valor CSS de la propiedad font-size al selector actual. */
   font-size: 14px; border-bottom: 2px solid transparent;
-/* Cierra el bloque de estilos actual. */
 }
-/* Define parte de una regla visual. */
 .menu a:hover { color: var(--tinta); }
-/* Define parte de una regla visual. */
 .menu a.activo { color: var(--acento); border-bottom-color: var(--acento); }
 
-/* Define parte de una regla visual. */
 main { padding: 26px 20px 40px; }
 
 /* --- encabezados de pantalla --- */
-/* Abre las reglas del selector .encabezado. */
 .encabezado {
-  /* Asigna el valor CSS de la propiedad display al selector actual. */
   display: flex; flex-wrap: wrap; gap: 14px;
-  /* Asigna el valor CSS de la propiedad align-items al selector actual. */
   align-items: flex-start; justify-content: space-between;
-  /* Asigna el valor CSS de la propiedad margin-bottom al selector actual. */
   margin-bottom: 20px;
-/* Cierra el bloque de estilos actual. */
 }
-/* Define parte de una regla visual. */
 h1 { font-size: 24px; margin: 0 0 4px; }
-/* Define parte de una regla visual. */
 h2 { font-size: 18px; margin: 0 0 8px; }
-/* Define parte de una regla visual. */
 .nota { color: var(--suave); margin: 0; font-size: 14px; max-width: 62ch; }
 
 /* --- avisos --- */
-/* Abre las reglas del selector .aviso. */
 .aviso {
-  /* Asigna el valor CSS de la propiedad padding al selector actual. */
   padding: 10px 14px; border-radius: 6px; margin: 0 0 10px;
-  /* Asigna el valor CSS de la propiedad border al selector actual. */
   border: 1px solid transparent; font-size: 14px;
-/* Cierra el bloque de estilos actual. */
 }
-/* Define parte de una regla visual. */
 .aviso.error { background: #fdecea; border-color: #f5c2bd; color: var(--error); }
-/* Define parte de una regla visual. */
 .aviso.exito { background: #e8f5ec; border-color: #b6ddc2; color: var(--exito); }
 
 /* --- tabla --- */
-/* Define parte de una regla visual. */
 .tabla-scroll { overflow-x: auto; background: #fff;
-                /* Asigna el valor CSS de la propiedad border al selector actual. */
                 border: 1px solid var(--borde); border-radius: 8px; }
-/* Define parte de una regla visual. */
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
-/* Define parte de una regla visual. */
 th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--borde); }
-/* Define parte de una regla visual. */
 th { background: #f0eeea; font-weight: 600; white-space: nowrap; }
-/* Define parte de una regla visual. */
 tbody tr:last-child td { border-bottom: 0; }
-/* Define parte de una regla visual. */
 tbody tr:hover { background: #fbfaf8; }
-/* Define parte de una regla visual. */
 .codigo { font-family: Consolas, monospace; background: #eceae6;
-          /* Asigna el valor CSS de la propiedad padding al selector actual. */
           padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-/* Define parte de una regla visual. */
 .acciones { display: flex; gap: 6px; white-space: nowrap; }
-/* Define parte de una regla visual. */
 .acciones form { margin: 0; }
 
 /* --- formulario --- */
-/* Abre las reglas del selector .tarjeta-formulario. */
 .tarjeta-formulario {
-  /* Asigna el valor CSS de la propiedad background al selector actual. */
   background: #fff; border: 1px solid var(--borde); border-radius: 8px;
-  /* Asigna el valor CSS de la propiedad padding al selector actual. */
   padding: 20px; max-width: 620px;
-/* Cierra el bloque de estilos actual. */
 }
-/* Define parte de una regla visual. */
 label { display: block; margin-bottom: 14px; font-size: 14px; font-weight: 600; }
-/* Abre las reglas del selector input, textarea. */
 input, textarea {
-  /* Asigna el valor CSS de la propiedad display al selector actual. */
   display: block; width: 100%; margin-top: 5px; padding: 9px 11px;
-  /* Asigna el valor CSS de la propiedad border al selector actual. */
   border: 1px solid var(--borde); border-radius: 6px; font: inherit;
-  /* Asigna el valor CSS de la propiedad background al selector actual. */
   background: #fff;
-/* Cierra el bloque de estilos actual. */
 }
-/* Define parte de una regla visual. */
 textarea { resize: vertical; }
-/* Define parte de una regla visual. */
 input[readonly] { background: #efedea; color: var(--suave); cursor: not-allowed; }
-/* Define parte de una regla visual. */
 .ayuda { display: block; margin-top: 5px; color: var(--suave);
-         /* Asigna el valor CSS de la propiedad font-size al selector actual. */
          font-size: 13px; font-weight: 400; }
-/* Define parte de una regla visual. */
 .pareja { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 
 /* --- botones --- */
-/* Abre las reglas del selector .boton. */
 .boton {
-  /* Asigna el valor CSS de la propiedad display al selector actual. */
   display: inline-block; padding: 8px 14px; border-radius: 6px;
-  /* Asigna el valor CSS de la propiedad border al selector actual. */
   border: 1px solid var(--borde); background: #fff; color: var(--tinta);
-  /* Asigna el valor CSS de la propiedad font al selector actual. */
   font: inherit; font-size: 14px; text-decoration: none; cursor: pointer;
-/* Cierra el bloque de estilos actual. */
 }
-/* Define parte de una regla visual. */
 .boton:hover { background: #f2f0ec; }
-/* Define parte de una regla visual. */
 .boton.primario { background: var(--acento); border-color: var(--acento); color: #fff; }
-/* Define parte de una regla visual. */
 .boton.primario:hover { background: #1739a8; }
-/* Define parte de una regla visual. */
 .boton.peligro { border-color: #e5b6b1; color: var(--error); }
-/* Define parte de una regla visual. */
 .boton.peligro:hover { background: #fdecea; }
 
 /* --- portada y vacío --- */
-/* Define parte de una regla visual. */
 .portada { background: #fff; border: 1px solid var(--borde);
-           /* Asigna el valor CSS de la propiedad border-radius al selector actual. */
            border-radius: 8px; padding: 28px; margin-bottom: 22px; }
-/* Define parte de una regla visual. */
 .tarjetas { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-/* Define parte de una regla visual. */
 .tarjeta { background: #fff; border: 1px solid var(--borde);
-           /* Asigna el valor CSS de la propiedad border-radius al selector actual. */
            border-radius: 8px; padding: 20px; }
-/* Define parte de una regla visual. */
 .tarjeta.apagada { background: transparent; border-style: dashed; color: var(--suave); }
-/* Define parte de una regla visual. */
 .tarjeta p { font-size: 14px; color: var(--suave); }
 
-/* Define parte de una regla visual. */
 .vacio { background: #fff; border: 1px solid var(--borde); border-radius: 8px;
-         /* Asigna el valor CSS de la propiedad padding al selector actual. */
          padding: 40px 20px; text-align: center; }
-/* Define parte de una regla visual. */
 .vacio p { margin: 0 0 6px; }
 
-/* Define parte de una regla visual. */
 footer { padding: 18px 20px 30px; color: var(--suave); font-size: 13px;
-         /* Asigna el valor CSS de la propiedad border-top al selector actual. */
          border-top: 1px solid var(--borde); margin-top: 30px; }
-/* Define parte de una regla visual. */
 footer p { margin: 0; }
-
-/* Las pantallas de relaciones necesitan menú adaptable y selectores. */
-/* Define parte de una regla visual. */
-.menu-interno { flex-wrap: wrap; }
-/* Define parte de una regla visual. */
-select { display: block; width: 100%; padding: 9px 11px; border: 1px solid var(--borde); border-radius: 6px; font: inherit; background: #fff; }
-/* Asigna el valor CSS de la propiedad button al selector actual. */
-button:disabled { opacity: 0.5; cursor: not-allowed; }

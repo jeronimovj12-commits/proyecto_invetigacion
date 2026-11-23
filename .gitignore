@@ -3,6 +3,3 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.env
-verificacion-v3-local.log
-*.sqlite3
-respaldos/

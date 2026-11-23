@@ -1,6 +1,0 @@
-# Excluye configuración local y sesiones de los contextos Docker del front.
-*.env
-*.sqlite3
-**/__pycache__
-**/.venv
-**/.pytest_cache
