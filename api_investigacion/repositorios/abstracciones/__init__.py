@@ -1,0 +1,1 @@
+"""Cada contrato se importa por recurso para conservar la inversión de dependencias."""

@@ -1,73 +1,66 @@
 {% extends "base.html" %}
-{% block titulo %}Áreas de conocimiento{% endblock %}
-
+{% block titulo %}Áreas de conocimiento · Módulo de Investigación{% endblock %}
 {% block contenido %}
-
-{# El listado de areas_conocimiento.
-
-   Las columnas están escritas aquí, con sus nombres. Cuando la v2 traiga
-   más tablas, cada una tendrá su plantilla — no una genérica que recorra
-   una descripción, porque entonces esta pantalla no podría decir lo que
-   solo vale para el área de conocimiento. #}
-
-<div class="encabezado">
+<div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3 mb-4">
   <div>
-    <h1>Áreas de conocimiento</h1>
-    <p class="nota">
-      El catálogo jerárquico del conocimiento: gran área, área y disciplina.
-      Las fichas retiradas dejan de aparecer aquí, pero no se borran: lo que
-      ya quedó registrado con ellas se conserva.
+    <p class="text-uppercase small fw-semibold text-umv-green mb-1">Catálogos institucionales</p>
+    <h1 class="display-6 fw-bold mb-2">Áreas de conocimiento</h1>
+    <p class="text-secondary mb-0">
+      Catálogo jerárquico del conocimiento: gran área, área y disciplina.
     </p>
   </div>
-  <a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>
+  {% if puede_escribir %}
+  <a class="btn btn-primary flex-shrink-0" href="{{ url_for('crear_area_conocimiento') }}">Agregar área</a>
+  {% endif %}
 </div>
 
 {% if filas %}
-  <div class="tabla-scroll">
-    <table>
-      <thead>
+<div class="card shadow-sm border-0">
+  <div class="table-responsive rounded">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-dark">
         <tr>
-          <th>Código</th>
-          <th>Gran área</th>
-          <th>Área</th>
-          <th>Disciplina</th>
-          <th></th>
+          <th scope="col">Código</th>
+          <th scope="col">Gran área</th>
+          <th scope="col">Área</th>
+          <th scope="col">Disciplina</th>
+          {% if puede_escribir %}<th scope="col" class="text-end">Acciones</th>{% endif %}
         </tr>
       </thead>
       <tbody>
         {% for fila in filas %}
         <tr>
-          <td><span class="codigo">{{ fila["id"] }}</span></td>
+          <td><span class="font-monospace fw-semibold">{{ fila["id"] }}</span></td>
           <td>{{ fila["gran_area"] if fila["gran_area"] is not none else "—" }}</td>
           <td>{{ fila["area"] if fila["area"] is not none else "—" }}</td>
           <td>{{ fila["disciplina"] if fila["disciplina"] is not none else "—" }}</td>
-          <td class="acciones">
-            <a class="boton" href="{{ url_for('editar_area_conocimiento', id=fila['id']) }}">Editar</a>
-
-            {# POST y no un enlace: un GET que borra lo puede disparar el
-               navegador solo al precargar la página. #}
-            <form method="post"
-                  action="{{ url_for('eliminar_area_conocimiento', id=fila['id']) }}"
-                  onsubmit="return confirm('¿Retirar la ficha {{ fila['id'] }}?');">
-              <button class="boton peligro" type="submit">Retirar</button>
-            </form>
+          {% if puede_escribir %}
+          <td class="text-end">
+            <div class="d-inline-flex flex-wrap justify-content-end gap-2">
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('editar_area_conocimiento', id=fila['id']) }}">Editar</a>
+              <form method="post" action="{{ url_for('eliminar_area_conocimiento', id=fila['id']) }}"
+                    class="m-0" onsubmit="return confirm('¿Retirar el área {{ fila['id'] }}?');">
+                <button class="btn btn-sm btn-outline-danger" type="submit">Retirar</button>
+              </form>
+            </div>
           </td>
+          {% endif %}
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
-  <p class="nota">{{ filas|length }} ficha(s).</p>
-
+  <div class="card-footer bg-white border-0 text-secondary small">{{ filas|length }} ficha(s)</div>
+</div>
 {% else %}
-  {# Vacío NO es un error, y la pantalla lo distingue: si la API está caída,
-     arriba hay además un aviso rojo. #}
-  <div class="vacio">
-    <p>Todavía no hay areas conocimiento.</p>
-    <p class="nota">Use «Agregar» para crear la primera ficha.</p>
-    <a class="boton primario" href="{{ url_for('crear_area_conocimiento') }}">Agregar</a>
+<section class="card shadow-sm border-0 empty-state">
+  <div class="card-body text-center py-5 px-4">
+    <h2 class="h4">Todavía no hay áreas de conocimiento</h2>
+    <p class="text-secondary mb-4">Las fichas activas aparecerán aquí.</p>
+    {% if puede_escribir %}
+    <a class="btn btn-primary" href="{{ url_for('crear_area_conocimiento') }}">Agregar la primera área</a>
+    {% endif %}
   </div>
+</section>
 {% endif %}
-
 {% endblock %}

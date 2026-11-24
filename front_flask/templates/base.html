@@ -3,68 +3,110 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titulo %}Investigación{% endblock %}</title>
+  <meta name="theme-color" content="#143D32">
+  <title>{% block titulo %}Módulo de Investigación{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-modern.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='marca.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
 </head>
-<body>
-
-  {# ==================================================================
-     LO QUE ESTA PANTALLA NO DICE, Y POR QUÉ
-
-     Aquí NO se nombra el stack —ni Flask, ni FastAPI, ni PostgreSQL— y el
-     pie NO explica la arquitectura. Quien usa esto administra el módulo de
-     Investigación, y esa información no le sirve para nada: es ruido entre
-     él y su tarea.
-
-     Todo eso está donde le corresponde, para quien SÍ lo necesita: el
-     README, la constitución y el documento de contratos.
-     ================================================================== #}
-
-  <header>
-    <div class="barra">
-      <div class="contenedor barra-interna">
-        <a class="marca" href="{{ url_for('inicio') }}">Investigación</a>
-        <span class="umv-logo">
-          <img src="{{ url_for('static', filename='logo-horizontal.png') }}"
-               alt="Universidad Monte Verde">
-        </span>
+<body class="d-flex flex-column min-vh-100 bg-light">
+  <nav class="navbar navbar-expand-xxl navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid px-3 px-xxl-4">
+      <a class="navbar-brand d-flex align-items-center gap-3" href="{{ url_for('inicio') }}">
+        <img class="logo-universidad" src="{{ url_for('static', filename='logo-horizontal.png') }}" alt="Universidad Monte Verde">
+        <span class="marca-titulo">Módulo de Investigación</span>
+      </a>
+      {% if usuario_actual %}
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navegacionPrincipal" aria-controls="navegacionPrincipal"
+              aria-expanded="false" aria-label="Abrir navegación">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navegacionPrincipal">
+        <ul class="navbar-nav me-auto mb-2 mb-xxl-0">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('inicio') }}">Inicio</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuCatalogos" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Catálogos</a>
+            <ul class="dropdown-menu" aria-labelledby="menuCatalogos">
+              <li><a class="dropdown-item" href="{{ url_for('listar_areas_conocimiento') }}">Áreas de conocimiento</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_ods') }}">ODS</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_areas_aplicacion') }}">Áreas de aplicación</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_terminos_clave') }}">Términos clave</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_universidades') }}">Universidades</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_lineas_investigacion') }}">Líneas de investigación</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuInvestigacion" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Investigación</a>
+            <ul class="dropdown-menu" aria-labelledby="menuInvestigacion">
+              <li><a class="dropdown-item" href="{{ url_for('listar_docentes') }}">Docentes</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_grupos_investigacion') }}">Grupos de investigación</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_semilleros') }}">Semilleros</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuVinculos" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Vínculos y Participación</a>
+            <ul class="dropdown-menu dropdown-menu-lg-end" aria-labelledby="menuVinculos">
+              <li><a class="dropdown-item" href="{{ url_for('listar_participaciones_grupo') }}">Participación en grupos</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_participaciones_semillero') }}">Participación en semilleros</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_grupo_linea') }}">Grupo – Línea</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_semillero_linea') }}">Semillero – Línea</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_ac_linea') }}">Área conocimiento – Línea</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_ods_linea') }}">ODS – Línea</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_aa_linea') }}">Área aplicación – Línea</a></li>
+            </ul>
+          </li>
+          {% if es_admin %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuAdministracion" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">Administración</a>
+            <ul class="dropdown-menu dropdown-menu-lg-end" aria-labelledby="menuAdministracion">
+              <li><a class="dropdown-item" href="{{ url_for('listar_usuarios') }}">Usuarios</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_roles') }}">Roles</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('listar_rol_usuario') }}">Asignación de Roles</a></li>
+            </ul>
+          </li>
+          {% endif %}
+        </ul>
+        <div class="navbar-identidad d-flex flex-column flex-xxl-row align-items-xxl-center gap-2 gap-xxl-3">
+          <div class="text-xxl-end">
+            <span class="navbar-usuario">{{ usuario_actual.nombre_completo or usuario_actual.username }}</span>
+            {% for rol in usuario_actual.roles %}
+            <span class="badge rounded-pill text-bg-light text-umv-dark ms-1">{{ rol }}</span>
+            {% endfor %}
+          </div>
+          <form method="post" action="{{ url_for('logout') }}" class="m-0">
+            <button class="btn btn-outline-light btn-sm" type="submit">Cerrar sesión</button>
+          </form>
+        </div>
       </div>
+      {% endif %}
     </div>
+  </nav>
 
-    {# EL MENÚ, con un enlace por pantalla. Cuando la v2 traiga más tablas
-       se agrega aquí, y aparece en todas las pantallas. La clase `activo`
-       sale del endpoint, que es la dirección de verdad. #}
-    <nav class="menu">
-      <div class="contenedor menu-interno">
-        <a href="{{ url_for('inicio') }}"
-           class="{{ 'activo' if request.endpoint == 'inicio' }}">Inicio</a>
-        <a href="{{ url_for('listar_areas_conocimiento') }}"
-           class="{{ 'activo' if request.endpoint and 'area_conocimiento' in request.endpoint or request.endpoint == 'listar_areas_conocimiento' }}"
-           >Áreas de conocimiento</a>
+  <main class="container flex-grow-1 py-4 py-lg-5">
+    {% for mensaje in avisos|default([]) %}
+      <div class="alert {{ 'alert-danger' if request.endpoint == 'login' or 'no está disponible' in mensaje else 'alert-success' }} alert-dismissible fade show" role="alert">
+        {{ mensaje }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
       </div>
-    </nav>
-  </header>
-
-  <main class="contenedor">
-
-    {# Los avisos que app.py dejó con flash(). Un párrafo por mensaje: cuando
-       la API devuelve tres errores de validación, se ven los tres. #}
-    {% with avisos = get_flashed_messages(with_categories=true) %}
-      {% for categoria, mensaje in avisos %}
-        <p class="aviso {{ categoria }}">{{ mensaje }}</p>
-      {% endfor %}
-    {% endwith %}
-
+    {% endfor %}
     {% block contenido %}{% endblock %}
-
   </main>
 
-  <footer class="contenedor">
-    <p>
-      Vicerrectoría de Investigaciones<br>
-      Universidad de Ejemplo
-    </p>
+  <footer class="py-4 mt-auto">
+    <div class="container text-center small">
+      <span>Universidad Monte Verde</span>
+      <span class="mx-2" aria-hidden="true">·</span>
+      <span>Módulo de Investigación</span>
+    </div>
   </footer>
-
+  <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

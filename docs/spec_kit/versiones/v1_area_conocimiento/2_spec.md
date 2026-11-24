@@ -1,155 +1,49 @@
-# Especificación — Versión 1: `area_conocimiento` + PostgreSQL
+# Especificación — Versión 1: Tablas Base (sin FK) + PostgreSQL + Frontend
 
-> **Versión 1** ([mapa](../0_mapa_versiones.md)) · La primera rebanada
-> vertical del módulo Investigación: una tabla, sus siete endpoints y las
-> tres capas completas. Ante conflicto con este documento, manda la
-> [constitución](../../1_constitution.md).
+> **Versión 1** ([mapa](../0_mapa_versiones.md)) · Ante conflicto con este documento, manda la [constitución](../../1_constitution.md).
 
 ## 1. Propósito de la v1
-
-Construir la API del catálogo de **áreas de conocimiento** de punta a
-punta: controlador, servicio, repositorio e interfaces, contra PostgreSQL
-y en un solo comando.
-
-La v1 no busca cubrir el módulo: busca **dejar el patrón montado y
-verificado**. Las demás tablas sin clave foránea son este mismo patrón con
-otros nombres.
+Construir la API REST (FastAPI + SQLAlchemy Core `text()`) y el Frontend independiente (Flask + Jinja2 + CSS manual UMV) para las **6 tablas sin clave foránea** del módulo Investigación: `area_conocimiento`, `objetivo_desarrollo_sostenible`, `area_aplicacion`, `termino_clave`, `universidad` y `linea_investigacion`.
 
 ## 2. Alcance
 
 **Incluye**
+- CRUD completo (`GET` listado con `?limite`, `GET/{id}`, `POST`, `PUT`, `PATCH`, `DELETE` lógico) para las **6 tablas sin FK**.
+- **Borrado lógico**: `DELETE` marca `activo = FALSE` y todas las lecturas filtran `activo = TRUE` (Artículo 6).
+- **Frontend Flask separado** en puerto `8078` con una pantalla propia por cada uno de los 6 recursos, sin conexión a BD y respetando `marca.css` (Artículos 1.1 y 12).
+- Manejo de variables de entorno mediante `.env` y `.env.example` (Artículo 7).
+- Prueba de capas desacopladas (`pruebas/prueba_capas.py`) corriendo con PostgreSQL apagado.
 
-- El CRUD completo de `area_conocimiento`: listar (con límite), obtener
-  por código, crear, reemplazar, actualizar parcialmente y eliminar.
-- **Borrado lógico**: `DELETE` marca `activo = FALSE` y los listados filtran
-  los inactivos (Artículo 6).
-- Un endpoint de diagnóstico y la documentación interactiva en `/docs`.
-- La prueba de capas: el servicio corriendo con un repositorio falso, sin
-  base de datos.
-
-**NO incluye** — y no se anticipa nada de esto (Artículo 1)
-
-- Ninguna otra tabla de las 19, aunque existan todas en la base.
-- Claves foráneas, listas desplegables ni integridad referencial: eso es
-  la v2.
-- Autenticación, JWT, roles ni usuarios: eso es la v3.
-- Dashboard ni consultas multitabla: eso es la v4.
-- Más pantallas que la de `area_conocimiento`: las demás tablas llegan en la v2, cada una con la suya.
-- **Reactivar** un registro inactivo (`activo = TRUE`). Nadie lo pidió; si
-  hace falta, se especifica en una versión posterior.
-- Búsqueda por texto, ordenamiento ni paginación con desplazamiento: el
-  único filtro de la v1 es `?limite`.
+**NO incluye**
+- Ninguna de las 10 tablas con FK ni las 3 de seguridad (v2 y v3).
+- Autenticación, JWT ni roles (v3).
+- Reactivación de registros inactivos (`activo = TRUE`).
 
 ## 3. Requisitos funcionales
 
-### RF1 — Listar áreas de conocimiento (GET + query string)
-`GET /api/area_conocimiento` → 200 con el sobre
-`{tabla, limite, total, datos:[…]}`.
-- Devuelve **solo las activas**.
-- Parámetro opcional `limite` (entero > 0; por defecto 1000).
-- Sin filas activas → **204** sin cuerpo.
+- **RF1 — Listar recursos (`GET /api/{recurso}[?limite=N]`):** Devuelve `200` con `{tabla, limite, total, datos}` solo con registros `activo = TRUE`. Si no hay filas activas devuelve `204` sin cuerpo. Si `limite <= 0` devuelve `400`.
+- **RF2 — Obtener por llave primaria (`GET /api/{recurso}/{id}`):** Devuelve `200` con el registro activo. Si no existe o tiene `activo = FALSE`, devuelve `404`.
+- **RF3 — Crear (`POST /api/{recurso}`):** Valida campos obligatorios con Pydantic (`422` si faltan o exceden longitud). Inserta con `activo = TRUE` y devuelve `200`. Si la PK ya existe, la base rechaza y devuelve `500`.
+- **RF4 — Reemplazar (`PUT /api/{recurso}/{id}`):** Exige **todos** los campos editables (`422` si falta uno). Actualiza y devuelve `200` con `filasAfectadas: 1` (`404` si no existe o está inactivo).
+- **RF5 — Actualizar parcialmente (`PATCH /api/{recurso}/{id}`):** Actualiza solo los campos enviados (`200`). Si el cuerpo llega vacío `{}` devuelve `400`. Si no existe o está inactivo devuelve `404`.
+- **RF6 — Eliminar lógicamente (`DELETE /api/{recurso}/{id}`):** Ejecuta `UPDATE ... SET activo = FALSE WHERE pk = :id AND activo = TRUE`. Devuelve `200` si afectó 1 fila, o `404` si no existía o ya estaba inactivo.
+- **RF7 — Diagnóstico (`GET /`):** Devuelve `200` con `{"mensaje": "...", "version": "v1", "contratos": "/docs"}`.
+- **RF8 — Interfaz Web Flask (`http://localhost:8078`):** 6 pantallas independientes (`/areas-de-conocimiento`, `/ods`, `/areas-aplicacion`, `/terminos-clave`, `/universidades`, `/lineas-investigacion`), con botones «Guardar la ficha completa» (`PUT`) y «Guardar solo lo que cambié» (`PATCH`), traducción de errores 422 al español y tolerancia a `204` (tabla vacía) y caída de la API.
 
-### RF2 — Obtener por código (GET + parámetro de ruta)
-`GET /api/area_conocimiento/{id}` → 200 con el área.
-- El `id` es **texto** (`1A01`), no un número.
-- Inexistente **o inactiva** → 404.
+## 4. Criterios de aceptación
+1. **Arranque único:** `docker compose up -d --build` levanta PostgreSQL (con las 19 tablas y semillas: 218 áreas, 17 ODS, 21 áreas de aplicación), la API (`8025`) y el Frontend (`8078`). `GET /` responde `"version": "v1"`.
+2. **Lecturas y límites:** `GET /api/area_conocimiento` devuelve `total: 218`; `?limite=3` devuelve `3`; `GET /api/objetivo_desarrollo_sostenible` devuelve `total: 17`; `GET /api/area_aplicacion` devuelve `total: 21`; `GET /api/universidad` (vacía inicialmente) devuelve `204`.
+3. **Obtener individual y 404:** `GET /api/area_conocimiento/1A01` y `GET /api/objetivo_desarrollo_sostenible/1` devuelven `200`; códigos inexistentes (`9Z99`, `999`) devuelven `404`.
+4. **Ciclo completo y contraste PUT vs PATCH:** En cada recurso, `POST` → `PUT` → `PATCH` → `GET` → `DELETE` → segundo `DELETE` (`404`). Enviar un cuerpo incompleto a `PUT` devuelve `422` y el mismo cuerpo a `PATCH` devuelve `200`.
+5. **Borrado lógico verificable:** Tras `DELETE` en `area_conocimiento/9Z01`, el `total` vuelve a `218` pero `SELECT activo FROM area_conocimiento WHERE id='9Z01'` muestra `f` (`FALSE`).
+6. **Validación y frontera:** `POST` con campos faltantes o longitudes excedidas → `422` con `errores[]`; PK duplicada → `500`.
+7. **Prueba de capas y separación de procesos:** `pruebas/prueba_capas.py` pasa con PostgreSQL apagado (`docker compose stop postgres`). Con la API apagada (`docker compose stop api-investigacion`), Flask sigue respondiendo sin mostrar datos ni caer.
 
-### RF3 — Crear (POST + cuerpo completo)
-`POST /api/area_conocimiento` con `{id, granArea, area, disciplina}`.
-- Los cuatro campos son obligatorios.
-- Nace con `activo = TRUE`.
-- Código ya existente → **500** (ver C8: por qué 500 y no 409).
-
-### RF4 — Reemplazar (PUT + cuerpo completo)
-`PUT /api/area_conocimiento/{id}` con `{granArea, area, disciplina}`.
-- **Los tres campos son obligatorios**: es un reemplazo. Falta uno → 422.
-- Devuelve `filasAfectadas`; inexistente → 404.
-
-### RF5 — Actualizar parcialmente (PATCH + cuerpo parcial)
-`PATCH /api/area_conocimiento/{id}` con los campos que se quieran cambiar.
-- Solo se modifican los enviados.
-- Cuerpo vacío → 400 (no hay nada que actualizar).
-- Devuelve `filasAfectadas`; inexistente → 404.
-
-### RF6 — Eliminar (DELETE, borrado lógico)
-`DELETE /api/area_conocimiento/{id}` marca `activo = FALSE`.
-- Devuelve `filasAfectadas`.
-- Inexistente **o ya inactiva** → 404.
-- El registro **deja de existir para la API**, pero sigue siendo
-  recuperable: eso es lo que significa que el borrado sea lógico.
-
-### RF7 — Diagnóstico
-`GET /` → JSON con mensaje, versión (`"v1"`) y la ruta de los contratos.
-
-## 4. Requisitos no funcionales
-
-- **Un solo comando**: `docker compose up -d --build` (Artículo 4).
-- **Tres capas con interfaces** y solo el ensamblador conociendo clases
-  concretas (Artículo 3).
-- **SQL a mano y siempre parametrizado** (`@parametro`), sin ORM de
-  entidades (Artículo 2).
-- **Todo en español** (Artículo 8).
-- El listado completo (218 filas) responde en **menos de 1 segundo** en un
-  equipo de escritorio corriente.
-- La API publica su documentación interactiva en `/docs`.
-
-## 5. Criterios de aceptación
-
-1. **Un solo comando.** `docker compose up -d --build` deja corriendo PostgreSQL —con la base creada, sus 19 tablas y **218 filas** en
-   `area_conocimiento`— y la API. `GET http://localhost:8025/` responde el
-   diagnóstico con `"version":"v1"`.
-2. **Listar.** `GET /api/area_conocimiento` devuelve
-   `{tabla:"area_conocimiento", total:218, …}` y
-   `GET /api/area_conocimiento?limite=3` devuelve **exactamente 3**.
-3. **Obtener.** `GET /api/area_conocimiento/1A01` devuelve
-   `{granArea:"Ciencias Naturales", area:"Matemáticas",
-   disciplina:"Matemáticas puras"}`; `GET /api/area_conocimiento/9Z99`
-   responde **404** con mensaje claro.
-4. **Ciclo de los cinco verbos.** `POST` crea `9Z01` → `PUT` lo reemplaza
-   completo → `PATCH` le cambia solo `disciplina` → `GET` lo confirma →
-   `DELETE` lo desactiva, y un **segundo** `DELETE` responde **404**.
-   Además, un `PUT` sin el campo `area` responde **422** mientras el
-   **mismo cuerpo** enviado por `PATCH` responde **200** — la diferencia
-   entre reemplazar y actualizar.
-5. **El borrado es lógico, y se verifica.** Después de crear `9Z01` el
-   listado dice `total: 219`; después del `DELETE` vuelve a decir
-   `total: 218`, **y la fila sigue en la base** con `activo = FALSE`
-   (comprobable con una consulta directa).
-6. **La validación es la frontera.** `POST` sin `granArea` → **422** con
-   `errores:[…]`; `POST` con un `id` de más de 6 caracteres → **422**;
-   `POST` con un código que ya existe → **500** con el error del motor en
-   `detalle`. En ninguno de los tres casos se toca la base.
-7. **Prueba de capas.** El proyecto `pruebas/` ejecuta el servicio con un
-   **repositorio de mentiras**: otra implementación de la misma interfaz
-   que guarda las filas en una lista en memoria, en vez de hablar con la
-   base. Todas sus verificaciones pasan **con PostgreSQL apagado** — que es
-   la prueba de que las capas están desacopladas ([3_plan](3_plan.md) §4.6).
-
-## 6. Clarificaciones
-
-> **Qué es esta sección:** el registro de las ambigüedades detectadas
-> ANTES de planear, con la respuesta acordada y su razón. Es la
-> **compuerta 1** del método: mientras quede un `[NECESITA ACLARACIÓN: …]`
-> en los requisitos de arriba, esta versión no pasa a la planeación.
-
-| # | La pregunta | La respuesta, con su razón | Dónde quedó |
-|---|---|---|---|
-| C1 | El script declara `area_conocimiento.id` como `INT`, pero los datos del Excel son códigos como `1A01`. ¿Cuál manda? | **Mandan los datos: `VARCHAR(6)`.** Un entero no puede guardar `1A01`, así que el script no podría cargar su propio catálogo. Arrastra a `ac_linea.area_conocimiento`, que lo referencia | `5_data_model` §2 · `db/investigacion.sql` |
-| C2 | `disciplina` está declarada `VARCHAR(60)` y el valor más largo del Excel tiene **124** caracteres. ¿Se recorta el dato o se agranda la columna? | **Se agranda a `VARCHAR(150)`.** Recortar un catálogo oficial lo falsea; el margen extra no cuesta nada | `5_data_model` §2 |
-| C3 | Ninguna tabla del módulo trae columna `activo`, pero la metodología exige borrado lógico. ¿Se agrega o se borra físicamente? | **Se agrega `activo BOOLEAN NOT NULL DEFAULT TRUE`** a las 16 tablas del módulo. Sin ella, la versión contradice su propia rúbrica | Artículo 6 · RF6 |
-| C4 | Un registro inactivo, ¿se puede consultar por su código? | **No: responde 404.** Si el listado los filtra, individualmente tampoco existen. Ser coherente importa más que ser permisivo | RF2 · RF6 |
-| C5 | ¿Y un segundo `DELETE` sobre el mismo código? | **404**, por consecuencia directa de C4: para la API ya no existe | RF6 · criterio 4 |
-| C6 | ¿Se puede reactivar un registro (`activo = TRUE`)? | **No en la v1.** Es una operación de negocio que nadie pidió. Queda en el NO incluye; si hace falta, se especifica | §2 Alcance |
-| C7 | `?limite=0` o negativo, ¿es 422 o 400? | **400.** La forma del dato es correcta —sí es un entero—; lo que se rompe es una regla de negocio. El 422 se reserva para el cuerpo mal formado | RF1 · Artículo 10 |
-| C8 | Crear con un código que ya existe, ¿409 o 500? | **500**, con el error del motor en `detalle`. En la v1 la llave la defiende la base, no la API; convertirlo en 409 sería lógica de negocio que esta versión no pide | RF3 · criterio 6 |
-| C9 | El catálogo trae **"Cienias Naturales"** (sin la `c`) en 48 de las 218 filas. ¿Se corrige o se carga tal cual? | **Se corrige a "Ciencias Naturales"** al generar las semillas, y queda anotado en la cabecera del script. Es un error de digitación de la fuente, no un dato; cargarlo tal cual lo perpetúa en pantalla y en los informes | `db/investigacion.sql` · `5_data_model` §3 |
-
-## 7. Definición de TERMINADA
-
-La v1 está terminada —y solo entonces se escribe la spec de la v2— cuando:
-
-1. Los **7 criterios de aceptación** pasan, verificados con el smoke test
-   de [7_quickstart.md](7_quickstart.md) **corrido por una persona**.
-2. La lista de [9_checklist.md](9_checklist.md) está en verde y firmada.
-3. No queda ningún `[NECESITA ACLARACIÓN: …]` en este documento.
-4. Se hace commit y **tag `v1`** (Artículo 1).
+## 5. Clarificaciones
+- **C1 a C5 (del script `db/init.sql`):** `area_conocimiento.id` es `VARCHAR(6)`, `disciplina` es `VARCHAR(150)`, `area_aplicacion.nombre` es `VARCHAR(150)`, todas las tablas tienen `activo BOOLEAN NOT NULL DEFAULT TRUE`, y se corrigió `Ciencias Naturales`.
+- **C6 (Tipos de llaves primarias por tabla):**
+  - `area_conocimiento`: `id` (`VARCHAR(6)`), provisto por el usuario en `POST`.
+  - `termino_clave`: `termino` (`VARCHAR(30)`), clave natural de texto provista por el usuario en `POST`.
+  - `objetivo_desarrollo_sostenible`, `area_aplicacion`, `universidad`: `id` (`INT`), provisto por el usuario en `POST`.
+  - `linea_investigacion`: `id` (`SERIAL`), autogenerado por PostgreSQL en `POST` (no se envía en el cuerpo de creación).
+- **C7 (Secretos):** Se cumple el Artículo 7 estricto: `.env` está en `.gitignore` y el repositorio incluye `.env.example`.

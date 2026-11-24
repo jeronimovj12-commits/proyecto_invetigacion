@@ -1,33 +1,65 @@
 {% extends "base.html" %}
-{% block titulo %}Investigación{% endblock %}
-
+{% block titulo %}Inicio · Módulo de Investigación{% endblock %}
 {% block contenido %}
-<div class="portada">
-  <h1>Módulo de Investigación</h1>
-  <p class="nota">El catálogo jerárquico del conocimiento: gran área, área y disciplina.</p>
-</div>
+<header class="bg-dark py-5 mb-5 rounded-4 shadow-sm hero-investigacion">
+  <div class="container px-4 px-lg-5">
+    <div class="row gx-5 align-items-center justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        <div class="my-3 my-lg-4 text-center text-lg-start">
+          <p class="text-uppercase fw-semibold small text-umv-ocre mb-2">Universidad Monte Verde</p>
+          <h1 class="display-5 fw-bolder text-white mb-3">Módulo de Investigación</h1>
+          <p class="lead text-white-50 mb-4">
+            Organiza la información institucional, los equipos académicos y las líneas
+            que conectan la actividad investigativa.
+          </p>
+          <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-lg-start">
+            <a class="btn btn-primary btn-lg px-4" href="{{ url_for('listar_docentes') }}">Docentes</a>
+            <a class="btn btn-outline-light btn-lg px-4" href="{{ url_for('listar_grupos_investigacion') }}">Grupos de investigación</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4 d-none d-xl-flex justify-content-center">
+        <div class="hero-emblema" aria-hidden="true">
+          <img src="{{ url_for('static', filename='logo-horizontal.png') }}" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 
-<div class="tarjetas">
-
-  <article class="tarjeta">
-    <h2>Áreas de conocimiento</h2>
-    <p>El catálogo jerárquico del conocimiento: gran área, área y disciplina.</p>
-    <a class="boton primario" href="{{ url_for('listar_areas_conocimiento') }}">
-      Ver el listado
-    </a>
-  </article>
-
-  {# La segunda tarjeta NO es un enlace, y es deliberado: dice lo que esta
-     versión NO hace. Un menú que promete pantallas que no existen es peor
-     que un menú corto. #}
-  <article class="tarjeta apagada">
-    <h2>Las demás tablas</h2>
-    <p>
-      Esta versión construye <strong>una</strong> tabla completa, de punta a
-      punta: su API y su pantalla. Las demás llegan en las versiones
-      siguientes, cada una con la suya.
-    </p>
-  </article>
-
-</div>
+{% set secciones = [
+  ("Catálogos Institucionales", ("areas_conocimiento", "ods", "areas_aplicacion", "terminos_clave", "universidades", "lineas_investigacion")),
+  ("Actores y Grupos de Investigación", ("docentes", "grupos_investigacion", "semilleros")),
+  ("Relaciones y Líneas", ("participa_grupo", "participa_semillero", "grupo_linea", "semillero_linea", "ac_linea", "ods_linea", "aa_linea")),
+  ("Seguridad y Administración", ("usuarios", "roles", "rol_usuario"))
+] %}
+{% for titulo_seccion, claves in secciones %}
+  {% if titulo_seccion != "Seguridad y Administración" or es_admin %}
+  <section class="mb-5" aria-labelledby="seccion-{{ loop.index }}">
+    <div class="d-flex align-items-end justify-content-between gap-3 mb-3">
+      <div>
+        <p class="text-uppercase small fw-semibold text-umv-green mb-1">Módulos</p>
+        <h2 class="h3 mb-0" id="seccion-{{ loop.index }}">{{ titulo_seccion }}</h2>
+      </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+      {% for clave in claves %}
+        {% set recurso = recursos[clave] %}
+        <div class="col">
+          <article class="card h-100 shadow-sm border-0 module-card">
+            <div class="card-body p-4 d-flex flex-column">
+              <span class="module-mark mb-3" aria-hidden="true"></span>
+              <h3 class="h5 card-title">{{ recurso.titulo }}</h3>
+              <p class="card-text text-secondary flex-grow-1">
+                Consulta y administra {{ "vínculos" if not recurso.get("editable", true) else "fichas" }} activos.
+              </p>
+              <a class="btn btn-outline-primary align-self-start" href="{{ url_for(recurso.endpoint_lista) }}">Abrir módulo</a>
+            </div>
+          </article>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+{% endfor %}
 {% endblock %}

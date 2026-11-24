@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}Acceso denegado · Investigación{% endblock %}
+{% block contenido %}
+<section class="card shadow-sm border-0 empty-state">
+  <div class="card-body text-center py-5 px-4">
+    <span class="badge rounded-pill text-bg-danger mb-3">403</span>
+    <h1 class="h2">Acceso denegado</h1>
+    <p class="text-secondary">Tu rol no permite acceder a este módulo o realizar esta operación.</p>
+    <a class="btn btn-primary" href="{{ url_for('inicio') }}">Volver al inicio</a>
+  </div>
+</section>
+{% endblock %}

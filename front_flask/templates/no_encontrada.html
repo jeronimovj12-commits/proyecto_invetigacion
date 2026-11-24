@@ -2,12 +2,12 @@
 {% block titulo %}Esa página no existe{% endblock %}
 
 {% block contenido %}
-<div class="vacio">
-  <h1>Esa página no existe</h1>
-  <p class="nota">
-    La dirección que escribió no corresponde a ninguna pantalla de este
-    sistema.
-  </p>
-  <a class="boton primario" href="{{ url_for('inicio') }}">Ir al inicio</a>
+<div class="card shadow-sm border-0 empty-state">
+  <div class="card-body text-center py-5 px-4">
+    <span class="badge rounded-pill text-bg-secondary mb-3">404</span>
+    <h1 class="h2">Esa página no existe</h1>
+    <p class="text-secondary">La dirección no corresponde a ninguna pantalla de este sistema.</p>
+    <a class="btn btn-primary" href="{{ url_for('inicio') }}">Ir al inicio</a>
+  </div>
 </div>
 {% endblock %}
