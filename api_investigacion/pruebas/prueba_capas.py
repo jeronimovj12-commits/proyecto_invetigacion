@@ -1,127 +1,140 @@
-"""
-prueba_capas.py — El servicio SIN base de datos.
-
-Enchufa al servicio un repositorio de mentiras que guarda las filas en una
-lista. Si esta prueba pasa con PostgreSQL apagado, la separación de capas es
-real y no un dibujo: el servicio nunca supo que había un motor detrás.
-
-Se corre con:  docker compose exec api-investigacion python pruebas/prueba_capas.py
-"""
+"""Prueba los servicios con repositorios de memoria para demostrar independencia del motor."""
 
 import asyncio
-import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# La ruta se fija desde el archivo de prueba para ejecutarlo igual desde el contenedor o el directorio raíz.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from servicios.servicio_area_aplicacion import ServicioAreaAplicacion
 from servicios.servicio_area_conocimiento import ServicioAreaConocimiento
+from servicios.servicio_linea_investigacion import ServicioLineaInvestigacion
+from servicios.servicio_objetivo_desarrollo_sostenible import ServicioObjetivoDesarrolloSostenible
+from servicios.servicio_termino_clave import ServicioTerminoClave
+from servicios.servicio_universidad import ServicioUniversidad
 
 
-class RepositorioDeMentiras:
-    """Cumple la interfaz del repositorio, pero guarda en una lista."""
+class RepositorioMemoria:
+    """Conserva datos y estado activo para sustituir al adaptador PostgreSQL en pruebas."""
 
-    def __init__(self):
-        self._filas: list[dict] = []
+    def __init__(self, clave: str, autogenerar: bool = False):
+        self.clave = clave
+        self.autogenerar = autogenerar
+        self.filas: list[dict] = []
+        self.siguiente = 1
 
     async def obtener_todos(self, limite: int) -> list[dict]:
-        activas = [fila for fila in self._filas if fila["activo"]]
-        return [{k: v for k, v in fila.items() if k != "activo"}
-                for fila in activas[:limite]]
+        return [
+            {campo: valor for campo, valor in fila.items() if campo != "activo"}
+            for fila in self.filas if fila["activo"]
+        ][:limite]
 
-    async def obtener_por_id(self, id_area: str) -> dict | None:
-        fila = next((f for f in self._filas
-                     if f["id"] == id_area and f["activo"]), None)
-        return ({k: v for k, v in fila.items() if k != "activo"}
+    async def obtener_por_id(self, identificador):
+        fila = next(
+            (fila for fila in self.filas
+             if fila[self.clave] == identificador and fila["activo"]),
+            None,
+        )
+        return ({campo: valor for campo, valor in fila.items() if campo != "activo"}
                 if fila else None)
 
-    async def crear(self, datos: dict) -> bool:
-        self._filas.append({**datos, "activo": True})
-        return True
+    async def crear(self, datos: dict):
+        fila = dict(datos)
+        if self.autogenerar:
+            fila[self.clave] = self.siguiente
+            self.siguiente += 1
+        self.filas.append({**fila, "activo": True})
+        return fila[self.clave]
 
-    async def actualizar(self, id_area: str, datos: dict) -> int:
-        fila = next((f for f in self._filas
-                     if f["id"] == id_area and f["activo"]), None)
+    async def actualizar(self, identificador, datos: dict) -> int:
+        fila = next(
+            (fila for fila in self.filas
+             if fila[self.clave] == identificador and fila["activo"]),
+            None,
+        )
         if fila is None:
             return 0
         fila.update(datos)
         return 1
 
-    async def eliminar_logico(self, id_area: str) -> int:
-        fila = next((f for f in self._filas
-                     if f["id"] == id_area and f["activo"]), None)
+    async def eliminar_logico(self, identificador) -> int:
+        fila = next(
+            (fila for fila in self.filas
+             if fila[self.clave] == identificador and fila["activo"]),
+            None,
+        )
         if fila is None:
             return 0
         fila["activo"] = False
         return 1
 
 
-def revisar(condicion: bool, mensaje_ok: str, mensaje_error: str) -> bool:
-    print(f"[{'OK' if condicion else 'ERROR'}] "
-          f"{mensaje_ok if condicion else mensaje_error}")
-    return condicion
+async def probar_servicio(servicio, datos: dict, clave: str, clave_automatica: bool = False):
+    assert await servicio.listar(100) == []
+    identificador = await servicio.crear(datos)
+    if not clave_automatica:
+        identificador = datos[clave]
+    registro = await servicio.obtener(identificador)
+    assert registro[clave] == identificador
 
+    campo_actualizable = next(campo for campo in datos if campo != clave)
+    await servicio.actualizar(identificador, {campo_actualizable: "Valor actualizado"})
+    assert (await servicio.obtener(identificador))[campo_actualizable] == "Valor actualizado"
 
-async def main() -> int:
-    print("=== Prueba de capas — SIN base de datos ===")
-    servicio = ServicioAreaConocimiento(RepositorioDeMentiras())
-    bien = True
-
-    bien &= revisar(await servicio.listar(1000) == [],
-                    "El sistema arranca vacío.",
-                    "Arrancó con filas que nadie creó.")
-
-    nueva = {"id": "9A01", "gran_area": "Ingeniería",
-             "area": "Ingeniería de Sistemas", "disciplina": "Software"}
-    await servicio.crear(nueva)
-    lista = await servicio.listar(1000)
-    bien &= revisar(len(lista) == 1 and lista[0]["id"] == "9A01",
-                    f"Área creada y listada: {lista[0]['disciplina']}",
-                    "La creación no se reflejó en el listado.")
-
+    await servicio.eliminar(identificador)
+    assert await servicio.listar(100) == []
     try:
-        await servicio.obtener("NOEXISTE")
-        bien &= revisar(False, "", "Un id inexistente NO lanzó LookupError.")
+        await servicio.obtener(identificador)
     except LookupError:
-        bien &= revisar(True, "Buscar un id inexistente lanza LookupError.", "")
+        pass
+    else:
+        raise AssertionError("El registro retirado debió tratarse como inexistente.")
 
     try:
-        await servicio.listar(0)
-        bien &= revisar(False, "", "limite = 0 NO lanzó ValueError.")
-    except ValueError:
-        bien &= revisar(True, "Límite menor o igual a cero rechazado.", "")
-
-    try:
-        await servicio.actualizar("9A01", {})
-        bien &= revisar(False, "", "Un cuerpo vacío NO lanzó ValueError.")
-    except ValueError:
-        bien &= revisar(True, "Cuerpo vacío en la actualización rechazado.", "")
-
-    await servicio.actualizar("9A01", {"disciplina": "Ingeniería de Software"})
-    tras = await servicio.obtener("9A01")
-    bien &= revisar(tras["disciplina"] == "Ingeniería de Software"
-                    and tras["area"] == "Ingeniería de Sistemas",
-                    "La actualización parcial cambió SOLO la disciplina.",
-                    "La actualización parcial tocó campos que no debía.")
-
-    await servicio.eliminar("9A01")
-    bien &= revisar(await servicio.listar(1000) == [],
-                    "Tras el borrado, el sistema vuelve a estar vacío.", "")
-    bien &= revisar(len(servicio._repositorio._filas) == 1
-                    and servicio._repositorio._filas[0]["activo"] is False,
-                    "El borrado es lógico: la fila sigue guardada como inactiva.",
-                    "El repositorio falso borró físicamente la fila.")
-
-    try:
-        await servicio.eliminar("9A01")
-        bien &= revisar(False, "", "La segunda eliminación NO falló.")
+        await servicio.eliminar(identificador)
     except LookupError:
-        bien &= revisar(True,
-                        "Segunda eliminación rechazada: ya no existe.", "")
+        pass
+    else:
+        raise AssertionError("Una segunda retirada debió producir LookupError.")
 
-    print("=== Prueba de capas completada "
-          f"{'CON ÉXITO' if bien else 'CON ERRORES'} ===")
-    return 0 if bien else 1
+
+async def main():
+    casos = [
+        (ServicioAreaConocimiento, "id",
+         {"id": "9Z01", "gran_area": "Ciencias", "area": "Datos", "disciplina": "Análisis"}),
+        (ServicioObjetivoDesarrolloSostenible, "id",
+         {"id": 90, "nombre": "Objetivo de prueba", "categoria": "Social"}),
+        (ServicioAreaAplicacion, "id", {"id": 90, "nombre": "Área de prueba"}),
+        (ServicioTerminoClave, "termino",
+         {"termino": "prueba", "termino_ingles": "test"}),
+        (ServicioUniversidad, "id",
+         {"id": 90, "nombre": "Universidad de prueba", "tipo": "Pública", "ciudad": "Verde"}),
+        (ServicioLineaInvestigacion, "id",
+         {"nombre": "Línea de prueba", "descripcion": "Descripción de prueba"}),
+    ]
+
+    for clase_servicio, clave, datos in casos:
+        autogenerar = clase_servicio is ServicioLineaInvestigacion
+        repositorio = RepositorioMemoria(clave, autogenerar)
+        await probar_servicio(clase_servicio(repositorio), datos, clave, autogenerar)
+
+    servicio = ServicioAreaConocimiento(RepositorioMemoria("id"))
+    for limite in (0, -1):
+        try:
+            await servicio.listar(limite)
+        except ValueError:
+            continue
+        raise AssertionError("Los límites no positivos deben producir ValueError.")
+    try:
+        await servicio.actualizar("1A01", {})
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Un PATCH vacío debe producir ValueError.")
+
+    print("Prueba de capas completada: seis servicios, reglas y borrado lógico verificados sin PostgreSQL.")
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
+    asyncio.run(main())

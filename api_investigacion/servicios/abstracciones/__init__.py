@@ -1,0 +1,1 @@
+"""Los Protocol permanecen en módulos por recurso para evitar una interfaz implícita."""

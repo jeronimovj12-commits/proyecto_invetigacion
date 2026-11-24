@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if editando else 'Crear' }} · {{ recurso.titulo }}{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3 mb-4">
+  <div>
+    <p class="text-uppercase small fw-semibold text-umv-green mb-1">{{ recurso.titulo }}</p>
+    <h1 class="display-6 fw-bold mb-2">{{ 'Editar registro' if editando else 'Crear registro' }}</h1>
+    <p class="text-secondary mb-0">Completa la información solicitada.</p>
+  </div>
+  <a class="btn btn-outline-secondary flex-shrink-0" href="{{ url_for(recurso.endpoint_lista) }}">Volver al módulo</a>
+</div>
+
+<section class="card form-card shadow-sm border-0">
+  <div class="card-body p-4 p-lg-5">
+    <form method="post" action="{{ accion }}">
+      {% for campo in recurso.campos %}
+        {% if (not campo.solo_salida or editando) and not campo.get('oculto_listado') %}
+        {% set nombre = campo.nombre %}
+        {% set bloqueado = (editando and campo.clave) or campo.solo_salida %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="{{ nombre }}">{{ campo.etiqueta }}</label>
+          {% if campo.catalogo %}
+          <select class="form-select" id="{{ nombre }}" name="{{ nombre }}" {% if bloqueado %}disabled{% endif %}>
+            {% if campo.nullable %}<option value="">Sin selección</option>{% else %}<option value="">Selecciona una opción</option>{% endif %}
+            {% for opcion in opciones.get(nombre, []) %}
+            <option value="{{ opcion.valor }}"
+                    {% if (ficha.get(nombre) | string) == (opcion.valor | string) %}selected{% endif %}>
+              {{ opcion.etiqueta }}
+            </option>
+            {% endfor %}
+          </select>
+          {% elif campo.multilinea %}
+          <textarea class="form-control" id="{{ nombre }}" name="{{ nombre }}" maxlength="{{ campo.maximo }}"
+                    {% if bloqueado %}readonly{% endif %}>{{ ficha.get(nombre, '') or '' }}</textarea>
+          {% else %}
+          <input class="form-control" id="{{ nombre }}" name="{{ nombre }}"
+                 type="{{ 'password' if campo.tipo == 'password' else ('date' if campo.tipo == 'date' else ('number' if campo.numero else ('email' if campo.tipo == 'email' else 'text'))) }}"
+                 {% if campo.maximo %}maxlength="{{ campo.maximo }}"{% endif %}
+                 value="{{ '' if campo.get('sensible') else (ficha.get(nombre, '') if ficha.get(nombre) is not none else '') }}"
+                 {% if bloqueado %}readonly{% endif %}>
+          {% if campo.get('sensible') and editando %}
+          <div class="form-text">Deja el campo en blanco para conservar la contraseña actual.</div>
+          {% endif %}
+          {% endif %}
+          {% if campo.nullable %}<div class="form-text">Opcional; deja el campo vacío para limpiarlo.</div>{% endif %}
+        </div>
+        {% if editando and not campo.clave and not campo.get('sensible') %}
+        <input type="hidden" name="original__{{ nombre }}"
+               value="{{ request.form.get('original__' ~ nombre, ficha.get(nombre, '') or '') }}">
+        {% endif %}
+        {% endif %}
+      {% endfor %}
+      {% if puede_escribir %}
+      <div class="d-flex flex-column flex-sm-row flex-wrap gap-2 pt-3">
+        {% if editando %}
+        <button class="btn btn-primary" type="submit" name="verbo" value="completa">Guardar la ficha completa</button>
+        <button class="btn btn-outline-primary" type="submit" name="verbo" value="parcial">Guardar solo lo que cambié</button>
+        {% else %}
+        <button class="btn btn-primary" type="submit">Crear registro</button>
+        {% endif %}
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</section>
+{% endblock %}

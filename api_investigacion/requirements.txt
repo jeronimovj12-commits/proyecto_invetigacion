@@ -1,6 +1,8 @@
 fastapi
-uvicorn[standard]
+uvicorn
 sqlalchemy[asyncio]
 asyncpg
 greenlet
 pydantic
+PyJWT
+bcrypt

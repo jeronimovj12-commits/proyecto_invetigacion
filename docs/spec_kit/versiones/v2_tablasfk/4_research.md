@@ -1,0 +1,9 @@
+### 4. `4_research.md`
+```markdown
+# Decisiones Técnicas — Versión 2
+
+- **D-v2-1 (Rutas para llaves primarias compuestas):** Las 7 tablas puente tienen PK compuesta `(fk1, fk2)`. Sus endpoints individuales usan ambos identificadores en la ruta (`/api/grupo_linea/{grupo_investigacion}/{linea_investigacion}`) para evitar ambigüedad y mantener contratos RESTful explícitos.
+- **D-v2-2 (Respeto a nombres exactos de columnas en `db/init.sql`):** En `grupo_investigacion` la columna FK se llama `universidsad` y en `docente` existe `nacionalidaad`. En SQL se usan esos nombres exactos para no romper la base dada (Art. 5), mientras que en la frontera JSON Pydantic expone `universidad` y `nacionalidad` mediante `Field(alias=...)`.
+- **D-v2-3 (Manejo de errores de integridad referencial):** Si se intenta insertar o actualizar una FK inexistente, PostgreSQL lanza `IntegrityError` (`ForeignKeyViolation`). El controlador captura el fallo y retorna HTTP `400` o `500` con mensaje claro en español indicando la violación de llave foránea.
+- **D-v2-4 (Listas desplegables en Flask sin acoplamiento):** Antes de renderizar un formulario de creación o edición, la vista en `app.py` consulta los catálogos padre mediante `cliente_api.py` y pasa las listas a Jinja2 para renderizar `<select>` con nombres legibles en lugar de IDs numéricos.
+- **D-v2-5 (Re-activación o inserción en tablas puente):** Si se intenta vincular una pareja `(fk1, fk2)` que ya existe con `activo = FALSE`, el repositorio puede reactivarla (`SET activo = TRUE`) o fallar por PK duplicada si ya está activa, garantizando consistencia de datos.
