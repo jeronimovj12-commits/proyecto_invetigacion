@@ -1,6 +1,7 @@
-Jeronimo velasquez
-samuel jimenez
-juen jose herrera
+# Integrantes 
+- Jeronimo velasquez
+- Samuel Jimenez
+- Juen Jose Herrera
 
 Este repositorio contiene **dos cosas distintas**, y conviene no confundirlas:
 
@@ -33,7 +34,7 @@ catálogos— y la API:
 
 | Qué | Dónde |
 |---|---|
-|Link Render | |
+|Link Render |https://investigacion-web.onrender.com/login |
 | **La pantalla** — empiece por aquí | **http://localhost:8078** |
 | **API — documentación interactiva** | http://localhost:8025/docs |
 | Diagnóstico | http://localhost:8025/ |
